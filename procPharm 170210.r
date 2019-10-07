@@ -7800,6 +7800,32 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 cnames<-dat$c.dat$id
             }
         }
+    #w this will place the cell of interest into the correct cell class
+        if(keyPressed=='w'){
+            #need to see if the dat has a cell_types
+            cellToReassign <- cnames[cell.i]
+            cellTypeId <- grep('^cell',names(dat), value=T)
+            if(length(cellTypeId) > 0){
+                #get only cell types that we want to reassign
+                cellTypeNames <- names(rdTmp[[cellTypeId]])
+                cellTypesToNotClean <- c('neurons', 'glia')
+                cellTypesToClean <- setdiff(cellTypeNames, cellTypesToNotClean)
+                
+                #remove it from all groups
+                dat[[cellTypeId]][cellTypesToClean] <- lapply(dat[[cellTypeId]][cellTypesToClean], function(X) setdiff(X,cellToReassign))
+                
+                ###now that we have indicated that we would like to place this cell into a new group
+                #First lets find all groups we can assign to
+                cat('\nWhich cell class does this actually belong to?\n')
+                correctCellClass <- menu(cellTypesToClean)
+                dat[[cellTypeId]][correctCellClass] <- union(dat[[cellTypeId]][correctCellClass], cellToReassign)
+                assign(dat.name,dat, envir=.GlobalEnv)
+
+            }else{
+                cat('\nSorry You haven\'t defined cell types yet. Please do this first!\n')
+            }
+        }
+
 
     #R: reset group specified
         if(keyPressed=="R"){
