@@ -7669,6 +7669,31 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(keyPressed=="Down")
         {cell.i <- cell.i - 1;if(cell.i<1){cell.i<-length(cnames)};lines.flag<-0}
         
+    #a: Assign this will place the cell of interest into the correct cell class
+        if(keyPressed=='a'){
+            #need to see if the dat has a cell_types
+            cellToReassign <- cnames[cell.i]
+            cellTypeId <- grep('^cell',names(dat), value=T)
+            if(length(cellTypeId) > 0){
+                #get only cell types that we want to reassign
+                cellTypeNames <- names(rdTmp[[cellTypeId]])
+                cellTypesToNotClean <- c('neurons', 'glia')
+                cellTypesToClean <- setdiff(cellTypeNames, cellTypesToNotClean)
+                
+                #remove it from all groups
+                dat[[cellTypeId]][cellTypesToClean] <- lapply(dat[[cellTypeId]][cellTypesToClean], function(X) setdiff(X,cellToReassign))
+                
+                ###now that we have indicated that we would like to place this cell into a new group
+                #First lets find all groups we can assign to\
+                bringToTop(-1)
+                cat('\nWhich cell class does this actually belong to?\n')
+                correctCellClass <- menu(cellTypesToClean)
+                dat[[cellTypeId]][correctCellClass] <- union(dat[[cellTypeId]][correctCellClass], cellToReassign)
+                assign(dat.name,dat, envir=.GlobalEnv)
+            }else{
+                cat('\nSorry You haven\'t defined cell types yet. Please do this first!\n')
+            }
+        }
 
 
     #c: add cells to g.names
@@ -7728,24 +7753,6 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             if( (levs=="") || identical(levs,character(0)) ){levs<-NULL}#levs<-setdiff(unique(as.character(dat$w.dat$wr1)),"")}
             lines.flag<-1
         }
-    #o: order all cells in a new way
-        if(keyPressed=="o"){
-        toMatch<-c("c.dat","bin","scp")
-        order_dat<-grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
-
-        
-        datfram<-select.list(order_dat,title="Where is the data?")
-        collumn<-select.list(names(dat[[datfram]]),title="Collumn to sort")
-        
-        tryCatch(cnames<-c.sort.2(dat[[datfram]],cnames,collumn=collumn),error=function(e) print("Something went wrong try again"))
-        cell.i<-1
-        }	
-    #O: order cells in Stacked Traces and multiview
-        if(keyPressed=="O"){
-            tryCatch(p.names<-c.sort.2(dat,p.names),error=function(e) print("You have not stacked traces yet."))
-            lines.flag<-1
-            window.flag<-1
-        }	
     #m: Move groups to another group
         if(keyPressed=="m"){
             bringToTop(-1)
@@ -7764,6 +7771,25 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             print(paste("Group ",gt_to_replace, "was replaced by ", gt_to_move))
             gt.names[[gt_to_replace]]<-gt.names[[gt_to_move]]
         }    
+
+    #o: order all cells in a new way
+        if(keyPressed=="o"){
+        toMatch<-c("c.dat","bin","scp")
+        order_dat<-grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
+
+        
+        datfram<-select.list(order_dat,title="Where is the data?")
+        collumn<-select.list(names(dat[[datfram]]),title="Collumn to sort")
+        
+        tryCatch(cnames<-c.sort.2(dat[[datfram]],cnames,collumn=collumn),error=function(e) print("Something went wrong try again"))
+        cell.i<-1
+        }	
+    #O: order cells in Stacked Traces and multiview
+        if(keyPressed=="O"){
+            tryCatch(p.names<-c.sort.2(dat,p.names),error=function(e) print("You have not stacked traces yet."))
+            lines.flag<-1
+            window.flag<-1
+        }	
     #p: Toggles points on graph
         if(keyPressed=="p"){
             if(pts){pts<-FALSE}else{pts<-TRUE}
@@ -7800,32 +7826,6 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 cnames<-dat$c.dat$id
             }
         }
-    #w this will place the cell of interest into the correct cell class
-        if(keyPressed=='w'){
-            #need to see if the dat has a cell_types
-            cellToReassign <- cnames[cell.i]
-            cellTypeId <- grep('^cell',names(dat), value=T)
-            if(length(cellTypeId) > 0){
-                #get only cell types that we want to reassign
-                cellTypeNames <- names(rdTmp[[cellTypeId]])
-                cellTypesToNotClean <- c('neurons', 'glia')
-                cellTypesToClean <- setdiff(cellTypeNames, cellTypesToNotClean)
-                
-                #remove it from all groups
-                dat[[cellTypeId]][cellTypesToClean] <- lapply(dat[[cellTypeId]][cellTypesToClean], function(X) setdiff(X,cellToReassign))
-                
-                ###now that we have indicated that we would like to place this cell into a new group
-                #First lets find all groups we can assign to
-                cat('\nWhich cell class does this actually belong to?\n')
-                correctCellClass <- menu(cellTypesToClean)
-                dat[[cellTypeId]][correctCellClass] <- union(dat[[cellTypeId]][correctCellClass], cellToReassign)
-                assign(dat.name,dat, envir=.GlobalEnv)
-
-            }else{
-                cat('\nSorry You haven\'t defined cell types yet. Please do this first!\n')
-            }
-        }
-
 
     #R: reset group specified
         if(keyPressed=="R"){
@@ -7906,6 +7906,22 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             lw<-scan(n=1)
             lines.flag<-1
         }
+    #x: Drop cell
+        if(keyPressed=="x")
+        {
+            print(cnames[cell.i])
+            dat$bin[cnames[cell.i], "drop"]<-1
+            print(dat$bin[cnames[cell.i], "drop"])
+            print(paste("You Dropped Cell",cnames[cell.i]))
+        }
+    #X: undrop cell
+        if(keyPressed=="X")
+        {
+            print(cnames[cell.i])
+            dat$bin[cnames[cell.i], "drop"]<-0
+            print(dat$bin[cnames[cell.i], "drop"])
+            print(paste("You Dropped Cell",cnames[cell.i]))
+        }
     #y: Zoom yaxis automatically
         if(keyPressed=="y"){
             if(yvar){yvar<-FALSE}else{yvar<-TRUE}
@@ -7919,23 +7935,6 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             lines.flag<-1
             window.flag<-1
         }
-
-        if(keyPressed=="x")
-        {
-            print(cnames[cell.i])
-            dat$bin[cnames[cell.i], "drop"]<-1
-            print(dat$bin[cnames[cell.i], "drop"])
-            print(paste("You Dropped Cell",cnames[cell.i]))
-        }
-
-        if(keyPressed=="X")
-        {
-            print(cnames[cell.i])
-            dat$bin[cnames[cell.i], "drop"]<-0
-            print(dat$bin[cnames[cell.i], "drop"])
-            print(paste("You Dropped Cell",cnames[cell.i]))
-        }
-
         
         #if(keyPressed=="k")
         #{
@@ -8126,7 +8125,23 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                     lines.flag<-1
                 }
 			}
-		}    
+		}  
+
+        #F7: Load cell Types into the groups to pick with 'P'
+        if(keyPressed=='F7')  {
+           cellTypeId <- grep('^cell',names(dat), value=T)
+            if(length(cellTypeId)>0){
+                bringToTop(-1)             
+                print("\nI have filled in your cell_types to choose by pressing \'P\' ENJOY!\n")
+                gt.names <- list()
+                for(i in 1:length(dat[[cellTypeId]])){
+                    #Fill in the gt.names with each cell type
+                    gt.names[[ names(dat[[cellTypeId]][i]) ]]<-dat[[cellTypeId]][[i]]
+                }
+            }else{
+                cat('\nSorry you haven\'t defined cell types yet, so i can\'t fill it it for you.\n')
+            }
+        }
 
         if(keyPressed=="1")
         {gt.names[[1]]<-union(gt.names[[1]],cnames[cell.i]);print(gt.names[1])}
