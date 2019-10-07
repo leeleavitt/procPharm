@@ -7913,6 +7913,14 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             dat$bin[cnames[cell.i], "drop"]<-1
             print(dat$bin[cnames[cell.i], "drop"])
             print(paste("You Dropped Cell",cnames[cell.i]))
+            # now that you have dropped a cell, this need to be removed from
+            # cell types
+            cellTypeId <- grep('^cell',names(dat), value=T)
+            if(length(cellTypeId) > 0){
+                drops <- row.names(dat$bin[dat$bin$drop,])
+                dat[[cellTypeId]] <- lapply(dat[[cellTypeId]], function(X) setdiff(X,drops))
+                assign(dat.name,dat, envir=.GlobalEnv)
+            }else{assign(dat.name,dat, envir=.GlobalEnv)}
         }
     #X: undrop cell
         if(keyPressed=="X")
