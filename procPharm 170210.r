@@ -7676,7 +7676,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             cellTypeId <- grep('^cell',names(dat), value=T)
             if(length(cellTypeId) > 0){
                 #get only cell types that we want to reassign
-                cellTypeNames <- names(rdTmp[[cellTypeId]])
+                cellTypeNames <- names(dat[[cellTypeId]])
                 cellTypesToNotClean <- c('neurons', 'glia')
                 cellTypesToClean <- setdiff(cellTypeNames, cellTypesToNotClean)
                 
