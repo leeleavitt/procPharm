@@ -9492,6 +9492,55 @@ ImageFiller<-function(dat){
     return(dat)
 }
 
+ImageFillerv2 <- function(dat, img_name_vec){
+
+    if( is.null(img_name_vec) ){
+        img_name_vec<-c(
+            "bf.gfp.tritc.start.png",
+            "gfp.tritc.start.ci.ltl.rs.png",
+            "tritc.start.ci.ltl.rs.png",
+            "gfp.start.ci.ltl.rs.png",
+            "bf.start.lab.png",
+            "fura2.png",
+            "fura2.divide.start.png",
+            "roi.img.png")
+        image_question <- T
+    }else{
+        image_question <- F
+    }
+    # Add images
+    img_list<-list()
+    for( j in 1:length(img_name_vec) ){
+        dat[[ paste0("img",j) ]] <- tryCatch(readPNG(img_name_vec[j]), error=function(e)NULL)
+    }
+    if(image_question == T){
+        cat('\nThese are the images I have attempted to load for you\nIf any are NULL, and want to add different images say yes to the \nnext question. You will be asked to select a png image for each loaction.\n\n')
+        cat(img_name_vec, sep='\n')
+        cat(str(img_list))
+
+        cat('\nDO YOU WANT DIFFERENT IMAGES[y,n]?\n')
+        img_reselect <- scan(n=1,what='character')
+        if( img_reselect=='y' ){
+            cat("\nAlright buddy I am going to give you options if you don't\nwant any image there just go ahead and press 0\n\n")
+            png_imgs <- list.files(pattern='png')
+            for( j in 1:8 ){
+                cat("\nWhat do you want for image ", j, '\n')
+                selection <- menu(png_imgs)
+                if(selection==0){
+                    dat[[paste0("img",j)]] <- NULL
+                }else{
+                    dat[[paste0("img",j)]] <- readPNG(png_imgs[selection])
+                }
+                cat('\nI have added ', png_imgs[selection],' to position ',j,'\n')
+            }
+            }
+    }
+    return(dat)    
+}
+
+
+
+
 # Fucntion locates single cell or groups of cells on plot.  
 # Needs more optional assignments
 cell.veiw.2048<-function(dat, img=NULL, cell=NULL, cells=NULL, cols=NULL,lmain="", bcex=.5, plot.new=T, cell.name=T){
