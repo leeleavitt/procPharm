@@ -7673,6 +7673,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(keyPressed=='a'){
             #need to see if the dat has a cell_types
             cellToReassign <- cnames[cell.i]
+            cat('\nReassigning cell', cellToReassign,'\n')
             cellTypeId <- grep('^cell',names(dat), value=T)
             if(length(cellTypeId) > 0){
                 #get only cell types that we want to reassign
@@ -7687,9 +7688,11 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 #First lets find all groups we can assign to\
                 bringToTop(-1)
                 cat('\nWhich cell class does this actually belong to?\n')
-                correctCellClass <- menu(cellTypesToClean)
-                dat[[cellTypeId]][correctCellClass] <- union(dat[[cellTypeId]][correctCellClass], cellToReassign)
-                assign(dat.name,dat, envir=.GlobalEnv)
+                correctCellClass <- cellTypesToClean[menu(cellTypesToClean)]
+                print(dat[[cellTypeId]][[correctCellClass]])
+                dat[[cellTypeId]][[correctCellClass]] <- union(dat[[cellTypeId]][[correctCellClass]], cellToReassign)
+                print(dat[[cellTypeId]][correctCellClass])
+                assign(dat.name, dat, envir=.GlobalEnv)
             }else{
                 cat('\nSorry You haven\'t defined cell types yet. Please do this first!\n')
             }
@@ -7716,10 +7719,31 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             if(sf==0){sf<-.001}
             lines.flag<-1
         }
-    #f: New trace fitting for pottassium pulses
-        if(keyPressed=="f"){
-            lines.flag<-3
-        }
+    # #f: New trace fitting for pottassium pulses
+    #     if(keyPressed=="f"){
+    #         lines.flag<-3
+    #     }
+    #f: Fixes the scoring
+    #This function will allow you to fix the region you click on
+        # if(keyPressed === 'f'){
+            # #first find the middle region of each levs to correct the scoring
+            # levsMiddle <- tapply(            levsMiddle <- tapply(dat$w.dat[,1], as.factor(dat$w.dat$wr1),mean)[levs]
+            # yLocation <- rep(par('usr')[4] + yinch(.5), length(levsMiddle))
+            # par(xpd=T)
+
+            # points(levsMiddle, yLocation, pch=7))
+            # identify(levsMiddle, yLocation, n=1)
+
+
+
+            # par(xpd=F)
+            # }
+
+
+        # }
+
+
+
     #F: New smoothing factor for fit trace
         if(keyPressed=="F"){
             print("Change the loess smoothing factor")
@@ -12462,6 +12486,7 @@ cat(
 
 saveRD <- function(dat){
     cat("\nDO NOT CLOSE UNTIL I SAY YOU CAN!\nWait for the sound...")
+    flush.console()
     bringToTop(-1)
     Sys.sleep(1)
 
@@ -12473,8 +12498,9 @@ saveRD <- function(dat){
 
     #Exp Saver
     expName <- deparse(substitute(dat))
-    expToSave <- get(expName, envir = .GlobalEnv)
-    save(expToSave, file=paste0(expName,".Rdata") )
+    #expToSave <- get(expName, envir = .GlobalEnv)
+    assign(expName, dat)
+    save(list=expName, file=paste0(expName,".Rdata") )
     alarm()
     cat('\nYou can now close. Please consider cleaning up the file,\n',historyName,'\n')
 }
