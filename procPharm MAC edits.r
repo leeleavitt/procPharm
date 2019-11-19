@@ -1803,7 +1803,7 @@ WindowRenamer<-function(dat){
     pulse<-select.list(pulsenames,title="Pulse To Rename", multiple=T)
     pulze<-pulse
     
-    bringToTop(-1)
+    #bringtotop(-1)
     print("#############These are your pulses###############")
     print(pulsenames)
     print("#############This is the pulse to rename:")
@@ -6622,8 +6622,9 @@ PeakFunc7 <- function(dat,n.names,t.type="t.dat",Plotit.trace=T,Plotit.both=F, i
     #text(dat.t[match(levs,wr),"Time"],c(ymin, ymin+(yrange*.2)),levs,pos=4,offset=0,cex=bcex)	
     #text(dat.t[match(levs,wr),"Time"],par("usr")[3],levs,pos=3,offset=-4.2,cex=bcex, srt=90)    
     levs_cex <- nchar(levs)
-	levs_cex[ levs_cex <= 12*1.3  ] <- 1
-	levs_cex[ levs_cex > 12*1.3  ] <- 12/levs_cex[ levs_cex>12*1.3  ]*1.3
+    cexSize<- 12
+	levs_cex[ levs_cex <= cexSize*1.3  ] <- 1
+	levs_cex[ levs_cex > cexSize*1.3  ] <- cexSize/levs_cex[ levs_cex>cexSize*1.3  ]*1.3
 
     text(levs.loc,par("usr")[3],levs,pos=3,offset=-4.3,cex=levs_cex, srt=90)	
 
@@ -7381,7 +7382,7 @@ onKeybd <- function(key){
 #f: New trace fitting for pottassium pulses
 #F: New smoothing factor for imputer
 #z: zoom factor to apply to the view of the cell on the right side of the trace, and to the view window
-tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type="t.dat", plot.new=F, info=T, pts=T, lns=T, bcex=1, levs=NULL, klevs=NULL, sft=NULL, underline=T, zf=20, lw=2, sf=1, dat.name=NULL, view_func_description=F, save_question = T){
+tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type="t.dat", plot.new=F, info=F, pts=T, lns=T, bcex=.5, levs=NULL, klevs=NULL, sft=NULL, underline=T, zf=20, lw=2, sf=1, dat.name=NULL, view_func_description=F, save_question = T, ps=9){
     graphics.off()
     print(environment())
     if(is.null(dat.name)){
@@ -7480,22 +7481,28 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     if(plot.new){graphics.off()}
     if(is.null(sft)){sft<-7}
     
-    windows(width=14,height=4,xpos=0, ypos=50)
+    
+    #windows(width=14,height=4,xpos=0, ypos=50)
+    Cairo(pointsize=ps, width=14, height=4)
     click.window<-dev.cur()
     
-    windows(width=10,height=6,xpos=0, ypos=450) 
+    #windows(width=10,height=6,xpos=0, ypos=450) 
+    Cairo(pointsize=ps, width=10,height=6)
     lines.window<-dev.cur()
     
     dimx<-dim(img)[2]
     dimy<-dim(img)[1]
     haight<-10*dimy/dimx
-    windows(width=haight*dimx/dimy, height=haight,xpos=1130, ypos=200)
+    #windows(width=haight*dimx/dimy, height=haight,xpos=1130, ypos=200)
+    Cairo(pointsize=ps, width=haight*dimx/dimy, height=haight)
     view.window<-dev.cur()
     
-    windows(width=8, height=8,xpos=1130, ypos=0)
+    #windows(width=8, height=8,xpos=1130, ypos=0)
+    Cairo(pointsize=ps, width=8, height=8)
     multipic.window<-dev.cur()
     
-    windows(width=12, height=2,xpos=0, ypos=550)
+    #windows(width=12, height=2,xpos=0, ypos=550)
+    Cairo(pointsize=ps, width=12, height=2)
     traceimpute.window<-dev.cur()
     
     window.flag<-0
@@ -7598,11 +7605,11 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             #if(length(p.names)<100){
                 if(length(p.names)>11){
                     dev.off(which=lines.window)
-                    windows(width=10,height=12,xpos=0, ypos=100) 
+                    Cairo(pointsize=ps, width=10,height=12) 
                     lines.window<-dev.cur()
                 }else{
                     dev.off(which=lines.window)
-                    windows(width=10,height=7,xpos=0, ypos=250) 
+                    Cairo(pointsize=ps, width=10,height=7) 
                     lines.window<-dev.cur()
                 }
                 dev.set(which=lines.window)
@@ -7614,7 +7621,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(lines.flag==2){
             sample.to.display<-as.numeric(select.list(as.character(c(5,10,20,50,70,100))),title='Sample Number?')
             tryCatch(dev.off(which=lines.window.2), error=function(e) print("this windows hasn't been opened yet"))
-            windows(width=10,height=12,xpos=0, ypos=250) 
+            Cairo(pointsize=ps, width=10,height=12) 
             lines.window.2<-dev.cur()
             dev.set(which=lines.window.2)
             
@@ -7686,7 +7693,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 
                 ###now that we have indicated that we would like to place this cell into a new group
                 #First lets find all groups we can assign to\
-                bringToTop(-1)
+                ##bringtotop(-1)
                 cat('\nWhich cell class does this actually belong to?\n')
                 correctCellClass <- cellTypesToClean[menu(cellTypesToClean)]
                 print(dat[[cellTypeId]][[correctCellClass]])
@@ -7712,7 +7719,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #D: LinesEvery seperation	
         if(keyPressed=="D"){
-            bringToTop(-1)
+            ##bringtotop(-1)
             print("change the zoom factor")
             print(paste("This is the current zoom",sf))
             sf<-scan(n=1)
@@ -7779,7 +7786,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #m: Move groups to another group
         if(keyPressed=="m"){
-            bringToTop(-1)
+            ##bringtotop(-1)
             cat("
             Select the Group you would like to move
             
@@ -7821,13 +7828,13 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #P: Pick a group/cells to click through
         if(keyPressed=="P"){
-            bringToTop(-1)
+            ##bringtotop(-1)
             print("Pick a Group of cells or a single cell to observe \nIf you Click cancel, all cells will be returned")
             selection<-select.list(c("group","cells"))
             if(selection=="group"){
                 gt.to.click<-select.list(names(gt.names), multiple=F)
                 if( is.null(gt.names[[gt.to.click]]) | is.logical( gt.names[[gt.to.click]]) ){
-                    bringToTop(-1)
+                    ##bringtotop(-1)
                     print("Nothing is in this Group")
                 }else{
                     cell.i<-1
@@ -7864,7 +7871,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #r: rename group names
         if(keyPressed=="r"){
-            bringToTop(-1)
+            #bringtotop(-1)
             print("Select a group to rename")
             gt.to.rename<-select.list(names(gt.names), multiple=F)
             name.number<-which(names(gt.names)==gt.to.rename,arr.ind=T)
@@ -7924,7 +7931,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 
     #w: Change Line Width on plot
         if(keyPressed=="w"){
-            bringToTop(-1)
+            #bringtotop(-1)
             print("change the line width (lw) for LinesEvery")
             print(paste("This is the current lw",lw))
             lw<-scan(n=1)
@@ -7960,7 +7967,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #z: image zoom
         if(keyPressed=="z"){
-            bringToTop(-1)
+            #bringtotop(-1)
             print("change the zoom factor")
             print(paste("This is the current zoom",zf))
             zf<-scan(n=1)
@@ -7991,7 +7998,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             #remove the NA, which will be repalced with a logical(0)
             gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
             #do the function bp.selector to gather data
-            bringToTop(-1)
+            #bringtotop(-1)
             cat("This function allows you to create statistics based on the statistic you select. 
             \n This Function finds a represention of peak amplification and or block 
             \n This function will take in what ever you are currently scrolling through
@@ -8036,7 +8043,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             #remove the NA, which will be repalced with a logical(0)
             gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
             #do the function bp.selector to gather data
-            bringToTop(-1)
+            #bringtotop(-1)
             cat("This function allows you to create statistics based on the statistic you select. 
             \n This Function finds a represention of peak amplification and or block 
             \n This function will take in what ever you are currently scrolling through
@@ -8075,7 +8082,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 dev.new(width=10,height=10)
                 density_win<-dev.cur()
             }else{}
-            bringToTop(-1)
+            #bringtotop(-1)
             cat("What dataframe wil contain your stat? \n")
             dense_df_q<-select.list(names(dat))
             cat("What attribute would you like to see the distribution? \n")
@@ -8163,7 +8170,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(keyPressed=='F7')  {
            cellTypeId <- grep('^cell',names(dat), value=T)
             if(length(cellTypeId)>0){
-                bringToTop(-1)             
+                #bringtotop(-1)             
                 print("\nI have filled in your cell_types to choose by pressing \'P\' ENJOY!\n")
                 gt.names <- list()
                 for(i in 1:length(dat[[cellTypeId]])){
@@ -8255,7 +8262,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     BACKUP<<-gt.names 
     
     assign(dat.name,dat, envir=.GlobalEnv)
-    bringToTop(-1)
+    #bringtotop(-1)
     if(save_question){
         print('Would y ou like to save you cell groups?')
         selection<-select.list(c('no','yes'),title='Save Groups?')
@@ -8415,7 +8422,7 @@ bp.selector<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T,save.bp=
     #define the open window
     peakfunc.window<-dev.cur()
     #plot the trace specified at the beigning
-    PeakFunc7(dat,cell, lmain="  ",bcex=1.5, info=F)
+    PeakFunc7(dat,cell, lmain="  ",bcex=bcex, info=F)
     title(expression("RED"* phantom("/BLUE")), col.main="red")
     title(expression(phantom("RED/")*"BLUE"),col.main="blue")
     title(expression(phantom("RED")*"/"*phantom("BLUE")),col.main="black")
@@ -8428,7 +8435,7 @@ bp.selector<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T,save.bp=
     #text(levs.mean,ys,labels=names(levs.mean),pos=c(1,3),cex=1, srt=90)
     
     ###Selecting Control Windows
-    bringToTop(-1)
+    #bringtotop(-1)
     cat("Choose one or more window regions for the denominator in the equations,
     
     Amplification-or-block = active.window / control.window
@@ -8444,7 +8451,7 @@ bp.selector<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T,save.bp=
     controlwindows<- levs[controlwindows]
     
     ###Selecting Active Windows
-    bringToTop(-1)
+    #bringtotop(-1)
     cat("Choose one or more window regions for the numerator in the equations,
     
     Amplification-or-block = active.window / control.window
@@ -8603,7 +8610,7 @@ bp.selector.advanced<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T
     #define the open window
     peakfunc.window<-dev.cur()
     #plot the trace specified at the beigning
-    PeakFunc7(dat,cell, lmain="  ",bcex=1.5, info=F)
+    PeakFunc7(dat,cell, lmain="  ",bcex=bcex, info=F)
     
     title("(After-Before)/(After+Before)")
     
@@ -8618,7 +8625,7 @@ bp.selector.advanced<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T
     while(continue=="yes"){
 
         ###Selecting Control Windows
-        bringToTop(-1)
+        #bringtotop(-1)
         cat("
         Choose the Pulse Following the compound of interest. 
         
@@ -8638,7 +8645,7 @@ bp.selector.advanced<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T
         afterwindows<- levs[afterwindows]
         
         ###Selecting Active Windows
-        bringToTop(-1)
+        #bringtotop(-1)
         cat("
         ###############################################
         Choose the Pulse Before the compound of interest.
@@ -8804,7 +8811,7 @@ density_ct_plotter<-function(dat, cells, cell_types,stat=dat$c.dat["area"],xlim_
         #}
         #cell_types<-selected_cell_types
     }else{
-        bringToTop(-1)
+        #bringtotop(-1)
         print("which Cell Types would you like to view on the plotter")
         selected_cell_types<-select.list(names(cell_types), multiple=T)
         cell_types<-cell_types[selected_cell_types]
@@ -9500,7 +9507,7 @@ ImageFiller<-function(dat){
     require(png)
     potential.images<-list.files(pattern='png')
     print(potential.images)
-    bringToTop(-1)
+    #bringtotop(-1)
     print("######################")
     print("These are the images you have the option of selecting")
     print("Now select the images to fill in for image 1 to 8")
@@ -10002,8 +10009,8 @@ XYtrace.2<-function(dat, cells=NULL, img=NULL, cols=NULL, zoom=T, labs=T, yvar=F
     {	#selected name of cell
             s.names <- row.names(dat$c.dat[cells,])[i]
             dev.set(which=trace.window)
-            if(yvar){PeakFunc7(dat,s.names, yvar=F, zf=zf, t.type=t.type,dat.n=dat.name)}
-            else{PeakFunc7(dat,s.names, yvar=F, zf=zf, t.type=t.type,dat.n=dat.name)}
+            if(yvar){PeakFunc7(dat,s.names, yvar=F, bcex=bcex, zf=zf, t.type=t.type,dat.n=dat.name)}
+            else{PeakFunc7(dat,s.names, yvar=F, zf=zf, bcex=bcex, t.type=t.type,dat.n=dat.name)}
 
             dev.set(which=pic.window)
             # If a cell is selected, that has already been selected, 
@@ -11996,7 +12003,7 @@ Trace_select_grid<-function(dat, x.names, levs=select.list(names(dat$bin)), t.ty
             #go to trace view
             dev.set(trace_view)
             #plot the trace
-            PeakFunc7(dat,x.names[sel.i], t.type="blc")
+            PeakFunc7(dat,x.names[sel.i], t.type="blc", bcex=bcex)
             #go back to the grid
             dev.set(grid_view)
             #now from 1 to the value selected
@@ -12068,7 +12075,7 @@ Trace_select_grid<-function(dat, x.names, levs=select.list(names(dat$bin)), t.ty
             #go to trace view
             dev.set(trace_view)
             #plot the trace
-            PeakFunc7(dat,x.names[sel.i], t.type="blc")
+            PeakFunc7(dat,x.names[sel.i], t.type="blc",bcex=bcex)
             #go back to the grid
             dev.set(grid_view)
             
@@ -12498,7 +12505,7 @@ cat(
 saveRD <- function(dat){
     cat("\nDO NOT CLOSE UNTIL I SAY YOU CAN!\nWait for the sound...")
     flush.console()
-    bringToTop(-1)
+    #bringtotop(-1)
     Sys.sleep(1)
 
     #History Saver
