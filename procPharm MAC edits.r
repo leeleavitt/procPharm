@@ -1,7 +1,7 @@
 library(utils)
 
 ## designate packages to install/load
-all_pkgs <-  c('reticulate', 'png', 'RColorBrewer', 'MALDIquant', 'data.table', 'docxtractr', 'xlsx')
+all_pkgs <-  c('reticulate', 'png', 'RColorBrewer', 'MALDIquant', 'data.table', 'docxtractr', 'xlsx', 'cairoDevice')
 ## find packages that need to be installed
 already_installed <- rownames( installed.packages() )
 to_install <- setdiff(all_pkgs, already_installed)
