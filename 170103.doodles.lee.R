@@ -1477,7 +1477,7 @@ SetShades <- function(tmp,trans=.1)
 #rscale is a boolean for rescaling the data
 #wh is the window height
 #hh is the window width (why the hell did I name it hh?)
-RDView <- function(tmp,c.i=NULL,wr.i="wr1",rd.name=NULL,rscale=F,wh=14,hh=8)
+RDView <- function(tmp,c.i=NULL,wr.i="wr1",rd.name=NULL,rscale=F,wh=11,hh=6)
 {
 	if(!is.element("bin",names(tmp))){stop("No bin ")}
 	if(!is.element("drop",names(tmp$bin))){tmp$bin[,"drop"] <- 0}
