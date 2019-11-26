@@ -1,7 +1,7 @@
 library(utils)
 
 ## designate packages to install/load
-all_pkgs <-  c('reticulate', 'png', 'RColorBrewer', 'MALDIquant', 'data.table', 'docxtractr', 'xlsx')
+all_pkgs <-  c('reticulate', 'png', 'RColorBrewer', 'MALDIquant', 'data.table', 'docxtractr', 'xlsx', 'cairoDevice')
 ## find packages that need to be installed
 already_installed <- rownames( installed.packages() )
 to_install <- setdiff(all_pkgs, already_installed)
@@ -10983,9 +10983,9 @@ PulseImputer<-function(tmp,cell,pulse.names=NULL,plot.new=F,sf=8){
     }
 }
 
-#function to build a table with defined cell types, and selected collumns
+#function to build a table with defined cell types, and selected columns
 TableBrewer<-function(dat, ct.names=NULL){
-    require(xlsx)
+    #require(xlsx)
     dat.name<-deparse(substitute(dat))
     pulse<-select.list(names(dat$bin), multiple=T, title="select variables for table")
     ct.sum<-data.frame()
@@ -11008,10 +11008,10 @@ TableBrewer<-function(dat, ct.names=NULL){
                 ct.sum[pulse[z],cell.type.names[x]]<-sum(dat$bin[cell.types[[ cell.type.names[x] ]],pulse[z]])
             }
     }
-    print('Endter you file name without sapces')
+    print('Enter your file name without spaces')
     save.names<-scan(n=1, what='character')
-    print(paste(save.names,'xlsx',sep=''))
-    write.xlsx(ct.sum, file=paste(save.names,'.xlsx',sep=''))
+    print(paste(save.names,'csv',sep=''))
+    write.csv(ct.sum, file=paste(save.names,'.csv',sep=''))
     return(ct.sum)
 }
 
