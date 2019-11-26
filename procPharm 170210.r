@@ -7674,7 +7674,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             #need to see if the dat has a cell_types
             cellToReassign <- cnames[cell.i]
             cat('\nReassigning cell', cellToReassign,'\n')
-            cellTypeId <- grep('^cell',names(dat), value=T)
+            #cellTypeId <- grep('^cell',names(dat), value=T)
             if(length(cellTypeId) > 0){
                 #get only cell types that we want to reassign
                 cellTypeNames <- names(dat[[cellTypeId]])
@@ -7941,7 +7941,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             # cell types
             cellTypeId <- grep('^cell',names(dat), value=T)
             if(length(cellTypeId) > 0){
-                drops <- row.names(dat$bin[dat$bin$drop,])
+                drops <- row.names(dat$bin[dat$bin$drop==1,])
+				print(drops)
                 dat[[cellTypeId]] <- lapply(dat[[cellTypeId]], function(X) setdiff(X,drops))
                 assign(dat.name,dat, envir=.GlobalEnv)
             }else{assign(dat.name,dat, envir=.GlobalEnv)}
@@ -8163,6 +8164,11 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(keyPressed=='F7')  {
            cellTypeId <- grep('^cell',names(dat), value=T)
             if(length(cellTypeId)>0){
+				if(length(cellTypeId)>1){
+					bringToTop(-1)
+					cat('\n Select the cell type to load in \n')
+					cellTypeId <- select.list(cellTypeId, title="Select Cell Type")
+				}
                 bringToTop(-1)             
                 print("\nI have filled in your cell_types to choose by pressing \'P\' ENJOY!\n")
                 gt.names <- list()
@@ -12515,4 +12521,13 @@ saveRD <- function(dat){
     alarm()
     cat('\nYou can now close. Please consider cleaning up the file,\n',historyName,'\n')
 }
+
+
+cellTypeFixer<- function(dat){
+	dropped <- row.names(dat$bin[dat$bin$drop==1,])
+	dat$cell_types <- lapply(dat$cell_types, function(x) setdiff(x, dropped))
+	return(dat)
+}
+
+
 
