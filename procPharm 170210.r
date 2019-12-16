@@ -10983,14 +10983,12 @@ PulseImputer<-function(tmp,cell,pulse.names=NULL,plot.new=F,sf=8){
 }
 
 #function to build a table with defined cell types, and selected collumns
-TableBrewer<-function(dat, ct.names=NULL){
+TableBrewer<-function(dat, ct.names=NULL, saveXlsx=T){
     require(xlsx)
     dat.name<-deparse(substitute(dat))
     pulse<-select.list(names(dat$bin), multiple=T, title="select variables for table")
     ct.sum<-data.frame()
-    
-    
-    
+
     if(is.null(ct.names)){
         cell.type.names<-names(dat$cell.types)
         cell.types<-dat$cell.types
@@ -11007,10 +11005,13 @@ TableBrewer<-function(dat, ct.names=NULL){
                 ct.sum[pulse[z],cell.type.names[x]]<-sum(dat$bin[cell.types[[ cell.type.names[x] ]],pulse[z]])
             }
     }
-    print('Endter you file name without sapces')
-    save.names<-scan(n=1, what='character')
-    print(paste(save.names,'xlsx',sep=''))
-    write.xlsx(ct.sum, file=paste(save.names,'.xlsx',sep=''))
+
+    if(saveXlsx){
+        print('Endter you file name without sapces')
+        save.names<-scan(n=1, what='character')
+        print(paste(save.names,'xlsx',sep=''))
+        write.xlsx(ct.sum, file=paste(save.names,'.xlsx',sep=''))
+    }
     return(ct.sum)
 }
 
