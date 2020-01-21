@@ -170,7 +170,7 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
         #until then the researcher will need to expor the time information before they start
         #this function. The funciton will sense whether the file is present or not.
 		py_pharm <- import('python_pharmer')
-		video <- list.files(pattern="^[Vv]ideo.*nd2$")
+		#video <- list.files(pattern="^[Vv]ideo.*nd2$")
 		
 		if( length(list.files(pattern = "^time.*txt$")) < 1 ){
 			py_pharm$time_info_gather( video )
@@ -4781,18 +4781,20 @@ LinesStack.2.1 <- function(dat,m.names=NULL,lmain="",levs=NULL, plot.new=TRUE,bc
 #
 LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, region.group=T,levs=NULL, plot.new=TRUE,bcex=.7, sf=1.1, subset.n=NULL, img=NULL,bp.param=NULL, bp=F, bp.pts=F){
     #graphics.off()
+    #
     if(is.null(img)){img<-dat$img1}
+    
+    # If a list of cells is not input, then look at all cells
     if(is.null(m.names)){
         dropped.cells<-cellzand(dat$bin, "drop",1)
         m.names<-setdiff(dat$c.dat$id, dropped.cells)
     }else{
         dropped.cells<-cellzand(dat$bin, "drop",1)
         m.names<-setdiff(m.names, dropped.cells)
-        }
+    }
         
     if(is.null(subset.n)){subset.n<-as.numeric(select.list(as.character(c(5,10,15,20,25,30))))}
     if(plot.new){
-    
         if(subset.n>=10){
             dev.new(width=14,height=10)
             }
@@ -4819,7 +4821,16 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
         ylim<-c(-.1,hbc)
         #ylim <- c(-.1,2.5)
         
-        plot(xseq,t.dat[,m.names[1]],ylim=ylim,xlab="",main=lmain,type="n",xlim=c(min(xseq)-1.5,max(xseq)+10))#-sf
+        plot(xseq,
+            t.dat[,m.names[1]],
+            ylim=ylim,
+            xlab="",
+            ylab='',
+            main=lmain,
+            type="n",
+            xlim=c(min(xseq)-1.5,max(xseq)+10),
+            bty='n'
+        )#-sf
         #axis(1, at=seq(floor(min(t.dat[,1])),ceiling(max(t.dat[,1])), 1))
         
         ## Tool for adding window region labeling
@@ -4827,15 +4838,12 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
             #levs <- setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
             x1s <- tapply(xseq,as.factor(wr),min)[levs]
             x2s <- tapply(xseq,as.factor(wr),max)[levs]
-            y1s <- rep(min(ylim)-.2,length(x1s))
-            y2s <- rep(max(ylim)+.2,length(x1s))
+            y1s <- par('usr')[3]
+            y2s <- par('usr')[4]
             rect(x1s,y1s,x2s,y2s,col="grey90",border="black")
             levs.loc<-tapply(dat$w.dat[,"Time"],as.factor(wr),mean)[levs]
             par(xpd=T)
-            text(levs.loc,par("usr")[3],levs,pos=3,offset=-4.3,cex=bcex, srt=90)	
-            #text(levs.loc,par("usr")[3],levs,pos=3,offset=-4.2,cex=bcex, srt=90)	
-            #text(t.dat[match(levs,wr),"Time"], par('usr')[4]-yinch(.5),levs, cex=bcex, offset=0, pos=4 )
-            #text(t.dat[match(levs,wr),"Time"],rep(c(-.05, abs(min(ylim)),abs(min(ylim))+.1),length=length(levs)),levs,cex=bcex,offset=0, pos=4)#,offset=-offs}
+            text(levs.loc, par("usr")[3] - yinch(.5),levs,cex=bcex, srt=90)	
         }
         ## Tool for adding line and point plot for all lines
             #matlines(xseq, blc[,m.names], col=rgb(0,0,0,3, maxColorValue=100), lwd=.01)
@@ -4847,7 +4855,7 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
         ## To select data within the experiment to group around
         if(region.group){
             dev.new(width=15, height=10)
-            LinesEvery.5(dat, sample(row.names(dat$c.dat)[1:5]), plot.new=F, lmain="Click to Select region to Groups Cells", t.type="t.dat", img="img1")
+            LinesEvery.5(dat, sample(dat$c.dat$id)[1:5], plot.new=F, lmain="Click to Select region to Groups Cells", t.type="t.dat", img="img1")
             #LinesEvery.4(dat, sample(row.names(dat$c.dat)[1:5]), plot.new=F, lmain="Click to Select region to Groups Cells", img=dat$img1)
             b.xseq<-locator(n=2, type="o", pch=15, col="red")$x
             dev.off()
@@ -4919,8 +4927,15 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
                 }
         }
         if(region.group){
-            points(b.xseq,rep(min(ylim),2),pch=15, col="blue", cex=.5)
-            abline(v=b.xseq, col="blue")
+            text(mean(b.xseq),
+                par('usr')[4]+yinch(3),
+                "Cluster Region",
+                col='blue',
+                font=2,
+                cex=2
+            )            
+            par(xpd=F)
+            abline(v=b.xseq, col="blue", lwd=2)
         }else{}
 
         par(xpd=F)
@@ -7614,7 +7629,12 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(lines.flag==2){
             sample.to.display<-as.numeric(select.list(as.character(c(5,10,20,50,70,100))),title='Sample Number?')
             tryCatch(dev.off(which=lines.window.2), error=function(e) print("this windows hasn't been opened yet"))
-            windows(width=10,height=12,xpos=0, ypos=250) 
+            
+            if(sample.to.display > 20){
+                windows(width=10,height=12,xpos=0, ypos=250)     
+            }else{
+                windows(width=10,height=7,xpos=0, ypos=250)
+            }
             lines.window.2<-dev.cur()
             dev.set(which=lines.window.2)
             
@@ -7678,7 +7698,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             if(length(cellTypeId) > 0){
                 #get only cell types that we want to reassign
                 cellTypeNames <- names(dat[[cellTypeId]])
-                cellTypesToNotClean <- c('neurons', 'glia')
+                cellTypesToNotClean <- c('neurons')
                 cellTypesToClean <- setdiff(cellTypeNames, cellTypesToNotClean)
                 
                 #remove it from all groups
@@ -8170,7 +8190,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 					cellTypeId <- select.list(cellTypeId, title="Select Cell Type")
 				}
                 bringToTop(-1)             
-                print("\nI have filled in your cell_types to choose by pressing \'P\' ENJOY!\n")
+                cat("\nI have filled in your cell_types to choose by pressing \'P\' ENJOY!\n")
                 gt.names <- list()
                 for(i in 1:length(dat[[cellTypeId]])){
                     #Fill in the gt.names with each cell type
@@ -12529,6 +12549,67 @@ cellTypeFixer<- function(dat){
 	dat$cell_types <- lapply(dat$cell_types, function(x) setdiff(x, dropped))
 	return(dat)
 }
+
+
+# dat1 is the flocation of the frist RD fil ex. "./1 video that yeeted itself/RD.1.Rdata"
+# dat2 is the second rd file taht needs to stich to "./2 R3J, TTAA, agonist vid/RD.2.Rdata"
+# timeBuffer is the time separation in minutes between the frist trace and the second trace
+# newName is the name of the experiment to save 
+traceSticher <- function(dat1Loc, dat2Loc, timeBuffer = 3, newName = NULL){
+    newName <- deparse(substitute(newName))
+    dat1 <- get(load(dat1Loc))
+    dat2 <- get(load(dat2Loc))
+
+    #How long were your experiments seperated?
+    #I think at least 7 min is mandatory
+    #time_buffer <- 3
+    #look at the max time value in the t.dat on the first experiemnt
+    #add it to the time_buffer
+    time_to_change<-max(dat1$t.dat[1])+timeBuffer
+    #now increase every time value in the second experiment by the 
+    #value above
+    dat2$t.dat <- dat2$t.dat[1:length(dat2$t.340[,1]), ]
+    dat2$w.dat <- dat2$w.dat[1:length(dat2$t.340[,1]), ]
+    changed_time <- dat2$t.dat[,1] + time_to_change
+
+    #Now we need make unique names of rhte windew regions
+    names_to_change<-setdiff(unique(dat2$w.dat[,"wr1"]),"")
+    new_names<-paste(names_to_change,"_2", sep="")
+    #dat2$w.dat["ignore"]<-0
+    for(i in 1:length(names_to_change)){
+        dat2$w.dat[ dat2$w.dat["wr1"]==names_to_change[i] ,2]<-new_names[i]
+    }
+
+    #Select the t.dat, blc and, w.dat
+    t_to_view<-c('t.dat', 't.340', 't.380', 'w.dat')
+    ##now merg ethe datasets
+    for(i in 1:length(t_to_view)){
+        #change the row names first
+        row.names( dat2[[ t_to_view[i] ]] ) <- as.character(changed_time)
+        #change the first collumn value
+        dat2[[ t_to_view[i] ]][1]<-changed_time
+        #combine the experiments trace dataframes together
+        dat1[[ t_to_view[i] ]]<-rbind(dat1[[ t_to_view[i] ]], dat2[[ t_to_view[i] ]])
+    }
+
+
+    #And reprocess the data
+    levs <- setdiff(unique(as.character(dat1$w.dat[,2])),"")
+        snr.lim=5;hab.lim=.05;sm=2;ws=3;blc="SNIP"
+    pcp <- ProcConstPharm(dat1,sm,ws,blc)
+    scp <- ScoreConstPharm(dat1,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
+    bin <- bScore(pcp$blc,pcp$snr,snr.lim,hab.lim,levs,dat1$w.dat[,"wr1"])
+
+    dat1$scp<-scp
+    dat1$snr<-pcp$snr
+    dat1$blc<-pcp$blc
+    dat1$bin<-bin
+
+    dat1 <- TraceBrewer(dat1)
+    assign(newName, dat1, envir = .GlobalEnv)  
+    save(list = newName ,file=paste(newName,'.Rdata',sep=''))
+}
+
 
 
 
