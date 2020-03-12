@@ -62,7 +62,7 @@ ephyz_total_plotter<-function(dat){
 }
 
 #Trace zoom
-ephyz_zoomer<-function(dat, plot.new=F, ephyzLims=c(-70,10), caLims = NULL, t_type="t.dat"){
+ephyz_zoomer<-function(dat, zoomLocations=NULL,caLims = NULL, ephyzLims=c(-70, 20), t_type="t.dat", plot.new=T){
     cat("\nThis function allows you to zoom in on the calcium imaging Trace\n")
     if(plot.new){
         graphics.off()
@@ -74,26 +74,32 @@ ephyz_zoomer<-function(dat, plot.new=F, ephyzLims=c(-70,10), caLims = NULL, t_ty
     PeakFunc7(dat, "X.1",t.type=t_type, bcex=1.2, zf=80 )
     #identify region to zoom
     bringToTop(-1)
-    cat("\nPlease identify the region you would like to more closely observe\nSelect the right side first followed by the left side\nPRESS ENTER TO CONTINUE\n")
-    scan(n=1)
+    cat("\nPlease identify the region you would like to more closely observe\nSelect the left side first followed by the right side")
+    #scan(n=1)
+    #flush.console()
+    bringToTop(dev.next())
+
     
     continue<-"T"
     plot_counter<-1
-    while(continue){
-        click1<-locator(n=1,type='p')
-        click2<-locator(n=1,type='p')
+    while(continue == 'T'){
+        if( is.null(zoomLocations) ){
+            click1<-locator(n=1,type='p')
+            click1 <- click1$x
+            click2<-locator(n=1,type='p')
+            click2 <- click2$x
+        }else{
+            click1 <- min(zoomLocations) 
+            click2 <- max(zoomLocations)
+        }
+        
         par(xpd=F)
-        abline(v=click2$x, col="blue", lwd=3)
-        abline(v=click1$x, col="blue", lwd=3)
+        abline(v=c(click1,click2), col="blue", lwd=3)
         if(plot_counter>1){dev.new(width=12, height=4)} 
-        
-        print(click1)
-        print(click2)
+        region_to_view <- min(which(dat$t.dat$Time>click1, arr.ind=T)) : max(which(dat$t.dat$Time<click2, arr.ind=T))
+        cat('\nThe time you selected was, \n1. ', click1, '\n2. ', click2, '\nYou can input this now as\n', 'ephyz_zoomer(tmpRD, c(', click1,', ', click2,') )\n')
+        v_region_to_view <- min(which(dat$ab$s > click1*60, arr.ind=T)) : max(which(dat$ab$s < click2*60, arr.ind=T))
 
-        region_to_view <- min(which(dat$t.dat$Time>click1$x, arr.ind=T)) : max(which(dat$t.dat$Time<click2$x, arr.ind=T))
-        
-        v_region_to_view <- min(which(dat$ab$s > click1$x*60, arr.ind=T)) : max(which(dat$ab$s < click2$x*60, arr.ind=T))
-        
         plot(dat$ab$s[v_region_to_view]/60, 
             dat$ab$traces[1,v_region_to_view], 
             type="l", 
@@ -118,9 +124,11 @@ ephyz_zoomer<-function(dat, plot.new=F, ephyzLims=c(-70,10), caLims = NULL, t_ty
 
         points(dat$t.dat$Time[region_to_view],dat$t.dat[region_to_view,"X.1"], pch=15)
 
+        cat('\nTo continue press ENTER\nTo end press any key then enter\n')
         continue<-scan(n=1, what='character')
         if(length(continue)==0){continue<-"T"}
         plot_counter<-plot_counter+1
+        locations = NULL
         dev.set(main_win)
     }
 }
@@ -188,21 +196,52 @@ stepPlotter<-function(){
 	#require(readABF)
 
 	abfFiles <- list.files(pattern='[.]abf$')
+
 	experiments <- select.list(abfFiles, multiple=T)
 	for(j in 1:length(experiments)){
 		tmpabf<- readABF(experiments[j])
+        # Now that i have loaded the data get the points/sec
+        pointPerSecond <- tmpabf$samplingIntervalInSec
+        # How many point are collected per run?
+        totalSweepLength <- length(tmpabf$data[[1]][,1])
+        # What is the total seconds caputured in a trace
+        secondsInTrace <- pointPerSecond * totalSweepLength
+
+
 		totalSteps <-length(tmpabf$data)
 
 		#png(paste0(experiments[j],'.png'), 2048, 4096, res=300)
-		pdf(paste0(experiments[j],'.pdf'), 8, 12)
+		pdf(paste0(experiments[j],'.pdf'), 8.3, 11.7)
 		par(mfrow=c(totalSteps,2))
+        
+        steps <- stepFinder(tmpabf)
 
-		for(i in totalSteps:1){
-			par(mai=c(0,.5,0,0))
-			plot(tmpabf$data[i][[1]][,2], type='l', ylim=c(-200,200))
-			plot(tmpabf$data[i][[1]][,1], type='l', ylim=c(-200,50),xaxt='n')
-		}
+		for(i in totalSteps:1){ 
+            par(mai=c(0,0,0,0), cex=.5)
+            
+            #Plot the Steps
+            plot(tmpabf$data[i][[1]][,2], type='l', ylim=c(-200,200), xaxt='n', ylab='', yaxt='n', bty='l')
+            if(i == totalSteps ){
+                legend('bottom', legend = experiments[j], bty='n', cex=1.5)
+            }
+            legend('bottomleft', legend = paste('Current Step =',steps[i]), bty='n')
+            
+            #Plot the Voltages
+            par(mai=c(0,0.5,0,0), cex=.5)
+            plot(tmpabf$data[i][[1]][,1], type='l', ylim=c(-200,50), xaxt='n', ylab='', bty='l')
+            if(i == totalSteps ){
+                legend('bottom', legend = experiments[j], bty='n', cex=1.5)
+            }
+            # Add line at zero for reference
+            abline(h=0, lwd=.1, col='red')
+            # Add current step for reference
+            legend('bottomright', legend = paste('Current Step =',steps[i]), bty='n')    
+            
+            # Calculate ap per second for reference, and display it
+            apsPerSecond <- apCounter(tmpabf$data[i][[1]][,1])/secondsInTrace
+            legend('bottomleft', legend = paste('AP/Second= ',apsPerSecond), bty='n')
 
+        }
 		dev.off()
 	}
 }
@@ -210,7 +249,7 @@ stepPlotter<-function(){
 #Function To count action Potentials
 # apInterval: Shortest interval inbetween action potentials 
 # apThresh: When action potential Fires
-apCounter <- function(trace, apInterval = 100, apThresh = -10){
+apCounter <- function(trace, apInterval = 100, apThresh = -15){
     #Trace is a step for firing.
     #Increas if ap has fired
     apCounter <- 0
@@ -329,8 +368,8 @@ stepsSpikeComparer <- function(apInterval=50, apThresh=-20){
     ##################################
     expDiff <- (expComps[,1] - expComps[,2]) / (expComps[,1] + expComps[,2])
 
-    dev.new(width = 20, height = 10)
-    par(mfrow = c(1,2))
+    dev.new(width = 12, height = 6)
+    par(mfrow = c(1,2), cex=.7)
     diffAbsPlotter(expDiff)
     diffPlotter(expComps)
 }
@@ -384,6 +423,8 @@ apCollector <- function(trace, apInterval = 300, apView = 500, apThresh = -10){
 # apView: to buffer around the action potential for viewing purpose
 # apThrsh: The minimum detectable hieght of an action potential 
 apStepCollector <- function(traces, apInterval = 200, apView = 400, apThresh = -10){
+    traces <- readABF(traces)
+    
     #List to hold all of my action potentials
     ap <- list()
     # Step identifier for each action potential
@@ -479,12 +520,12 @@ apStepCollector <- function(traces, apInterval = 200, apView = 400, apThresh = -
             }
         }
     }
-    print(layoutMat)
+    #print(layoutMat)
 
 
     ## Plotting of the action Potentials
     if(length(ap) > 0){
-        graphics.off()
+        #graphics.off()
         # dev to plot action potentials
         dev.new(width= 1.25 * rows, height=20)
         apPlotSize <- ceiling(sqrt(length(ap)))
@@ -499,7 +540,7 @@ apStepCollector <- function(traces, apInterval = 200, apView = 400, apThresh = -
             box('plot', col='white')
         }
     }
-    return(ap)
+    #return(ap)
 }
 
 # This function calculates the spikes per second every specified second specified
@@ -509,21 +550,34 @@ apStepCollector <- function(traces, apInterval = 200, apView = 400, apThresh = -
 # regions: The number of regions to perform the calculations
 # specifiedSeconds = How often to calculate the action potentials, every 1 second for example
 apRateCalculator <- function(tmpRD, regions = 2, specifiedSeconds = 1){
-    if(!exists('totalPlot')){
+    # if(exists('totalPlot')){
+    #     totalPlot <- get('totalPlot', envir = .GlobalEnv)
+    #     print(totalPlot)
+    #     # totalPlot <<- dev.cur()
+    #     # totalPlot <- dev.cur()
+    #     # dev.set(totalPlot)
+    # }else{
+        graphics.off()
+        #dev.new(width=14,height=8)
+        #totalPlot <<- dev.cur()
         ephyz_total_plotter(tmpRD)
+        totalPlot <- dev.cur()
         alarm()
-        totalPlot <<- dev.cur()
-    }else{}
-    
-    #if(!exists('ratePlotter')){
-    dev.new(width= 5 * regions, height=5)
-    ratePlotter <<- dev.cur()
-    par(mfrow=c(1,regions))
+    #}
+
+    # if(exists('ratePlotter')){
+    #     #dev.set(ratePlotter)
+    # }else{
+        dev.new(width= 5 * regions, height=5)
+        #ratePlotter <<- dev.cur()
+        ratePlotter <- dev.cur()
+        par(mfrow=c(1,regions))
     #}
 
     regionStats <- list()
     for( j in 1:regions){
         dev.set(totalPlot)
+        print('set your dev to totalPlot')
         timeLocs <- locator(n=2)
         xStart <- min(which(tmpRD$ab$s>=timeLocs$x[1]*60, arr.ind=T))
         xEnd <- max(which(tmpRD$ab$s<=timeLocs$x[2]*60, arr.ind=T))
