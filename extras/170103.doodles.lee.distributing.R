@@ -975,20 +975,6 @@ ClusterDendroView <- function(wt,xsec=NULL,wdist=NULL,d50=NULL)
 
 }
 
-
-
-BackgroundRaster <- function(wt,ht,wd,col50,xlim,ylim)
-{
-	require(png)
-	png("tmp.png",width=wd,height=ht,units="in",res=72,bg="transparent",type="cairo")
-	par(bty="n",ann=F,fig=c(0,1,0,1),mar=c(0,0,0,0),mgp=c(0,0,0),xpd=NA,xaxs="i",yaxs="i")
-	plot(wt[,1],wt[,2],xaxt="n",yaxt="n",ylim=ylim,xlim=xlim,type="n")
-	for(i in 2:ncol(wt)){lines(wt[,1],wt[,i],lwd=1,col=col50[i-1])}
-	dev.off()
-	tmp.png <- readPNG("tmp.png")
-	return(tmp.png)			
-}
-
 SetShades <- function(tmp,trans=.1)
 {
 	gfp.frac <- NULL

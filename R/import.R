@@ -3,6 +3,7 @@
 #' @param area_conversion conversion factor from the object used from the experiment
 #' @param img_name_vec vector of image names ex c('bf.gfp.cy5', 'bf.gfp')
 #' @param image_question will ask you to fill in images if you don't have an img_name_vec
+#' @export 
 pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec = NULL, image_question=T){
     cat('#########################################\nPHARM HARVEST\n#########################################\n')
     tryCatch(cat(readLines("Y:/Box Sync/procpharm/farm.txt"),sep='\n'), error=function(e) cat('\nPHARM ON PHARM ANIMAL\n'))
@@ -299,7 +300,12 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
     cat("\n#####################################################\nTotal Harvest took. ",total_end_time - total_start_time,"\n#####################################################\n")
 }
 
-#HAS TRACEBREWER
+#' Old school way to import data
+#' 
+#' First step of this function is to change the working directory \code{setwd("Z:/Lee Leavitt/experimentFolder")}
+#' Next use \code{ReadDataDump.lee.2("RD.date.age.gender.microscope.protocol", "bf.gfp.cy5")}
+#' To make this work, you already need to have a \code{'Data (full).txt', 'ROI Data.txt', 'wr1.docx'}
+#' @export
 ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=NULL,img5=NULL, img6=NULL, img7=NULL, img8=NULL, fancy=F,fname="Data (full).txt",wrdef="wr1.docx", Wr=NULL, c.dat="ROI Data.txt" ,sep="\t"){
     require(png)
     require(MALDIquant)
@@ -644,11 +650,12 @@ MakeWr <- function(t.dat,wr1,padL=0,padR=0){
     return(w.dat)
 }
 
-#Made a mistake in you window regions?
-# If it is only the time sequence, but all other info is corrected
-# then make complete F.  This will allow you to select the windows that need reapri
-# if the naming is off, then make complete=F.  You will need to do a complete reapri
-# you will lose all information from RDView
+#' Made a mistake in you window regions?
+#' If it is only the time sequence, but all other info is corrected
+#' then make complete F.  This will allow you to select the windows that need reapri
+#' if the naming is off, then make complete=F.  You will need to do a complete reapri
+#' you will lose all information from RDView
+#' @export 
 WindowRepair_docx<-function(dat, complete=F, trace_brew=F){
     require(docxtractr)
     tmp<-dat #first create a tmp to repair
@@ -720,11 +727,11 @@ WindowRepair_docx<-function(dat, complete=F, trace_brew=F){
     return(dat)
 }
 
-#Made a mistake in you window regions?
-#If it is only the time sequence, but all other info is corrected
-#then make complete F.  This will allow you to select the windows that need reapri
-#if the naming is off, then make complete=F.  You will need to do a complete reapri
-# you will lose all information from RDView
+#' Made a mistake in you window regions?
+#' If it is only the time sequence, but all other info is corrected
+#' then make complete F.  This will allow you to select the windows that need reapri
+#' if the naming is off, then make complete=F.  You will need to do a complete reapri
+#' you will lose all information from RDView
 WindowRepair<-function(dat, complete=T){
 
     tmp<-dat #first create a tmp to repair

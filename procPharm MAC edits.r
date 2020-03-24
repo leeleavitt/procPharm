@@ -170,7 +170,7 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
         #until then the researcher will need to expor the time information before they start
         #this function. The funciton will sense whether the file is present or not.
 		py_pharm <- import('python_pharmer')
-		#video <- list.files(pattern="^[Vv]ideo.*nd2$")
+		video <- list.files(pattern="^[Vv]ideo.*nd2$")
 		
 		if( length(list.files(pattern = "^time.*txt$")) < 1 ){
 			py_pharm$time_info_gather( video )
@@ -195,8 +195,7 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
 		wrdef <- "wr1.docx"
         wrdef <- list.files(pattern = '^wr1')
 		wrdef_logic <- grep(".docx", wrdef, ignore.case=T, value=T)
-		# If it is a wr1.docx, continue
-        if( length(wrdef_logic) == 1 ){
+		if( length(wrdef_logic) == 1 ){
 			require(docxtractr)
 			wr <- docx.wr1.importer(wrdef)
 			w.dat <- MakeWr.docx(t.dat, wr)		
@@ -214,8 +213,7 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
                 wr <- ReadResponseWindowFile(wrdef)
                 , error=function(e) print("YOU NEED A wr1.docx or wr1.csv")
             )
-            #Wr<-length(wr[,1])#complete and revise this section
-            wr['at'] <- wr['at'] - (10/60)
+            Wr<-length(wr[,1])#complete and revise this section
 
             w.dat <- MakeWr(t.dat,wr)
 		}
@@ -711,9 +709,9 @@ ReadDataDump.lee <- function(rd.name=NULL,img1="bf.f2.png",img2="bf.f2.lab.png",
         #save as RD file
     }
 
-#HAS TRACEBREWER
-ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=NULL,img5=NULL, img6=NULL, img7=NULL, img8=NULL, fancy=F,fname="Data (full).txt",wrdef="wr1.docx", Wr=NULL, c.dat="ROI Data.txt" ,sep="\t")
-{
+    #HAS TRACEBREWER
+    ReadDataDump.lee.2 <- function(rd.name=NULL,img1="bf.f2.png",img2="bf.f2.lab.png",img3=NULL,img4=NULL,img5=NULL, img6=NULL, img7=NULL, img8=NULL, fancy=F,fname="Data (full).txt",wrdef="wr1.docx", Wr=NULL, c.dat="ROI Data.txt" ,sep="\t")
+    {
     require(png)
     require(MALDIquant)
 
@@ -949,8 +947,7 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
     
     
     f.name <- paste(rd.name,".Rdata",sep="")
-    assign(rd.name, tmp.rd, envir=.GlobalEnv)
-	assign(rd.name,tmp.rd)
+    assign(rd.name,tmp.rd)
     save(list=rd.name,file=f.name)
     return(paste(nrow(tmp.rd$c.dat),"traces read saved to ",f.name))
     #save as RD file
@@ -1350,7 +1347,6 @@ docx.wr1.importer<-function(file.name='wr1.docx'){
     
     print(paste("You have a total of",error,"errors")) 
     if(error>0){
-        alarm()
         print("Fix these Errors")
         print("PRESS ANY KEY TO CONTINUE")
         scan(n=1)
@@ -1415,7 +1411,7 @@ MakeWr <- function(t.dat,wr1,padL=0,padR=0)
     for(i in 1:nrow(wr1))
     {
         x1 <- which.min(abs(wr1[i,"at"]-t.dat[,"Time"]))
-        x2 <- which.min(abs((wr1[i,"at"] + wr1[i,"duration"]) - t.dat[,"Time"]))
+        x2 <- which.min(abs((wr1[i,"at"]+wr1[i,"duration"])-t.dat[,"Time"]))
         w.dat[max((x1-padL),1):min((x2+padR),nrow(t.dat)),"wr1"] <- as.character(wr1[i,"treatment"])
     }
     return(w.dat)
@@ -1586,14 +1582,12 @@ WindowRepair<-function(dat, complete=T){
     #Now do all of this to tmp.rd
     wrdef<-"wr1.csv"
     t.dat<-tmp.rd$t.dat
-    if(!is.null(wrdef)){
+    if(!is.null(wrdef))
+        {
             wr <- ReadResponseWindowFile(wrdef)
             Wr<-length(wr[,1])#complete and revise this section
             if(length(colnames(wr))<2){w.dat<-WrMultiplex(t.dat,wr,n=Wr)}
-            else{
-                wr['at'] <- wr['at'] - (10/60)
-                w.dat <- MakeWr(t.dat,wr)
-            }
+            else{w.dat <- MakeWr(t.dat,wr)}
             tmp.rd$w.dat<-w.dat
         }
     levs<-setdiff(unique(as.character(tmp.rd$w.dat$wr1)),"")
@@ -1678,6 +1672,9 @@ WindowRepair_docx<-function(dat, complete=F, trace_brew=F){
     hab.lim <- .05 #height above baseline threshold
     blc="SNIP"
     
+    if(length(summary(names(tmp.rd)=='t.norm')) == 2 | trace_brew ){
+        tmp.rd <- TraceBrewer(tmp.rd)
+    }
     pcp <- ProcConstPharm(tmp.rd,sm,ws,blc)
     scp <- ScoreConstPharm(tmp.rd,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
     bin <- bScore(pcp$blc,pcp$snr,snr.lim,hab.lim,levs,tmp.rd$w.dat[,"wr1"])
@@ -1695,10 +1692,6 @@ WindowRepair_docx<-function(dat, complete=F, trace_brew=F){
     #Now surgically add the selected corrected data from tmp.rd to the tmp
     #starting with the window region
     tmp$w.dat$wr1<-tmp.rd$w.dat$wr1
-    
-	if(length(summary(names(tmp.rd)=='t.norm')) == 2 | trace_brew ){
-        tmp.rd <- TraceBrewer(tmp.rd)
-    }
 
     #select the window region you want to repair
     if(complete==T){
@@ -4788,20 +4781,18 @@ LinesStack.2.1 <- function(dat,m.names=NULL,lmain="",levs=NULL, plot.new=TRUE,bc
 #
 LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, region.group=T,levs=NULL, plot.new=TRUE,bcex=.7, sf=1.1, subset.n=NULL, img=NULL,bp.param=NULL, bp=F, bp.pts=F){
     #graphics.off()
-    #
     if(is.null(img)){img<-dat$img1}
-    
-    # If a list of cells is not input, then look at all cells
     if(is.null(m.names)){
         dropped.cells<-cellzand(dat$bin, "drop",1)
         m.names<-setdiff(dat$c.dat$id, dropped.cells)
     }else{
         dropped.cells<-cellzand(dat$bin, "drop",1)
         m.names<-setdiff(m.names, dropped.cells)
-    }
+        }
         
     if(is.null(subset.n)){subset.n<-as.numeric(select.list(as.character(c(5,10,15,20,25,30))))}
     if(plot.new){
+    
         if(subset.n>=10){
             dev.new(width=14,height=10)
             }
@@ -4828,16 +4819,7 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
         ylim<-c(-.1,hbc)
         #ylim <- c(-.1,2.5)
         
-        plot(xseq,
-            t.dat[,m.names[1]],
-            ylim=ylim,
-            xlab="",
-            ylab='',
-            main=lmain,
-            type="n",
-            xlim=c(min(xseq)-1.5,max(xseq)+10),
-            bty='n'
-        )#-sf
+        plot(xseq,t.dat[,m.names[1]],ylim=ylim,xlab="",main=lmain,type="n",xlim=c(min(xseq)-1.5,max(xseq)+10))#-sf
         #axis(1, at=seq(floor(min(t.dat[,1])),ceiling(max(t.dat[,1])), 1))
         
         ## Tool for adding window region labeling
@@ -4845,12 +4827,15 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
             #levs <- setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
             x1s <- tapply(xseq,as.factor(wr),min)[levs]
             x2s <- tapply(xseq,as.factor(wr),max)[levs]
-            y1s <- par('usr')[3]
-            y2s <- par('usr')[4]
+            y1s <- rep(min(ylim)-.2,length(x1s))
+            y2s <- rep(max(ylim)+.2,length(x1s))
             rect(x1s,y1s,x2s,y2s,col="grey90",border="black")
             levs.loc<-tapply(dat$w.dat[,"Time"],as.factor(wr),mean)[levs]
             par(xpd=T)
-            text(levs.loc, par("usr")[3] - yinch(.5),levs,cex=bcex, srt=90)	
+            text(levs.loc,par("usr")[3],levs,pos=3,offset=-4.3,cex=bcex, srt=90)	
+            #text(levs.loc,par("usr")[3],levs,pos=3,offset=-4.2,cex=bcex, srt=90)	
+            #text(t.dat[match(levs,wr),"Time"], par('usr')[4]-yinch(.5),levs, cex=bcex, offset=0, pos=4 )
+            #text(t.dat[match(levs,wr),"Time"],rep(c(-.05, abs(min(ylim)),abs(min(ylim))+.1),length=length(levs)),levs,cex=bcex,offset=0, pos=4)#,offset=-offs}
         }
         ## Tool for adding line and point plot for all lines
             #matlines(xseq, blc[,m.names], col=rgb(0,0,0,3, maxColorValue=100), lwd=.01)
@@ -4862,7 +4847,7 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
         ## To select data within the experiment to group around
         if(region.group){
             dev.new(width=15, height=10)
-            LinesEvery.5(dat, sample(dat$c.dat$id)[1:5], plot.new=F, lmain="Click to Select region to Groups Cells", t.type="t.dat", img="img1")
+            LinesEvery.5(dat, sample(row.names(dat$c.dat)[1:5]), plot.new=F, lmain="Click to Select region to Groups Cells", t.type="t.dat", img="img1")
             #LinesEvery.4(dat, sample(row.names(dat$c.dat)[1:5]), plot.new=F, lmain="Click to Select region to Groups Cells", img=dat$img1)
             b.xseq<-locator(n=2, type="o", pch=15, col="red")$x
             dev.off()
@@ -4934,15 +4919,8 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
                 }
         }
         if(region.group){
-            text(mean(b.xseq),
-                par('usr')[4]+yinch(3),
-                "Cluster Region",
-                col='blue',
-                font=2,
-                cex=2
-            )            
-            par(xpd=F)
-            abline(v=b.xseq, col="blue", lwd=2)
+            points(b.xseq,rep(min(ylim),2),pch=15, col="blue", cex=.5)
+            abline(v=b.xseq, col="blue")
         }else{}
 
         par(xpd=F)
@@ -7643,16 +7621,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(lines.flag==2){
             sample.to.display<-as.numeric(select.list(as.character(c(5,10,20,50,70,100))),title='Sample Number?')
             tryCatch(dev.off(which=lines.window.2), error=function(e) print("this windows hasn't been opened yet"))
-<<<<<<< HEAD:extras/procPharm MAC edits.r
             Cairo(pointsize=ps, width=10,height=12) 
-=======
-            
-            if(sample.to.display > 20){
-                windows(width=10,height=12,xpos=0, ypos=250)     
-            }else{
-                windows(width=10,height=7,xpos=0, ypos=250)
-            }
->>>>>>> 02c76eaf0507e5b2abfc9b5cea8d86cca953c6ef:procPharm 170210.r
             lines.window.2<-dev.cur()
             dev.set(which=lines.window.2)
             
@@ -7712,19 +7681,11 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             #need to see if the dat has a cell_types
             cellToReassign <- cnames[cell.i]
             cat('\nReassigning cell', cellToReassign,'\n')
-<<<<<<< HEAD:extras/procPharm MAC edits.r
             cellTypeId <- grep('^cell',names(dat), value=T)
             if(length(cellTypeId) > 0){
                 #get only cell types that we want to reassign
                 cellTypeNames <- names(dat[[cellTypeId]])
                 cellTypesToNotClean <- c('neurons', 'glia')
-=======
-            #cellTypeId <- grep('^cell',names(dat), value=T)
-            if(length(cellTypeId) > 0){
-                #get only cell types that we want to reassign
-                cellTypeNames <- names(dat[[cellTypeId]])
-                cellTypesToNotClean <- c('neurons')
->>>>>>> 02c76eaf0507e5b2abfc9b5cea8d86cca953c6ef:procPharm 170210.r
                 cellTypesToClean <- setdiff(cellTypeNames, cellTypesToNotClean)
                 
                 #remove it from all groups
@@ -7732,11 +7693,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 
                 ###now that we have indicated that we would like to place this cell into a new group
                 #First lets find all groups we can assign to\
-<<<<<<< HEAD:extras/procPharm MAC edits.r
                 ##bringtotop(-1)
-=======
-                bringToTop(-1)
->>>>>>> 02c76eaf0507e5b2abfc9b5cea8d86cca953c6ef:procPharm 170210.r
                 cat('\nWhich cell class does this actually belong to?\n')
                 correctCellClass <- cellTypesToClean[menu(cellTypesToClean)]
                 print(dat[[cellTypeId]][[correctCellClass]])
@@ -7829,11 +7786,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #m: Move groups to another group
         if(keyPressed=="m"){
-<<<<<<< HEAD:extras/procPharm MAC edits.r
             ##bringtotop(-1)
-=======
-            bringToTop(-1)
->>>>>>> 02c76eaf0507e5b2abfc9b5cea8d86cca953c6ef:procPharm 170210.r
             cat("
             Select the Group you would like to move
             
@@ -7995,12 +7948,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             # cell types
             cellTypeId <- grep('^cell',names(dat), value=T)
             if(length(cellTypeId) > 0){
-<<<<<<< HEAD:extras/procPharm MAC edits.r
                 drops <- row.names(dat$bin[dat$bin$drop,])
-=======
-                drops <- row.names(dat$bin[dat$bin$drop==1,])
-				print(drops)
->>>>>>> 02c76eaf0507e5b2abfc9b5cea8d86cca953c6ef:procPharm 170210.r
                 dat[[cellTypeId]] <- lapply(dat[[cellTypeId]], function(X) setdiff(X,drops))
                 assign(dat.name,dat, envir=.GlobalEnv)
             }else{assign(dat.name,dat, envir=.GlobalEnv)}
@@ -8019,11 +7967,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #z: image zoom
         if(keyPressed=="z"){
-<<<<<<< HEAD:extras/procPharm MAC edits.r
             #bringtotop(-1)
-=======
-            bringToTop(-1)
->>>>>>> 02c76eaf0507e5b2abfc9b5cea8d86cca953c6ef:procPharm 170210.r
             print("change the zoom factor")
             print(paste("This is the current zoom",zf))
             zf<-scan(n=1)
@@ -8226,18 +8170,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(keyPressed=='F7')  {
            cellTypeId <- grep('^cell',names(dat), value=T)
             if(length(cellTypeId)>0){
-<<<<<<< HEAD:extras/procPharm MAC edits.r
                 #bringtotop(-1)             
                 print("\nI have filled in your cell_types to choose by pressing \'P\' ENJOY!\n")
-=======
-				if(length(cellTypeId)>1){
-					bringToTop(-1)
-					cat('\n Select the cell type to load in \n')
-					cellTypeId <- select.list(cellTypeId, title="Select Cell Type")
-				}
-                bringToTop(-1)             
-                cat("\nI have filled in your cell_types to choose by pressing \'P\' ENJOY!\n")
->>>>>>> 02c76eaf0507e5b2abfc9b5cea8d86cca953c6ef:procPharm 170210.r
                 gt.names <- list()
                 for(i in 1:length(dat[[cellTypeId]])){
                     #Fill in the gt.names with each cell type
@@ -10880,17 +10814,16 @@ census.brewer<-function(dat){
     stacked.traces<-dev.cur()
     LinesEvery.5.1(dat, sample(row.names(dat$c.dat)[1:5]), plot.new=F, lmain="WAZZZUPPPP", t.type="t.dat", img=dat$img1)
 
-    cat("HOWDY PARTNER How Many groups to census?\n")
-    bringToTop(-1)
+    print("How Many groups to census?")
     group.number<-scan(n=1, what='numeric')
 
-    cat("\nEnter the names of your census groups seperated by '.'\n")
+    print("enter the names of your census groups seperated by '.' (6)")
     census.names<-scan(n=as.numeric(group.number), what='character')
     dev.off(stacked.traces)
 
 
     selected.cell.groups<-select.list(names(cell.types), title="Select groups to census", multiple=T)
-    cat("\nThese are the cells you have chosen\n")
+    print("These are the cells you have chosen")
     print(selected.cell.groups)
     census<-list()
 
@@ -10899,7 +10832,7 @@ census.brewer<-function(dat){
         print(selected.cell.groups[i])
         
         if(length(cell.types[[selected.cell.groups[i]]])>1){
-            census[[i]]<-tcd(dat, Reduce(union,cell.types[[selected.cell.groups[i]]]), save_question=F)
+            census[[i]]<-tcd(dat, Reduce(union,cell.types[[selected.cell.groups[i]]]))
             names(census[[i]])<-census.names
         }else{
             census[[i]]<-NA
@@ -10911,8 +10844,6 @@ census.brewer<-function(dat){
     names(census)<-selected.cell.groups
 
     dat$census<-census
-
-    dat <- census_to_table(dat)        
     return(dat)
 }
 
@@ -10932,22 +10863,20 @@ census.brewer.2<-function(dat){
         census.names<-scan(n=as.numeric(group.number), what='character')
         dev.off(stacked.traces)
     }else{
-        census.names<-names(dat$census[[1]])[!is.na(names(dat$census[[1]]))]
+    census.names<-names(dat$census[[1]])[!is.na(names(dat$census[[1]]))]
     }
+
 
     selected.cell.groups<-select.list(names(cell.types), title="Select groups to census", multiple=T)
-    print("These are the cells you have chosen")
-    print(selected.cell.groups)
 
-    if(is.null(dat$census)){
-        dat$census<-list()
-    }
+    if(is.null(dat$census)){dat$census<-list()}
 
     for(i in selected.cell.groups)
     {
         print(i)
+        
         if(length(cell.types[[i]])>1){
-            dat$census[[i]]<-tcd(dat, Reduce(union,cell.types[[i]]))
+            dat$census[[i]]<-Trace.Click.dev(dat, Reduce(union,cell.types[[i]]))
             names(dat$census[[i]])<-census.names
         }else{
             dat$census[[i]]<-NULL
@@ -11054,33 +10983,21 @@ PulseImputer<-function(tmp,cell,pulse.names=NULL,plot.new=F,sf=8){
     }
 }
 
-<<<<<<< HEAD:extras/procPharm MAC edits.r
 #function to build a table with defined cell types, and selected columns
 TableBrewer<-function(dat, ct.names=NULL){
     #require(xlsx)
-=======
-#function to build a table with defined cell types, and selected collumns
-TableBrewer<-function(dat, ct.names=NULL, save=T, xlsx=T){
->>>>>>> 02c76eaf0507e5b2abfc9b5cea8d86cca953c6ef:procPharm 170210.r
     dat.name<-deparse(substitute(dat))
     pulse<-select.list(names(dat$bin), multiple=T, title="select variables for table")
     ct.sum<-data.frame()
-
+    
+    
+    
     if(is.null(ct.names)){
-        #F7: Load cell Types into the groups to pick with 'P'
-        cellTypeId <- grep('^cell', names(dat), value=T)
-        if(length(cellTypeId)>0){
-			if(length(cellTypeId)>1){
-				bringToTop(-1)
-				cat('\n Select the cell type to load in \n')
-				cellTypeId <- select.list(cellTypeId, title="Select Cell Type")
-            }
-        }
-        cell.type.names <- names(dat[[cellTypeId]])
-        cell.types <- dat[[cellTypeId]]
+        cell.type.names<-names(dat$cell.types)
+        cell.types<-dat$cell.types
     }else{
-        cell.type.names <- names(ct.names)
-        cell.types <- ct.names
+        cell.type.names<-names(ct.names)
+        cell.types<-ct.names
     }
     
     for(z in 1:length(pulse)){
@@ -11091,28 +11008,10 @@ TableBrewer<-function(dat, ct.names=NULL, save=T, xlsx=T){
                 ct.sum[pulse[z],cell.type.names[x]]<-sum(dat$bin[cell.types[[ cell.type.names[x] ]],pulse[z]])
             }
     }
-<<<<<<< HEAD:extras/procPharm MAC edits.r
     print('Enter your file name without spaces')
     save.names<-scan(n=1, what='character')
     print(paste(save.names,'csv',sep=''))
     write.csv(ct.sum, file=paste(save.names,'.csv',sep=''))
-=======
-
-    if(save){
-        print('Enter you file name without spaces')
-        save.names <- scan(n=1, what='character')
-        print(paste(save.names,'xlsx',sep=''))
-        if(xlsx){
-            require(xlsx)
-            tryCatch(
-                write.xlsx(ct.sum, file=paste(save.names,'.xlsx',sep='')), 
-                error=function(e) print("You Forgot to input cells.")
-            )
-        }else{
-            write.csv(ct.sum, file=paste(save.names,'.csv',sep=''))
-        }
-    }
->>>>>>> 02c76eaf0507e5b2abfc9b5cea8d86cca953c6ef:procPharm 170210.r
     return(ct.sum)
 }
 
@@ -12606,11 +12505,7 @@ cat(
 saveRD <- function(dat){
     cat("\nDO NOT CLOSE UNTIL I SAY YOU CAN!\nWait for the sound...")
     flush.console()
-<<<<<<< HEAD:extras/procPharm MAC edits.r
     #bringtotop(-1)
-=======
-    bringToTop(-1)
->>>>>>> 02c76eaf0507e5b2abfc9b5cea8d86cca953c6ef:procPharm 170210.r
     Sys.sleep(1)
 
     #History Saver
@@ -12628,182 +12523,3 @@ saveRD <- function(dat){
     cat('\nYou can now close. Please consider cleaning up the file,\n',historyName,'\n')
 }
 
-<<<<<<< HEAD:extras/procPharm MAC edits.r
-=======
-
-cellTypeFixer<- function(dat){
-	dropped <- row.names(dat$bin[dat$bin$drop==1,])
-	dat$cell_types <- lapply(dat$cell_types, function(x) setdiff(x, dropped))
-	return(dat)
-}
-
-
-# MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS,
-# ALSO HAVE SEPERATE WR1's that match  exactly what happened
-# 1 Now tht we know the videos are ok we will simply do the cell profiler pipeline
-# 2 we copy everything from the cell profiler pipeline into the 2 folders that contain the videos
-# 3 Now do the pharming harvest and select both folders that contain the seperate videos
-
-# dat1 is the flocation of the frist RD fil ex. "./1 video that yeeted itself/RD.1.Rdata"
-# dat2 is the second rd file taht needs to stich to "./2 R3J, TTAA, agonist vid/RD.2.Rdata"
-# timeBuffer is the time separation in minutes between the frist trace and the second trace
-# newName is the name of the experiment to save 
-# Example of how to use
-#traceSticher(
-#    './1 video that yeeted itself/RD.1.Rdata',
-#   './2 R3J, TTAA, agonist vid/RD.2.Rdata',
-#   3,
-#    'RD.bob')
-
-traceSticher <- function(dat1Loc, dat2Loc, timeBuffer = 3, newName = NULL){
-    cat("
-    # MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS, 
-    # ALSO HAVE SEPERATE WR1's that match  exactly what happened
-    # 1 Now tht we know the videos are ok we will simply do the cell profiler pipeline
-    # 2 we copy everything from the cell profiler pipeline into the 2 folders that contain the videos
-    # 3 Now do the pharming harvest and select both folders that contain the seperate videos
-    
-    traceSticher(
-        './1 video that yeeted itself/RD.1.Rdata', 
-        './2 R3J, TTAA, agonist vid/RD.2.Rdata', 
-        3, 
-        'RD.bob')
-    ")
-    dat1 <- get(load(dat1Loc))
-    dat2 <- get(load(dat2Loc))
-
-    fName <- paste0(newName, ".Rdata")
-    assign(newName, dat1)
-    assign(newName, dat1, envir = .GlobalEnv)  
-    save(list = newName ,file=fName )
-
-    #How long were your experiments seperated?
-    #I think at least 7 min is mandatory
-    #time_buffer <- 3
-    #look at the max time value in the t.dat on the first experiemnt
-    #add it to the time_buffer
-    #look at the max time value in the t.dat on the first experiemnt
-    #add it to the time_buffer
-    time_to_change<-max(dat1$t.dat[1])+timeBuffer
-    #now increase every time value in the second experiment by the 
-    #value above
-    changed_time <- dat2$t.dat[,1] + time_to_change
-
-    #Now we need make unique names of rhte windew regions
-    names_to_change<-setdiff(unique(dat2$w.dat[,"wr1"]),"")
-    new_names<-paste(names_to_change,"_2", sep="")
-    #dat2$w.dat["ignore"]<-0
-    for(i in 1:length(names_to_change)){
-        dat2$w.dat[ dat2$w.dat["wr1"]==names_to_change[i] ,2]<-new_names[i]
-    }
-
-    #Select the t.dat, blc and, w.dat
-    t_to_view<-c('t.dat', 't.340', 't.380', 'w.dat')
-    ##now merg ethe datasets
-    for(i in 1:length(t_to_view)){
-        #we need to get rid of the epad
-        notEpadLogic <- dat1$w.dat$wr1 != "epad"
-        dat1[[ t_to_view[i] ]] <- dat1[[ t_to_view[i] ]][notEpadLogic, ]
-        #change the row names first
-        
-        notEpadLogic <- dat2$w.dat$wr1 != "epad"
-        dat2[[ t_to_view[i] ]] <- dat2[[ t_to_view[i] ]][notEpadLogic, ]
-        row.names( dat2[[ t_to_view[i] ]] ) <- as.character(changed_time)
-        #change the first collumn value
-        dat2[[ t_to_view[i] ]][1]<-changed_time
-        #combine the experiments trace dataframes together
-        dat1[[ t_to_view[i] ]]<-rbind(dat1[[ t_to_view[i] ]], dat2[[ t_to_view[i] ]])
-    }
-
-    #And reprocess the data
-    levs<-setdiff(unique(as.character(dat1$w.dat[,2])),"")
-        snr.lim=5;hab.lim=.05;sm=2;ws=3;blc="SNIP"
-    pcp <- ProcConstPharm(dat1,sm,ws,blc)
-    scp <- ScoreConstPharm(dat1,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
-    bin <- bScore(pcp$blc,pcp$snr,snr.lim,hab.lim,levs,dat1$w.dat[,"wr1"])
-
-    dat1$scp<-scp
-    dat1$snr<-pcp$snr
-    dat1$blc<-pcp$blc
-    dat1$bin<-bin
-    
-    #dat1 <- TraceBrewer(dat1)
-
-    fName <- paste0(newName, '.Rdata')
-    assign(newName, dat1)
-    assign(newName, dat1, envir = .GlobalEnv)  
-    save(list = newName ,file=fName )
-}
-
-# now create table 
-barPlotter <- function(dat = NULL, cols = 'YlOrRd'){
-    cat("\nREAD ME\nWelcome to barPlotter to use me,\nbarPlotter(dat=RD.experiment, col = \'YlOrRd\')\nCustomize your colors, go to this webpage to get other names \nhttps://www.datanovia.com/en/wp-content/uploads/dn-tutorials/ggplot2/figures/0101-rcolorbrewer-palette-rcolorbrewer-palettes-1.png")
-
-    cat('\nSelect what you Want to be on your barPlot\n')
-    table <- TableBrewer(dat, ,F,F)
-    # for each row except the first (this is the number of cells in each cell type)
-    tableList <- list()
-    for(i in 2:dim(table)[1]){
-        tableList[[ row.names(table)[i] ]] <- table[c(1,i),,drop=F]
-    }
-    #tableList[['ATP']] <- read.csv('./atp.csv', row.names=1)
-    #tableList[['Ca-free ATP']] <- read.csv('./caFree.csv', row.names=1)
-    #tableList[['MRS-2365']] <- read.csv('./mrs2365.csv', row.names=1)
-
-
-    tablePercs <- Reduce(rbind,lapply(tableList, function(x) round(x[2,]/x[1,]*100, digits=2)))
-    tablePercsMut <- as.matrix(rev(tablePercs[nrow(tablePercs):1,]))
-
-    # BARPLOT
-    require(RColorBrewer)
-    cols <- rev(brewer.pal(5, cols))[length(tableList):1]
-    graphics.off()
-    dev.new(width=5, height=12)
-    par(mar=c(5,4,4,7))
-    bpDims <- barplot(
-        tablePercsMut, 
-        beside=T, 
-        horiz=T,
-        col=cols,
-        yaxt='n',
-        xlab='% Cell Class Reponding',
-        xlim=c(0,100),
-        border=NA)
-
-    # LEGEND
-    par(xpd=T)
-    responses <- names(tableList)
-    legend(
-        par('usr')[2]+xinch(.2),
-        par('usr')[4]+yinch(.2), 
-        responses, 
-        fill=rev(cols), 
-        border=NA,
-        bty='n',
-        horiz=F,
-        cex=.7)
-
-    # YLAB
-    yLocs <- apply(bpDims, 2, mean)
-    xLocs <- rep(par('usr')[1]-xinch(.5), length(yLocs))
-    tableLabs <- rev(names(tableList[[1]]))
-    par(xpd=T)
-    text(xLocs, yLocs, tableLabs)
-
-
-    # BARLABS
-    tablePercsMut <- tablePercsMut[nrow(tablePercsMut):1,,drop=F]
-    bpDims <- bpDims[nrow(bpDims):1,, drop=F]
-
-    for(i in 1:nrow(bpDims)){
-        xLocs <- tablePercsMut[i,] + xinch(.3)
-        yLocs <- bpDims[i,] +yinch(.02)
-        textToPlace <- paste(rev(tableList[[i]][2,]), '/', rev(tableList[[i]][1,]))
-        text(xLocs, yLocs, textToPlace, cex=.6)
-    }
-
-}
-
-
-
->>>>>>> 02c76eaf0507e5b2abfc9b5cea8d86cca953c6ef:procPharm 170210.r

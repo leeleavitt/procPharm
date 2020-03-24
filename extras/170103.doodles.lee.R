@@ -1467,6 +1467,51 @@ SetShades <- function(tmp,trans=.1)
 	
 }
 
+<<<<<<< HEAD:extras/170103.doodles.lee.R
+=======
+#tmp is an RD object
+#wr.i is the window region definition.
+#rd.name is the name of the RD object (used for png.out)
+#c.i is an alternate list of cells to review (instead of all)
+#rscale is a boolean for rescaling the data
+#wh is the window height
+#hh is the window width (why the hell did I name it hh?)
+RDView <- function(tmp,c.i=NULL,wr.i="wr1",rd.name=NULL,rscale=F,wh=11,hh=6)
+{
+	if(!is.element("bin",names(tmp))){stop("No bin ")}
+	if(!is.element("drop",names(tmp$bin))){tmp$bin[,"drop"] <- 0}
+	col50 <- SetShades(tmp,trans=200/(nrow(tmp$bin)^1.5))
+	tlevs <- unique(tmp$w.dat[,wr.i])
+ 	tlevs <- tlevs[tlevs!=""]
+ 	tlevs <- intersect(tlevs,names(tmp$bin))
+	if(!is.element("ignore",names(tmp$w.dat)))
+	{
+		tmp$w.dat[,"ignore"] <- 0
+	}
+	sel.i <- 1
+#	if(!is.element("grps",names(tmp))){tmp$grps <- tmp$bin[,tlevs];tmp$grps[] <- NA}
+
+	while(sel.i != 0)
+	{
+		sel.i <- menu(tlevs,,title="Select Window To Review")
+		if(sel.i > 0)
+		{
+			r.i <- tmp$w.dat[,wr.i]==tlevs[sel.i]
+			if(is.null(c.i)){c.i <- row.names(tmp$bin)[tmp$bin[,"drop"]==0]}
+			if(is.element("mp",names(tmp)))
+				{wt <- tmp$mp[r.i,c("Time",c.i)]}
+			else
+				{wt <- tmp$t.dat[r.i,c("Time",c.i)]}
+			if(rscale){wt <- sweep(wt,2,apply(wt,2,min),"-")}
+			wt.sl <- ScoreLev(wt,tmp$bin[c.i,tlevs[sel.i]],tmp$w.dat[r.i,"ignore"],col50,main.lab=tlevs[sel.i],rd.name=rd.name,wh=wh,hh=hh)
+			tmp$bin[c.i,tlevs[sel.i]] <- wt.sl$bin
+			tmp$w.dat[r.i,"ignore"] <- wt.sl$ignore
+			tmp$grps <- wt.sl[["groups"]]
+		}
+	}		
+	return(tmp)
+}
+>>>>>>> 02c76eaf0507e5b2abfc9b5cea8d86cca953c6ef:170103.doodles.lee.R
 
 #off loaded from above this should calculate the relevant features of a response
 #presumably wts is spike trimed data wtd is the delta data. ignore is a vector of points to use
