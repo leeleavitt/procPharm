@@ -1,16 +1,16 @@
-
-#This function plots the stat(data.frame form) of all cells, and individual
-#cell type densities.
-#dat: RD data
-#cells: Total group
-#cell_types: How to seperate the groups
-#stat: premade statistic in data.frame formate where row names are cell.names
-#xlim_top: this is the maximun xlim value to display
-#xlim_bottom: this is the minimun xlim value to display
-#overlay: will plot the density plot ontop of the cells density plot
-#dens_sep: This will plot out the densitys on seperate plots
-#plot_new: Will create a new window for this plot
-#abline_loc: where to display the added line to help display data better
+#' This function plots the stat(data.frame form) of all cells, and individual
+#' cell type densities.
+#' @param dat RD data
+#' @param cells Total group
+#' @param cell_types How to seperate the groups
+#' @param stat premade statistic in data.frame formate where row names are cell.names
+#' @param xlim_top this is the maximun xlim value to display
+#' @param xlim_bottom this is the minimun xlim value to display
+#' @param overlay will plot the density plot ontop of the cells density plot
+#' @param dens_sep This will plot out the densitys on seperate plots
+#' @param plot_new Will create a new window for this plot
+#' @param abline_loc where to display the added line to help display data better
+#' @export
 density_ct_plotter<-function(dat, cells, cell_types,stat=dat$c.dat["area"],xlim_top=NULL, xlim_bottom=NULL,overlay=T,dense_sep=T,plot_new=T,env=NULL,dat.name=NULL, abline_loc=0){	
     par(xpd=F)
     if(is.null(dat.name)){
@@ -123,7 +123,8 @@ density_ct_plotter<-function(dat, cells, cell_types,stat=dat$c.dat["area"],xlim_
     }
 }
 
-# Display census in a barplot
+#' Display census in a barplot
+#' @export 
 barPlotter <- function(dat = NULL, cols = 'YlOrRd'){
     cat("\nREAD ME\nWelcome to barPlotter to use me,\nbarPlotter(dat=RD.experiment, col = \'YlOrRd\')\nCustomize your colors, go to this webpage to get other names \nhttps://www.datanovia.com/en/wp-content/uploads/dn-tutorials/ggplot2/figures/0101-rcolorbrewer-palette-rcolorbrewer-palettes-1.png")
 

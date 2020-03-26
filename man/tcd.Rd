@@ -92,6 +92,8 @@ tcd(
 \item{F2}{advanced stat peak comparison min max norm creator}
 
 \item{F3}{Density plot visualization}
+
+\item{F5}{does something}
 }
 \description{
 This function is an interactive dashboard for viewing your exeriments.

@@ -1,3 +1,5 @@
+#' Function to perform the basline correction
+#' @export
 ProcConstPharm <- function(dat,shws=2,phws=20,bl.meth="SNIP"){
     if(class(dat)=="data.frame"){(dat1<-dat)}else{dat1 <- dat$t.dat}
     t.names <- names(dat1)[-1]#Time in first column
@@ -18,17 +20,17 @@ ProcConstPharm <- function(dat,shws=2,phws=20,bl.meth="SNIP"){
     return(list(snr=dat1.snr,blc=dat1.bc, der=dat1.der))
 }
 
-#binary score for all cells for the regions of interest bScore
-#argument 1 is the baseline corrected data
-#argument 2 is the snr peak data
-#argument 3 is the threshold for significance on the peaks
-#argument 4 is the intensity above baseline theshold
-#argument 5 indicates the regions of interest. (e.g. the response windows for which the cells will be scored)
-#argument 6 indicates the response windows. 
-#argument 7 indicates the cells to score (if null all cells will be scored)
-#returns the scoring for all cells subject to the above parameters.
-#as well as the sum for the snr scores and the sd for the snr scores.
-
+#' binary score for all cells for the regions of interest bScore
+#' returns the scoring for all cells subject to the above parameters.
+#' as well as the sum for the snr scores and the sd for the snr scores.
+#' @param blc is the baseline corrected data
+#' @param snr is the signal to noise peak data
+#' @param snr.lim is the threshold for significance on the peaks
+#' @param blc.lim is the intensity above baseline theshold
+#' @param levs indicates the regions of interest. (e.g. the response windows for which the cells will be scored)
+#' @param wr indicates the response windows. 
+#' @param cnames indicates the cells to score (if null all cells will be scored)
+#' @export
 bScore <- function(blc, snr, snr.lim, blc.lim, levs, wr, cnames=NULL){
     notzero <- function(x){as.integer(sum(x) > 0)}
     if(is.null(cnames)){cnames <- names(blc)[-1]}
@@ -47,13 +49,13 @@ bScore <- function(blc, snr, snr.lim, blc.lim, levs, wr, cnames=NULL){
     return(b.score)
 }
 
-# Binary scoring dependent upon score const pharm talbe values
-# Best way to determine parameters is to look through trace click before hand
-# snr.min = minimun signal to noise value
-# max.min= minimun above baseline threshold
-# tot.min= area minimun to consider
-# wm.min= which max, Where within the window region does the maximun value occur
-# wm.max= where to stop looking for the maximun value
+#'  Binary scoring dependent upon score const pharm talbe values
+#'  Best way to determine parameters is to look through trace click before hand
+#' @param snr.min = minimun signal to noise value
+#' @param max.min= minimun above baseline threshold
+#' @param tot.min= area minimun to consider
+#' @param wm.min= which max, Where within the window region does the maximun value occur
+#' @param wm.max= where to stop looking for the maximun value
 bscore2<-function(dat, levs.1=NULL, snr.min=2.8, max.min=.03, wm.min=0, wm.max=600){
     scp<-dat$scp
     levs<-setdiff(unique(as.character(dat$w.dat[,2])),"")
@@ -82,19 +84,20 @@ bscore2<-function(dat, levs.1=NULL, snr.min=2.8, max.min=.03, wm.min=0, wm.max=6
             return(dat2)
 }
 
-# calculate a table of cell characteristics globally and 
-# within specific windows
-# these specifics should include
-# mean and sd, sum of in window peaks, sum of out of window peaks
-# 1)  some measure of dead cell
-# 2)  yes/no peak response for each window
-# 3) peak height
-# 4) max peak SNR
-# 5) peak timing in window
-# 6)
-# variance of smoothed - raw in window
-# define and number blank windows.
-ScoreConstPharm <- function(dat,blc=NULL, snr=NULL, der=NULL, snr.lim=3,blc.lim=.03,shws=2){
+#' calculate a table of cell characteristics globally and 
+#' within specific windows
+#' these specifics should include
+#' mean and sd, sum of in window peaks, sum of out of window peaks
+#' 1)  some measure of dead cell
+#' 2)  yes/no peak response for each window
+#' 3) peak height
+#' 4) max peak SNR
+#' 5) peak timing in window
+#' 6)
+#' variance of smoothed - raw in window
+#' define and number blank windows.
+#' @export
+ScoreConstPharm <- function(dat, blc=NULL, snr=NULL, der=NULL, snr.lim=3, blc.lim=.03, shws=2){
     t.dat<-dat$t.dat
     if(is.null(blc)){
         blc<-dat$blc
@@ -167,8 +170,11 @@ ScoreConstPharm <- function(dat,blc=NULL, snr=NULL, der=NULL, snr.lim=3,blc.lim=
     }
     return(res.tab)
 }
-
-
+#' calculate a table of cell characteristics globally and 
+#' within specific windows
+#' these specifics should include
+#' mean and sd, sum of in window peaks, sum of out of window peaks
+#' @export
 ScoreConstPharm.2 <- function(dat,t.type=NULL, snr=NULL, der=NULL, snr.lim=3,blc.lim=.03,shws=2){
     require(MALDIquant)
     t.dat<-dat$t.dat

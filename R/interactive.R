@@ -1,17 +1,18 @@
-# New Boxplot Function
-# dat : Experiment list RD.
-# l.cells: Cells in a list format
-# dat.name: Dataframe to pull data from
-# col.name: collumn name  to get data for the boxplot
-# jitter.f: Factor of jitter to  accomplish
-# pts: points to add to boxplot
-# notchs: logical (T/F) stand for notch selection 
-#c("area","mean.gfp.start","mean.cy5.start")
+#' New Boxplot Function
+#' @param dat : Experiment list RD.
+#' @param l.cells: Cells in a list format
+#' @param dat.name: Dataframe to pull data from
+#' @param col.name: collumn name  to get data for the boxplot
+#' @param jitter.f: Factor of jitter to  accomplish
+#' @param pts: points to add to boxplot
+#' @param notchs: logical (T/F) stand for notch selection 
+#' @param col.name c("area","mean.gfp.start","mean.cy5.start")
+#' @export 
 boxPlotList<-function(dat,l.cells=NULL,dat.name="c.dat",col.name=NULL,jitter.f=.5,pts=T, notchs=F, bplog="y", sort=T){
 
     #back up operation to fill with cells for the boxplotting
     if(is.null(l.cells)){
-        l.cells<-dat$cell.types
+        l.cells<-dat$cell_types
     }else{
         l.cells<-l.cells
     }
@@ -121,7 +122,8 @@ boxPlotList<-function(dat,l.cells=NULL,dat.name="c.dat",col.name=NULL,jitter.f=.
 
 }
 
-# Interactive statistic maker. This creates a statistic based on peak heights or peak widths.
+#' Interactive statistic maker. This creates a statistic based on peak heights or peak areas.
+#' @export
 bp.selector<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T,save.bp=F,view.cells=F, env=NULL, localize=T){
     #print(environment())
     if(is.null(env)){
@@ -312,7 +314,8 @@ bp.selector<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T,save.bp=
     }
 }
 
-# Interactive stat maker, min max normalization.
+#' Interactive stat maker, min max normalization.
+#' @export 
 bp.selector.advanced<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T,save.bp=F,view.cells=F, env=NULL, localize=T){
     if(is.null(env)){
         env<-.GlobalEnv
@@ -513,7 +516,8 @@ bp.selector.advanced<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T
     }
 }
 
-# Function allows for selection and deselection of cells to build stacked traces
+#' Function allows for selection and deselection of cells to build stacked traces
+#' @export
 XYtrace <- function(dat, cell=NULL, img=NULL, cols=NULL, labs=F, y.var=T){
     graphics.off()
     dat.name<-deparse(substitute(dat))
@@ -595,7 +599,9 @@ XYtrace <- function(dat, cell=NULL, img=NULL, cols=NULL, labs=F, y.var=T){
        
 }
 
-XYtrace.2<-function(dat, cells=NULL, img=NULL, cols=NULL, zoom=T, labs=T, yvar=F, zf=40, t.type=NULL, sf=1,plot.labs=T){
+#' More advanced image clickers
+#' @export 
+XYtrace.2<-function(dat, cells=NULL, img=NULL, cols=NULL, zoom=T, labs=T, yvar=F, zf=40, t.type=NULL, sf=1, plot.labs=T){
     dat.name<-deparse(substitute(dat))
     print(class(cells))
     if(is.null(t.type)){t.type<-select.list(names(dat),title="Select a Trace")}

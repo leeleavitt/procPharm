@@ -491,19 +491,19 @@ LinesEvery.5 <- function(dat,m.names, img="img1",channel=NULL,pic.plot=TRUE,zf=N
     #return(pic.pos)
 }
 
-##170109
-#intereact: LOGICAL; 
-#TRUE select cell groups to work though and return list of groups of cells
-#FALSE only plot out the groups, and dont return group of cells
 
-##region.group: Select a region to group the cells around.  Brings up option to select region to group around
-#170403 bp logical: lets you choose whether to boxplot
+#' intereact: LOGICAL; 
+#' TRUE select cell groups to work though and return list of groups of cells
+#' FALSE only plot out the groups, and dont return group of cells
 
-#170508 Allows to select the trace you would like to use for grouping with option:
-#t.type:input character
+#' #region.group: Select a region to group the cells around.  Brings up option to select region to group around
+#' 170403 bp logical: lets you choose whether to boxplot
 
-#170605:  Adding a drop function to this.  It will automatically update the RD.file.  I need something to drop cells much faster
-#
+#' 170508 Allows to select the trace you would like to use for grouping with option:
+#' t.type:input character
+
+#' 170605:  Adding a drop function to this.  It will automatically update the RD.file.  I need something to drop cells much faster
+#' @export
 LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, region.group=T,levs=NULL, plot.new=TRUE,bcex=.7, sf=1.1, subset.n=NULL, img=NULL,bp.param=NULL, bp=F, bp.pts=F){
     #graphics.off()
     #

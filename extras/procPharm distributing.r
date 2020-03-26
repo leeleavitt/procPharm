@@ -5004,45 +5004,6 @@ multi.pic.zoom.3<-function(dat, m.names, img, labs=T,plot.new=T, zf=20){
     }
         
 }
-
-image.selector<-function(tmp.rd, multi=T){
-    img.names<-grep(names(tmp.rd),pattern="img", value=T)
-    
-    null.images<-vector()
-    for(i in 1:length(img.names)){null.images[i]<-!is.null(tmp.rd[[img.names[i]]])}
-    img.logical<-cbind(img.names,null.images)
-    real.imgs<-which(img.logical[,2]=="TRUE")
-    
-    img.names<-img.logical[real.imgs, 1]
-    
-    
-    dev.new(width=ceiling(sqrt(length(img.names)))*4, height=ceiling(sqrt(length(img.names)))*4)
-    img.sel<-dev.cur()
-    par(mfrow=c(ceiling(sqrt(length(img.names))),ceiling(sqrt(length(img.names)))))
-    
-    for(i in 1:length(img.names)){
-        par(mar=c(0,0,0,0))
-        img<-tmp.rd[[img.names[[i]]]]
-        img.dim.y<-dim(img)[1]
-        img.dim.x<-dim(img)[2]	
-        
-        top<-img.dim.y*.25
-        bottom<-img.dim.y*.75
-        left<-img.dim.x*.25
-        right<-img.dim.x*.75
-        
-        plot(0, 0, 
-            xlim=c(img.dim.x*.4, img.dim.x*.6),
-            ylim=c(img.dim.y*.4,img.dim.y*.6),xaxt="n", yaxt="n",pch="."
-            )
-        rasterImage(img[top:bottom,left:right,], 0, img.dim.y, img.dim.x, 0)
-        text(img.dim.x*.45,img.dim.y*.45,labels=paste(i), cex=2, col="white")
-    }
-    img<-select.list(img.names, title="Images", multiple=multi)
-    dev.off(img.sel)
-    return(img)
-}
-
 PointTrace <- function(lookat,png=F,col=rep("black",nrow(lookat)),pch=16,cex=1,lmain="PointTrace",ylim=c(-2,2),x.trt=NULL,y.trt=NULL,wr="wr1",t.names=NULL){
     if(!is.null(x.trt)){lookat["x"] <- lookat[,x.trt]}
     if(!is.null(y.trt)){lookat["y"] <- lookat[,y.trt]}	

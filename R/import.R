@@ -732,6 +732,7 @@ WindowRepair_docx<-function(dat, complete=F, trace_brew=F){
 #' then make complete F.  This will allow you to select the windows that need reapri
 #' if the naming is off, then make complete=F.  You will need to do a complete reapri
 #' you will lose all information from RDView
+#' @export 
 WindowRepair<-function(dat, complete=T){
 
     tmp<-dat #first create a tmp to repair
@@ -800,11 +801,12 @@ WindowRepair<-function(dat, complete=T){
     return(dat)
 }
 
-#Something happened within you experiment and you need to delete a region of row fro the traces
-#to recover the data and clean up the display.
-#dat: This is the RD object
-#cell: Cell the display on the plot, if left empty, X.1 will be used
-#complete: logical, If you say true, all window regions will be reassessed. If False window region can be selected.
+#' Something happened within you experiment and you need to delete a region of row fro the traces
+#' to recover the data and clean up the display.
+#' dat: This is the RD object
+#' cell: Cell the display on the plot, if left empty, X.1 will be used
+#' complete: logical, If you say true, all window regions will be reassessed. If False window region can be selected.
+#' @export
 RegionDeleter<-function(dat, cell=NULL, complete=T){
 
     if(is.null(cell)){cell<-"X.1"}

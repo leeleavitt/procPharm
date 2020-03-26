@@ -118,7 +118,6 @@ SetShades <- function(tmp,trans=.1){
 	return(col50)
 	
 }
-
 	
 ScoreLev <- function(wt,bin=NULL,ignore=NULL,col1=NULL,main.lab=NULL,bin.cat=3,rd.name="",wh=14,hh=8){
 	#score 1 region

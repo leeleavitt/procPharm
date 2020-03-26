@@ -229,13 +229,52 @@ SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed"
     
 }
 
-#three tests Drop (confirm), Red (confirm) and Green (confirm)
-#return and RD object with the changes made to c.dat and bin
-#tmp is an RD object with images, "tritc.mean" and "gfp.mean" in c.dat
-#x.names is a list of specific cells to review
-#pad is the expansion factor about the center of the cell.
-#subset.n is number of cells to review at once instead of all at once.
-ROIreview <- function(tmp,x.names=NULL,pad=2,wh=7,hh=7,subset.n=500, roi.img=NULL){	
+image.selector<-function(tmp.rd, multi=T){
+    img.names<-grep(names(tmp.rd),pattern="img", value=T)
+    
+    null.images<-vector()
+    for(i in 1:length(img.names)){null.images[i]<-!is.null(tmp.rd[[img.names[i]]])}
+    img.logical<-cbind(img.names,null.images)
+    real.imgs<-which(img.logical[,2]=="TRUE")
+    
+    img.names<-img.logical[real.imgs, 1]
+    
+    
+    dev.new(width=ceiling(sqrt(length(img.names)))*4, height=ceiling(sqrt(length(img.names)))*4)
+    img.sel<-dev.cur()
+    par(mfrow=c(ceiling(sqrt(length(img.names))),ceiling(sqrt(length(img.names)))))
+    
+    for(i in 1:length(img.names)){
+        par(mar=c(0,0,0,0))
+        img<-tmp.rd[[img.names[[i]]]]
+        img.dim.y<-dim(img)[1]
+        img.dim.x<-dim(img)[2]	
+        
+        top<-img.dim.y*.25
+        bottom<-img.dim.y*.75
+        left<-img.dim.x*.25
+        right<-img.dim.x*.75
+        
+        plot(0, 0, 
+            xlim=c(img.dim.x*.4, img.dim.x*.6),
+            ylim=c(img.dim.y*.4,img.dim.y*.6),xaxt="n", yaxt="n",pch="."
+            )
+        rasterImage(img[top:bottom,left:right,], 0, img.dim.y, img.dim.x, 0)
+        text(img.dim.x*.45,img.dim.y*.45,labels=paste(i), cex=2, col="white")
+    }
+    img<-select.list(img.names, title="Images", multiple=multi)
+    dev.off(img.sel)
+    return(img)
+}
+
+#' three tests Drop (confirm), Red (confirm) and Green (confirm)
+#' return and RD object with the changes made to c.dat and bin
+#' @param tmp is an RD object with images, "tritc.mean" and "gfp.mean" in c.dat
+#' @param x.names is a list of specific cells to review
+#' @param pad is the expansion factor about the center of the cell.
+#' @param subset.n is number of cells to review at once instead of all at once.
+#' @export
+ROIreview <- function(tmp, x.names=NULL, pad=2, wh=7,hh=7, subset.n=500, roi.img=NULL){	
     print(names(tmp$c.dat)[1:20])
     choices<-select.list(
         title="Score what?", 

@@ -62,10 +62,8 @@ onKeybd <- function(key){
 #' @param F1 advanced stat comparison statistic creator
 #' @param F2 advanced stat peak comparison min max norm creator
 #' @param F3 Density plot visualization
-#' @param F5
-#' @examples 
+#' @param F5 does something
 #' @export
-#' 
 tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type="t.dat", plot.new=F, info=T, pts=T, lns=T, bcex=1, levs=NULL, klevs=NULL, sft=NULL, underline=T, zf=20, lw=2, sf=1, dat.name=NULL, view_func_description=F, save_question = T){
     graphics.off()
     print(environment())

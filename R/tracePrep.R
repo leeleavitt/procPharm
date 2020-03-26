@@ -106,6 +106,8 @@ TraceNormal<-function(dat, t.type='blc'){
     return(dat)
 }
 
+#' This is our trace cleaning protocol
+#' @export 
 TraceBrewer<-function(dat){
     cat('
     #The current flow of our trace cleaning protocol is as follows, and this is
@@ -143,25 +145,26 @@ TraceBrewer<-function(dat){
     return(tmp.rd)
 }
 
-# MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS,
-# ALSO HAVE SEPERATE WR1's that match  exactly what happened
-# 1 Now tht we know the videos are ok we will simply do the cell profiler pipeline
-# 2 we copy everything from the cell profiler pipeline into the 2 folders that contain the videos
-# 3 Now do the pharming harvest and select both folders that contain the seperate videos
+#' MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS,
+#' ALSO HAVE SEPERATE WR1's that match  exactly what happened
+#' 1 Now tht we know the videos are ok we will simply do the cell profiler pipeline
+#' 2 we copy everything from the cell profiler pipeline into the 2 folders that contain the videos
+#' 3 Now do the pharming harvest and select both folders that contain the seperate videos
 
-# dat1 is the flocation of the frist RD fil ex. "./1 video that yeeted itself/RD.1.Rdata"
-# dat2 is the second rd file taht needs to stich to "./2 R3J, TTAA, agonist vid/RD.2.Rdata"
-# timeBuffer is the time separation in minutes between the frist trace and the second trace
-# newName is the name of the experiment to save 
-# Example of how to use
-#traceSticher(
-#    './1 video that yeeted itself/RD.1.Rdata',
-#   './2 R3J, TTAA, agonist vid/RD.2.Rdata',
-#   3,
-#    'RD.bob')
+#' @param dat1Loc is the flocation of the frist RD fil ex. "./1 video that yeeted itself/RD.1.Rdata"
+#' @param dat2Loc is the second rd file taht needs to stich to "./2 R3J, TTAA, agonist vid/RD.2.Rdata"
+#' @param timeBuffer is the time separation in minutes between the frist trace and the second trace
+#' @param newName is the name of the experiment to save 
+#' @export
+#' @examples 
+#' traceSticher(
+#'    './1 video that yeeted itself/RD.1.Rdata',
+#'   './2 R3J, TTAA, agonist vid/RD.2.Rdata',
+#'   3,
+#'    'RD.bob')
 traceSticher <- function(dat1Loc, dat2Loc, timeBuffer = 3, newName = NULL){
     cat("
-    # MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS, 
+    #' MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS, 
     # ALSO HAVE SEPERATE WR1's that match  exactly what happened
     # 1 Now tht we know the videos are ok we will simply do the cell profiler pipeline
     # 2 we copy everything from the cell profiler pipeline into the 2 folders that contain the videos

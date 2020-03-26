@@ -72,9 +72,7 @@ census.brewer<-function(dat){
 #' @param edit_ct Logical, if true each cell class will be double checked
 #' @param UL_classify default is T If TRUE then classify large diameter cells
 #' @param GFP logical, default is T if TRUE then classify green cells
-#' @param cell_types list input.  This is mainly used if the large cell types have already been classified.
-#' if so then then the large cell types are passed straight to the cell_types
-#' @param 
+#' @param cell_types list input.  This is mainly used if the large cell types have already been classified. If so then then the large cell types are passed straight to the cell_types
 #' @export
 Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NULL){
     
