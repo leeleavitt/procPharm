@@ -8,3 +8,8 @@ This R package depends on some python processing. After installing the package y
 pip install PATH_TO_WHERE_PROCPHARM_IS\procPharm\python_packages\python_pharmer
 ````
 `PATH_TO_WHERE_PROCPHARM_IS` is most likely located in `C:/Users/username/Documents/R/win-library/3.6`
+
+For example this is how I installed the package
+````
+pip install C:\Users\leele\Documents\procPharm\python_packages\python_pharmer\
+````
