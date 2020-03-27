@@ -20,6 +20,12 @@ ProcConstPharm <- function(dat,shws=2,phws=20,bl.meth="SNIP"){
     return(list(snr=dat1.snr,blc=dat1.bc, der=dat1.der))
 }
 
+#' @export 
+modelMaker <- function(dat){
+    datum <- read.csv("../python_packages/python_pharmer/python_pharmer/peakDeepDetect/models/AITC.100uM.h5")
+    return(datum)
+}
+
 #' binary score for all cells for the regions of interest bScore
 #' returns the scoring for all cells subject to the above parameters.
 #' as well as the sum for the snr scores and the sd for the snr scores.
@@ -32,6 +38,7 @@ ProcConstPharm <- function(dat,shws=2,phws=20,bl.meth="SNIP"){
 #' @param cnames indicates the cells to score (if null all cells will be scored)
 #' @export
 bScore <- function(blc, snr, snr.lim, blc.lim, levs, wr, cnames=NULL){
+    
     notzero <- function(x){as.integer(sum(x) > 0)}
     if(is.null(cnames)){cnames <- names(blc)[-1]}
     wr2 <- wr[is.element(wr,levs)]
