@@ -6,6 +6,7 @@ setuptools.setup(name='python_pharmer',
       author='Lee Leavitt, Rishi Alluri',
       author_email='lee.leavitt.u@gmail.com',
       packages=setuptools.find_packages(),
-      package_data={'':['models/*.h5']}
+      package_data={'':['models/*.h5']},
+      install_requires=['pims', 'tensorflow']
       )
 

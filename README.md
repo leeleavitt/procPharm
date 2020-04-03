@@ -15,7 +15,7 @@ install_github("https://github.com/leeleavitt/procPharm.git")
 
 ````
 
-If installing R on computers in the lab (these need to be connected to the network drive see [here](./extras/Z_drive_Mounting_Information_1.docx). From there you need to follow the instructions [here](./extras/README.R)
+If installing R on computers in the lab (these need to be connected to the network drive see [here](./extras/Z_drive_Mounting_Information_1.docx)). From there you need to follow the instructions [here](./extras/README.R)
 
 This R package depends on some python processing. To install
 1. Install the [anaconda distribution](https://www.anaconda.com/distribution/). From there you will need to use `pip` to install our software. 
@@ -25,3 +25,4 @@ This R package depends on some python processing. To install
 
 ````
 pip install -e "git+https://github.com/leeleavitt/procPharm/#egg=pkg&subdirectory=python_packages/python_pharmer"
+````

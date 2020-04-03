@@ -1,7 +1,10 @@
 require(procPharm)
+#require(devtools)
 options(locatorBell=F)
 
 # Also add the new libpath
 .First <- function(){
     .libPaths(c("Z:/Computer setup/R/rLibraries", .libPaths()))
+    cat("These are your library paths, before you get to carried away.\n")
+    print(.libPaths())
 }

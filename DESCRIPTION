@@ -9,8 +9,7 @@ Authors@R: c(
            comment = c(ORCID = "YOUR-ORCID-ID")),
     person( given = "Kevin",
             family="Chase",
-            role="aut"
-            ))
+            role="aut"))
 Description: This package analyzes calcium imaging data collected from the experimental designs of Constellation Pharmcology.
 License: MIT + file LICENSE
 Encoding: UTF-8
