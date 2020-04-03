@@ -1,27 +1,39 @@
 require(procPharm)
+require(reticulate)
+pyPharm <- import('python_pharmer')
 
 tmpRD <- get(load("./extras/RD.200309.30.m.m3.p1.Rdata"))
 
-# Import the python packages
-require(reticulate)
-#pyPharm <-import_from_path("python_pharmer","C:/Users/leele/Documents/procPharm/python_packages/python_pharmer/python_pharmer/")
-pyPharm <- import('python_pharmer')
-pyPharm <- import('python_pharmer')
+# Find where the AITC is located and go out 120 points
 
-# Find where the AITC is located
-minWin <- min( grep("^AITC.*", tmpRD$w.dat$wr1) )
-maxWin <- minWin + 119
+fancyBin<- function(dat){
+    pulsesWithNN <- c('^[bB]ob.*', "^AITC.*", "^[cC]aps.*", "^[mM]enth.*", "[kK][.]40.*")
+    nnNames <- c('blob','aitc', 'menthol', 'capsaicin', 'k40')
 
-testTraces <- as.data.frame(t(tmpRD$blc[minWin:maxWin,-1]))
-write.csv(testTraces, file='testTraces.csv')
+    for( i in 1:length(pulsesWithNN)){
+        print(i)
+        
+        # Make sure the pulse exists
+        pulse <- grep(pulsesWithNN[i], dat$w.dat$wr1)
+        
+        if(length(pulse) > 0){
+            minWin <- min( pulse )
+            maxWin <- minWin + 119
 
-featureFrame <- pyPharm$featureMaker(testTraces, 10, 'aitc')
+            # Snag the pulse for all cells
+            pulseToScore <- as.data.frame(t(dat$blc[minWin:maxWin,-1]))
 
+            # Now use the python score all the responses of interest
+            featureFrame <- pyPharm$featureMaker(pulseToScore, 10)
+            featureScores <- pyPharm$modelRunner(featureFrame, nnNames[i])
 
+            # Transfer these scoring to the binary dataframe
+            binName <- grep(pulsesWithNN[i], names(dat$bin), value=T)
+            dat$bin[binName] <- featureScores
+        }
 
+    }
+    return(dat)
+}
 
-#pulseModels = pyPharm$models$pulseModels
-
-require(keras)
-aitcModel<-load_model_hdf5("./python_packages/python_pharmer/python_pharmer/peakDeepDetect/data/AITC.100uM.h5")
-aitcPreds <- aitcModel$predict_classes(featureFrame)
+tmpRD <- fancyBin(tmpRD)

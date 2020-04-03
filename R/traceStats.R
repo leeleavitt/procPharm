@@ -91,6 +91,40 @@ bscore2<-function(dat, levs.1=NULL, snr.min=2.8, max.min=.03, wm.min=0, wm.max=6
             return(dat2)
 }
 
+#' Function to use the neural networks within the python package
+#' @param dat is the RD file input
+#' @export
+fancyBin<- function(dat){
+    pulsesWithNN <- c('^[bB]ob.*', "^AITC.*", "^[cC]aps.*", "^[mM]enth.*", "[kK][.]40.*")
+    nnNames <- c('blob','aitc', 'menthol', 'capsaicin', 'k40')
+
+    for( i in 1:length(pulsesWithNN)){
+        print(i)
+        
+        # Make sure the pulse exists
+        pulse <- grep(pulsesWithNN[i], dat$w.dat$wr1)
+        
+        if(length(pulse) > 0){
+            minWin <- min( pulse )
+            maxWin <- minWin + 119
+
+            # Snag the pulse for all cells
+            pulseToScore <- as.data.frame(t(dat$blc[minWin:maxWin,-1]))
+
+            # Now use the python score all the responses of interest
+            featureFrame <- pyPharm$featureMaker(pulseToScore, 10)
+            featureScores <- pyPharm$modelRunner(featureFrame, nnNames[i])
+
+            # Transfer these scoring to the binary dataframe
+            binName <- grep(pulsesWithNN[i], names(dat$bin), value=T)
+            dat$bin[binName] <- featureScores
+        }
+
+    }
+    return(dat)
+}
+
+
 #' calculate a table of cell characteristics globally and 
 #' within specific windows
 #' these specifics should include

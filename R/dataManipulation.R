@@ -447,3 +447,20 @@ census_viewer <- function(dat){
 		return(cells_to_view)
 	}
 }	
+
+#' Function to rename experiment to the name of the folder it
+#' resides
+#' @export
+renamer <- function(){
+    expName <- rev(strsplit(getwd(), "/")[[1]])[1]
+    expName <- strsplit(expName, " ")[[1]][1]
+    expName <- paste0("RD.", expName)
+
+    print(ls(pattern = "^RD[.]"))
+    expToRename <- get(ls(pattern = "^RD[.]", envir=.GlobalEnv))
+
+    assign(expName, expToRename)
+
+    save(list=expName, file=paste0(expName,".Rdata") )
+}
+

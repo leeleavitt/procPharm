@@ -1,0 +1,7 @@
+require(procPharm)
+options(locatorBell=F)
+
+# Also add the new libpath
+.First <- function(){
+    .libPaths(c("Z:/Computer setup/R/rLibraries", .libPaths()))
+}

@@ -738,7 +738,7 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
                             
                             if(assesment.selection=="LinesEvery"){
                                 number.to.display<-as.numeric(select.list(as.character(c(5,10,20))))
-                                LinesEvery.5(dat,sample(names(which(info==i, arr.ind=T)))[1:number.to.display], img, pic.plot=T, lmain=i,m.order="area", plot.new=T, col="black")
+                                LinesEvery.5(dat,sample(names(which(info==i, arr.ind=T)))[1:number.to.display], img, pic.plot=T, lmain=i, plot.new=T, col="black")
                             }
                             
                             if(assesment.selection=="LinesStack"){

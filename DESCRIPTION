@@ -22,6 +22,7 @@ Imports:
     RColorBrewer,
     MALDIquant,
     data.table,
-    docxtractr
+    docxtractr,
+    keras
 Suggests:    
     xlsx

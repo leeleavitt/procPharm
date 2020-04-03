@@ -106,6 +106,92 @@ TraceNormal<-function(dat, t.type='blc'){
     return(dat)
 }
 
+#' take a defined window vector and
+#' number of the contiguos blank regions ("")
+NumBlanks <- function(x){
+    nw <-  as.character(x)
+    xlen <- length(x)
+    bl.cnt <- 1
+    mi <- match("",nw)
+    while(!is.na(mi) & bl.cnt < 20)
+    {
+        mi2 <- mi+1
+        while((x[mi2] == "") & mi2 <= xlen){mi2 <- mi2+1}
+        nw[mi:(mi2-1)] <- paste("blank",bl.cnt,sep="")
+        bl.cnt <- bl.cnt+1
+        mi <- match("",nw)
+    }
+    return(as.factor(nw))
+}
+
+#Display the analysis of a single trace 
+#dat is the trace dataframe with "Time" in the first column and cell trace intensities in subsequent columns
+#i is the index column to be analyzed and displayed.
+#shws is the smoothing half window size
+#Plotit is a flag indicating that the results should be ploted or not.
+#wr is the response window factor 
+#SNR.lim is the signal to noise ratio limit for peak detection
+#bl.meth is the method for baseline correction.
+PeakFunc2 <- function(dat,i,shws=2,phws=20,Plotit=F,wr=NULL,SNR.lim=2,bl.meth="TopHat",lmain=NULL){
+    library("MALDIquant")
+    s1 <- createMassSpectrum(dat[,"Time"],dat[,i])
+    if(shws > 1)
+        s3 <- smoothIntensity(s1, method="SavitzkyGolay", halfWindowSize=shws)
+    else
+        s3 <- s1
+    if(Plotit)
+    {
+        bSnip <- estimateBaseline(s3, method="SNIP")
+        bTopHat <- estimateBaseline(s3, method="TopHat")
+    }
+    s4 <- removeBaseline(s3, method=bl.meth)
+    Baseline <- estimateBaseline(s3, method=bl.meth)
+    p <- detectPeaks(s4, method="MAD", halfWindowSize=phws, SNR=SNR.lim)
+    if(Plotit)
+    {
+        xlim <- range(mass(s1)) # use same xlim on all plots for better comparison
+        ylim <- c(-.1,1.4)
+        #ylim <- range(intensity(s1))
+        plot(s1, main=paste(lmain,i),xlim=xlim,ylim=ylim,xlab="Time (min)", xaxt="n")
+        axis(1, at=seq(0, length(dat[,1]), 5))  
+        if(length(wr) > 0)
+        {
+            levs <- setdiff(unique(wr),"")
+            levs <- setdiff(levs,grep("blank",levs,value=T))
+            x1s <- tapply(dat[,"Time"],as.factor(wr),min)[levs]
+            x2s <- tapply(dat[,"Time"],as.factor(wr),max)[levs]
+            y1s <- rep(min(ylim)-.2,length(x1s))
+            y2s <- rep(max(ylim)+.2,length(x1s))
+            #cols <- rainbow(length(x1s))
+            rect(x1s,y1s,x2s,y2s,col="lightgrey")
+            #points(dat[,"Time"],as.integer(wr=="")*-1,pch=15,cex=.6)
+            ## for(j in levs)
+            ## {
+            ##     x1 <- mass(s3)[min(grep(j,wr))]
+            ##     x2 <- mass(s3)[max(grep(j,wr))]
+            ##     y1 <- min(ylim)-.2
+            ##     y2 <- max(ylim)+.2
+            ##     polygon(c(x1,x2,x2,x1),c(y1,y1,y2,y2),col="lightgrey",lwd=.1)
+            ## }
+            text(dat[match(levs,wr),"Time"],rep(-.1,length(levs)),levs,pos=4,offset=0,cex=.5)
+        }
+        
+        lines(s3,lwd=3,col="cyan")
+        lines(s1)
+        lines(bSnip, lwd=2, col="red")
+        lines(bTopHat, lwd=2, col="blue")
+        lines(s4,lwd=2)
+    }
+    if((length(p) > 0)&Plotit)
+    {
+        points(p)
+        ## label top 40 peaks
+        top40 <- intensity(p) %in% sort(intensity(p), decreasing=TRUE)[1:40]
+        labelPeaks(p, index=top40, underline=TRUE,labels=round(snr(p)[top40],2))
+    }
+    return(list(peaks=p,baseline=Baseline,dat=s4))
+}
+
 #' This is our trace cleaning protocol
 #' @export 
 TraceBrewer<-function(dat){
@@ -145,26 +231,21 @@ TraceBrewer<-function(dat){
     return(tmp.rd)
 }
 
-#' MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS,
+#' This fucntion stiches two videos together
+#' 
+#' Make sure both Videos are in seperate Folders
 #' ALSO HAVE SEPERATE WR1's that match  exactly what happened
 #' 1 Now tht we know the videos are ok we will simply do the cell profiler pipeline
 #' 2 we copy everything from the cell profiler pipeline into the 2 folders that contain the videos
 #' 3 Now do the pharming harvest and select both folders that contain the seperate videos
-
 #' @param dat1Loc is the flocation of the frist RD fil ex. "./1 video that yeeted itself/RD.1.Rdata"
 #' @param dat2Loc is the second rd file taht needs to stich to "./2 R3J, TTAA, agonist vid/RD.2.Rdata"
 #' @param timeBuffer is the time separation in minutes between the frist trace and the second trace
 #' @param newName is the name of the experiment to save 
 #' @export
-#' @examples 
-#' traceSticher(
-#'    './1 video that yeeted itself/RD.1.Rdata',
-#'   './2 R3J, TTAA, agonist vid/RD.2.Rdata',
-#'   3,
-#'    'RD.bob')
 traceSticher <- function(dat1Loc, dat2Loc, timeBuffer = 3, newName = NULL){
     cat("
-    #' MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS, 
+    # MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS, 
     # ALSO HAVE SEPERATE WR1's that match  exactly what happened
     # 1 Now tht we know the videos are ok we will simply do the cell profiler pipeline
     # 2 we copy everything from the cell profiler pipeline into the 2 folders that contain the videos

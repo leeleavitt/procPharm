@@ -4,7 +4,7 @@
 \alias{barPlotter}
 \title{Display census in a barplot}
 \usage{
-barPlotter(dat = NULL, cols = "YlOrRd")
+barPlotter(dat = NULL, cols = "YlOrRd", selectCT = T, horiz = T)
 }
 \description{
 Display census in a barplot

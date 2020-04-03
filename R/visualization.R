@@ -125,71 +125,133 @@ density_ct_plotter<-function(dat, cells, cell_types,stat=dat$c.dat["area"],xlim_
 
 #' Display census in a barplot
 #' @export 
-barPlotter <- function(dat = NULL, cols = 'YlOrRd'){
-    cat("\nREAD ME\nWelcome to barPlotter to use me,\nbarPlotter(dat=RD.experiment, col = \'YlOrRd\')\nCustomize your colors, go to this webpage to get other names \nhttps://www.datanovia.com/en/wp-content/uploads/dn-tutorials/ggplot2/figures/0101-rcolorbrewer-palette-rcolorbrewer-palettes-1.png")
+barPlotter <- function(dat = NULL, cols = 'YlOrRd', selectCT = T, horiz=T){
+    print(deparse(substitute(dat)))
+    cat("\nREAD ME\nWelcome to barPlotter to use me,\nbarPlotter(dat=RD.experiment, col = \'YlOrRd\')\n\nCustomize your colors, TRY \n\n\'Set1\', \'Set2\', \'Pastel1\', \'Dark2\', \'PuBu\', \'Reds\'\n\nGo to this webpage to get other names \nhttps://www.datanovia.com/en/wp-content/uploads/dn-tutorials/ggplot2/figures/0101-rcolorbrewer-palette-rcolorbrewer-palettes-1.png")
 
     cat('\nSelect what you Want to be on your barPlot\n')
     table <- TableBrewer(dat, ,F,F)
+
+    # Select the cell type to display
+    if(selectCT){
+        tableNames <- colnames(table)
+        cat("\nSelect Cell Types to display\n") 
+        tableNames <- select.list(tableNames, multiple=T, title="Select CellTypes")
+        table <- table[tableNames]
+    }
+
     # for each row except the first (this is the number of cells in each cell type)
     tableList <- list()
     for(i in 2:dim(table)[1]){
         tableList[[ row.names(table)[i] ]] <- table[c(1,i),,drop=F]
     }
+
     #tableList[['ATP']] <- read.csv('./atp.csv', row.names=1)
     #tableList[['Ca-free ATP']] <- read.csv('./caFree.csv', row.names=1)
     #tableList[['MRS-2365']] <- read.csv('./mrs2365.csv', row.names=1)
 
-
     tablePercs <- Reduce(rbind,lapply(tableList, function(x) round(x[2,]/x[1,]*100, digits=2)))
-    tablePercsMut <- as.matrix(rev(tablePercs[nrow(tablePercs):1,]))
 
     # BARPLOT
-    require(RColorBrewer)
-    cols <- rev(brewer.pal(5, cols))[length(tableList):1]
-    graphics.off()
-    dev.new(width=5, height=12)
-    par(mar=c(5,4,4,7))
-    bpDims <- barplot(
-        tablePercsMut, 
-        beside=T, 
-        horiz=T,
-        col=cols,
-        yaxt='n',
-        xlab='% Cell Class Reponding',
-        xlim=c(0,100),
-        border=NA)
+    if(!horiz){
+        tablePercsMut <- as.matrix(rev(tablePercs[nrow(tablePercs):1,]))
+        require(RColorBrewer)
+        cols <- rev(brewer.pal(5, cols))[length(tableList):1]
+        graphics.off()
+        dev.new(width=5, height=12)
+        par(mar=c(5,4,4,7))
+        bpDims <- barplot(
+            tablePercsMut, 
+            beside=T, 
+            horiz=T,
+            col=cols,
+            yaxt='n',
+            xlab='% Cell Class Reponding',
+            xlim=c(0,100),
+            border=NA)
 
-    # LEGEND
-    par(xpd=T)
-    responses <- names(tableList)
-    legend(
-        par('usr')[2]+xinch(.2),
-        par('usr')[4]+yinch(.2), 
-        responses, 
-        fill=rev(cols), 
-        border=NA,
-        bty='n',
-        horiz=F,
-        cex=.7)
+        # LEGEND
+        par(xpd=T)
+        responses <- names(tableList)
+        legend(
+            par('usr')[2]+xinch(.2),
+            par('usr')[4]+yinch(.2), 
+            responses, 
+            fill=rev(cols), 
+            border=NA,
+            bty='n',
+            horiz=F,
+            cex=.7)
 
-    # YLAB
-    yLocs <- apply(bpDims, 2, mean)
-    xLocs <- rep(par('usr')[1]-xinch(.5), length(yLocs))
-    tableLabs <- rev(names(tableList[[1]]))
-    par(xpd=T)
-    text(xLocs, yLocs, tableLabs)
+        # YLAB
+        yLocs <- apply(bpDims, 2, mean)
+        xLocs <- rep(par('usr')[1]-xinch(.5), length(yLocs))
+        tableLabs <- rev(names(tableList[[1]]))
+        par(xpd=T)
+        text(xLocs, yLocs, tableLabs)
 
+        # BARLABS
+        tablePercsMut <- tablePercsMut[nrow(tablePercsMut):1,,drop=F]
+        bpDims <- bpDims[nrow(bpDims):1,, drop=F]
 
-    # BARLABS
-    tablePercsMut <- tablePercsMut[nrow(tablePercsMut):1,,drop=F]
-    bpDims <- bpDims[nrow(bpDims):1,, drop=F]
+        for(i in 1:nrow(bpDims)){
+            xLocs <- tablePercsMut[i,] + xinch(.3)
+            yLocs <- bpDims[i,] +yinch(.02)
+            textToPlace <- paste(rev(tableList[[i]][2,]), '/', rev(tableList[[i]][1,]))
+            text(xLocs, yLocs, textToPlace, cex=.6)
+        }
+        par(xpd=T)
+    }else{
+        require(RColorBrewer)
+        tablePercsMut <- as.matrix(tablePercs)
 
-    for(i in 1:nrow(bpDims)){
-        xLocs <- tablePercsMut[i,] + xinch(.3)
-        yLocs <- bpDims[i,] +yinch(.02)
-        textToPlace <- paste(rev(tableList[[i]][2,]), '/', rev(tableList[[i]][1,]))
-        text(xLocs, yLocs, textToPlace, cex=.6)
+        cols <- rev(brewer.pal(5, cols))[1:length(tableList)]
+        graphics.off()
+        dev.new(width=12, height=5)
+        par(mar=c(5,5,5,2))
+        bpDims <- barplot(
+            tablePercsMut, 
+            beside=T, 
+            horiz=F,
+            col=cols,
+            xaxt='n',
+            ylab='% Cell Class Reponding',
+            ylim=c(0,100),
+            border=NA)
+
+        # LEGEND
+        par(xpd=T)
+        responses <- names(tableList)
+        legend(
+            mean(c(par('usr')[1], par('usr')[2]))-xinch(1.8),
+            par('usr')[4]+yinch(.8), 
+            responses, 
+            fill=cols, 
+            border=NA,
+            bty='n',
+            horiz=T,
+            cex=.7)
+
+        # XLAB
+        xLocs <- apply(bpDims, 2, mean)
+        yLocs <- rep(par('usr')[3]-yinch(.3), length(xLocs))
+        tableLabs <- names(tableList[[1]])
+        par(xpd=T)
+        text(xLocs, yLocs, tableLabs,srt=45)
+
+        # BARLABS
+        #tablePercsMut <- tablePercsMut[1:nrow(tablePercsMut),,drop=F]
+        #print(tablePercsMut)
+        #bpDims <- bpDims[1:nrow(bpDims),, drop=F]
+
+        for(i in 1:nrow(bpDims)){
+            yLocs <- tablePercsMut[i,] + yinch(.25)
+            xLocs <- bpDims[i,] - xinch(0.02)
+            textToPlace <- paste(tableList[[i]][2,], '/', tableList[[i]][1,])
+            text(xLocs, yLocs, textToPlace, cex=.6, srt=90)
+        }
     }
+    text(par('usr')[1]-xinch(.1), par('usr')[3]-yinch(.88), deparse(substitute(dat)), cex=.7)
 
 }
 

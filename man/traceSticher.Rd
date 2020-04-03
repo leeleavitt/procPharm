@@ -2,11 +2,7 @@
 % Please edit documentation in R/tracePrep.R
 \name{traceSticher}
 \alias{traceSticher}
-\title{MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS,
-ALSO HAVE SEPERATE WR1's that match  exactly what happened
-1 Now tht we know the videos are ok we will simply do the cell profiler pipeline
-2 we copy everything from the cell profiler pipeline into the 2 folders that contain the videos
-3 Now do the pharming harvest and select both folders that contain the seperate videos}
+\title{This fucntion stiches two videos together}
 \usage{
 traceSticher(dat1Loc, dat2Loc, timeBuffer = 3, newName = NULL)
 }
@@ -20,17 +16,9 @@ traceSticher(dat1Loc, dat2Loc, timeBuffer = 3, newName = NULL)
 \item{newName}{is the name of the experiment to save}
 }
 \description{
-MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS,
+Make sure both Videos are in seperate Folders
 ALSO HAVE SEPERATE WR1's that match  exactly what happened
 1 Now tht we know the videos are ok we will simply do the cell profiler pipeline
 2 we copy everything from the cell profiler pipeline into the 2 folders that contain the videos
 3 Now do the pharming harvest and select both folders that contain the seperate videos
-}
-\examples{
-traceSticher(
-   './1 video that yeeted itself/RD.1.Rdata',
-  './2 R3J, TTAA, agonist vid/RD.2.Rdata',
-  3,
-   'RD.bob')
-MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS, 
 }

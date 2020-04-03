@@ -280,6 +280,7 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
         w.dat=w.dat,c.dat=c.dat, bin=bin, scp=scp, snr=pcp$snr, blc=pcp$blc, der=pcp$der) 
         
         tmp.rd <- TraceBrewer(tmp.rd) 
+        tmp.rd <- fancyBin(tmp.rd)
         tmp.rd <- c(tmp.rd, img_list)
         rd.name <- rd.names[i]
         f.name <- paste(rd.name,".Rdata",sep="")
