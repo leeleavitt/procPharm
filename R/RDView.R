@@ -11,7 +11,7 @@
 #' @param wh is the window height
 #' @param hh is the window width (why the hell did I name it hh?)
 #' @export 
-RDView <- function(tmp,c.i=NULL,wr.i="wr1",rd.name=NULL,rscale=F,wh=11,hh=6){
+RDView <- function(tmp,c.i=NULL,wr.i="wr1",rd.name=NULL,rscale=F,wh=14,hh=8){
 	if(!is.element("bin",names(tmp))){stop("No bin ")}
 	if(!is.element("drop",names(tmp$bin))){tmp$bin[,"drop"] <- 0}
 	col50 <- SetShades(tmp,trans=200/(nrow(tmp$bin)^1.5))

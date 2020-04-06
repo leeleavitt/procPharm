@@ -10,7 +10,7 @@ Authors@R: c(
     person( given = "Kevin",
             family="Chase",
             role="aut"))
-Description: This package analyzes calcium imaging data collected from the experimental designs of Constellation Pharmcology.
+Description: This package analyzes calcium imaging data collected from the experimental designs of Constellation Pharmacology.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -24,4 +24,5 @@ Imports:
     docxtractr,
     keras
 Suggests:    
-    xlsx
+    xlsx,
+    cairoDevice

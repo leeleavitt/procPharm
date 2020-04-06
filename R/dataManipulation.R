@@ -253,7 +253,7 @@ c.sort.2<-function(dat,cells=NULL,collumn=NULL){
 
 #' function to build a table with defined cell types, and selected collumns
 #' @export
-TableBrewer<-function(dat, ct.names=NULL, save=T, xlsx=T){
+TableBrewer<-function(dat, ct.names=NULL, save=T, xlsx=F){
     dat.name<-deparse(substitute(dat))
     pulse<-select.list(names(dat$bin), multiple=T, title="select variables for table")
     ct.sum<-data.frame()
