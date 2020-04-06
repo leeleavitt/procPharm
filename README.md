@@ -15,6 +15,8 @@ install_github("https://github.com/leeleavitt/procPharm.git")
 
 ````
 
+If you are working on a Mac, please follow these [instructions](./extras/procPharm_MacOS_setup.docx) to set your computer up.
+
 If installing R on computers in the lab (these need to be connected to the network drive see [here](./extras/Z_drive_Mounting_Information_1.docx)). From there you need to follow the instructions [here](./extras/README.R)
 
 This R package depends on some python processing. To install
@@ -26,3 +28,5 @@ This R package depends on some python processing. To install
 ````
 pip install -e "git+https://github.com/leeleavitt/procPharm/#egg=pkg&subdirectory=python_packages/python_pharmer"
 ````
+5. Computer will need a restart after this
+
