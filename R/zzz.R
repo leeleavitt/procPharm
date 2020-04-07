@@ -13,7 +13,7 @@
         # }
 
         #windows <- Cairo
-        formals(windows)$pointsize <- 9
+        #formals(windows)$pointsize <- 9
         #formals(PeakFunc7)$bcex <- 1.5
         formals(RDView)$wh <- 11
         formals(RDView)$hh <- 6
