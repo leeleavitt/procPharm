@@ -6,13 +6,6 @@
         formals(tcd)$info <- F
         formals(tcd)$bcex <- 0.5
         
-        require(utils)
-        packages = installed.packages()
-        packages = packages[, "Package"]
-        if (!"cairoDevice" %in% packages) {
-            install.packages("cairoDevice")
-        }
-
         windows <- cairoDevice::Cairo
         formals(windows)$pointsize <- 9
         formals(PeakFunc7)$bcex <- 1.5
