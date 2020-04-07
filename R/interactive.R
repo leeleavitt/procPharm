@@ -89,10 +89,10 @@ boxPlotList<-function(dat,l.cells=NULL,dat.name="c.dat",col.name=NULL,jitter.f=.
     
     bp.sel<-select.list(col.name, title="Select a Bp")
     
-    windows(width=12, height=6,xpos=0, ypos=10)
+    tryCatch(windows(width=12, height=6,xpos=0, ypos=10), error=function(e) windows(width=12, height=6))
     bp.win<-dev.cur()
     
-    windows(width=14,height=4,xpos=0, ypos=540)
+    tryCatch(windows(width=14,height=4,xpos=0, ypos=540), error=function(e) windows(width=14,height=4))
     click.window<-dev.cur()
     
     dev.set(bp.win)

@@ -164,22 +164,22 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     if(plot.new){graphics.off()}
     if(is.null(sft)){sft<-7}
     
-    windows(width=14,height=4,xpos=0, ypos=50)
+    tryCatch(windows(width=14,height=4,xpos=0, ypos=50), error=function(e) windows(width=14,height=4))
     click.window<-dev.cur()
     
-    windows(width=10,height=6,xpos=0, ypos=450) 
+    tryCatch(windows(width=10,height=6,xpos=0, ypos=450), error=function(e) windows(width=14,height=4))
     lines.window<-dev.cur()
     
     dimx<-dim(img)[2]
     dimy<-dim(img)[1]
     haight<-10*dimy/dimx
-    windows(width=haight*dimx/dimy, height=haight,xpos=1130, ypos=200)
+    tryCatch(windows(width=haight*dimx/dimy, height=haight,xpos=1130, ypos=200), error=function(e) windows(width=haight*dimx/dimy, height=haight))
     view.window<-dev.cur()
     
-    windows(width=8, height=8,xpos=1130, ypos=0)
+    tryCatch(windows(width=8, height=8,xpos=1130, ypos=0), error=function(e) windows(width=8, height=8))
     multipic.window<-dev.cur()
     
-    windows(width=12, height=2,xpos=0, ypos=550)
+    tryCatch(windows(width=12, height=2,xpos=0, ypos=550), error=function(e) windows(width=12, height=2))
     traceimpute.window<-dev.cur()
     
     window.flag<-0
@@ -281,11 +281,11 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             #if(length(p.names)<100){
                 if(length(p.names)>11){
                     dev.off(which=lines.window)
-                    windows(width=10,height=12,xpos=0, ypos=100) 
+                    tryCatch(windows(width=10,height=12,xpos=0, ypos=100), error=function(e)windows(width=10,height=12))
                     lines.window<-dev.cur()
                 }else{
                     dev.off(which=lines.window)
-                    windows(width=10,height=7,xpos=0, ypos=250) 
+                    tryCatch(windows(width=10,height=7,xpos=0, ypos=250) , error=function(e)windows(width=10,height=7))
                     lines.window<-dev.cur()
                 }
                 dev.set(which=lines.window)
@@ -299,9 +299,9 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             tryCatch(dev.off(which=lines.window.2), error=function(e) print("this windows hasn't been opened yet"))
             
             if(sample.to.display > 20){
-                windows(width=10,height=12,xpos=0, ypos=250)     
+                tryCatch(windows(width=10,height=12,xpos=0, ypos=250), error=function(e)windows(width=10,height=12))
             }else{
-                windows(width=10,height=7,xpos=0, ypos=250)
+                tryCatch(windows(width=10,height=7,xpos=0, ypos=250), error=function(e)windows(width=10,height=7))
             }
             lines.window.2<-dev.cur()
             dev.set(which=lines.window.2)
