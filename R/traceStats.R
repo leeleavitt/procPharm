@@ -95,6 +95,8 @@ bscore2<-function(dat, levs.1=NULL, snr.min=2.8, max.min=.03, wm.min=0, wm.max=6
 #' @param dat is the RD file input
 #' @export
 fancyBin<- function(dat){
+    pyPharm <- reticulate::import('python_pharmer')
+
     pulsesWithNN <- c('^[bB]ob.*', "^AITC.*", "^[cC]aps.*", "^[mM]enth.*", "[kK][.]40.*")
     nnNames <- c('blob','aitc', 'menthol', 'capsaicin', 'k40')
 
