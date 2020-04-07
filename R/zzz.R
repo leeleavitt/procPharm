@@ -6,11 +6,11 @@
         formals(tcd)$info <- F
         formals(tcd)$bcex <- 0.5
 
-        packages = installed.packages()
-        packages = packages[, "Package"]
-        if (!"cairoDevice" %in% packages) {
-            install.packages("cairoDevice")
-        }
+        # packages = installed.packages()
+        # packages = packages[, "Package"]
+        # if (!"cairoDevice" %in% packages) {
+        #     install.packages("cairoDevice")
+        # }
 
         windows <- Cairo
         formals(windows)$pointsize <- 9
