@@ -54,7 +54,7 @@ density_ct_plotter<-function(dat, cells, cell_types,stat=dat$c.dat["area"],xlim_
         #}
         #cell_types<-selected_cell_types
     }else{
-        bringToTop(-1)
+        tryCatch(bringToTop(-1), error=function(e)NULL)
         print("which Cell Types would you like to view on the plotter")
         selected_cell_types<-select.list(names(cell_types), multiple=T)
         cell_types<-cell_types[selected_cell_types]

@@ -890,7 +890,7 @@ WindowRenamer<-function(dat){
     pulse<-select.list(pulsenames,title="Pulse To Rename", multiple=T)
     pulze<-pulse
     
-    bringToTop(-1)
+    tryCatch(bringToTop(-1), error=function(e)NULL)
     print("#############These are your pulses###############")
     print(pulsenames)
     print("#############This is the pulse to rename:")

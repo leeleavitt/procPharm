@@ -6,7 +6,7 @@ ImageFiller<-function(dat){
     require(png)
     potential.images<-list.files(pattern='png')
     print(potential.images)
-    bringToTop(-1)
+    tryCatch(bringToTop(-1), error=function(e)NULL)
     print("######################")
     print("These are the images you have the option of selecting")
     print("Now select the images to fill in for image 1 to 8")

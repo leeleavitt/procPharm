@@ -26,7 +26,7 @@ census.brewer<-function(dat){
     LinesEvery.5.1(dat, sample(row.names(dat$c.dat)[1:5]), plot.new=F, lmain="WAZZZUPPPP", t.type="t.dat", img=dat$img1)
 
     cat("HOWDY PARTNER How Many groups to census?\n")
-    bringToTop(-1)
+    tryCatch(bringToTop(-1), error=function(e)NULL)1)
     group.number<-scan(n=1, what='numeric')
 
     cat("\nEnter the names of your census groups seperated by '.'\n")

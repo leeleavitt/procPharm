@@ -374,7 +374,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 
                 ###now that we have indicated that we would like to place this cell into a new group
                 #First lets find all groups we can assign to\
-                bringToTop(-1)
+                tryCatch(bringToTop(-1), error=function(e)NULL)
                 cat('\nWhich cell class does this actually belong to?\n')
                 correctCellClass <- cellTypesToClean[menu(cellTypesToClean)]
                 print(dat[[cellTypeId]][[correctCellClass]])
@@ -399,7 +399,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #D: LinesEvery seperation	
         if(keyPressed=="D"){
-            bringToTop(-1)
+            tryCatch(bringToTop(-1), error=function(e)NULL)
             print("change the zoom factor")
             print(paste("This is the current zoom",sf))
             sf<-scan(n=1)
@@ -466,7 +466,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #m: Move groups to another group
         if(keyPressed=="m"){
-            bringToTop(-1)
+            tryCatch(bringToTop(-1), error=function(e)NULL)
             cat("
             Select the Group you would like to move
             
@@ -508,13 +508,13 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #P: Pick a group/cells to click through
         if(keyPressed=="P"){
-            bringToTop(-1)
+            tryCatch(bringToTop(-1), error=function(e)NULL)
             print("Pick a Group of cells or a single cell to observe \nIf you Click cancel, all cells will be returned")
             selection<-select.list(c("group","cells"))
             if(selection=="group"){
                 gt.to.click<-select.list(names(gt.names), multiple=F)
                 if( is.null(gt.names[[gt.to.click]]) | is.logical( gt.names[[gt.to.click]]) ){
-                    bringToTop(-1)
+                    tryCatch(bringToTop(-1), error=function(e)NULL)
                     print("Nothing is in this Group")
                 }else{
                     cell.i<-1
@@ -551,7 +551,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #r: rename group names
         if(keyPressed=="r"){
-            bringToTop(-1)
+            tryCatch(bringToTop(-1), error=function(e)NULL)
             print("Select a group to rename")
             gt.to.rename<-select.list(names(gt.names), multiple=F)
             name.number<-which(names(gt.names)==gt.to.rename,arr.ind=T)
@@ -611,7 +611,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 
     #w: Change Line Width on plot
         if(keyPressed=="w"){
-            bringToTop(-1)
+            tryCatch(bringToTop(-1), error=function(e)NULL)
             print("change the line width (lw) for LinesEvery")
             print(paste("This is the current lw",lw))
             lw<-scan(n=1)
@@ -648,7 +648,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #z: image zoom
         if(keyPressed=="z"){
-            bringToTop(-1)
+            tryCatch(bringToTop(-1), error=function(e)NULL)
             print("change the zoom factor")
             print(paste("This is the current zoom",zf))
             zf<-scan(n=1)
@@ -679,7 +679,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             #remove the NA, which will be repalced with a logical(0)
             gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
             #do the function bp.selector to gather data
-            bringToTop(-1)
+            tryCatch(bringToTop(-1), error=function(e)NULL)
             cat("This function allows you to create statistics based on the statistic you select. 
             \n This Function finds a represention of peak amplification and or block 
             \n This function will take in what ever you are currently scrolling through
@@ -724,7 +724,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             #remove the NA, which will be repalced with a logical(0)
             gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
             #do the function bp.selector to gather data
-            bringToTop(-1)
+            tryCatch(bringToTop(-1), error=function(e)NULL)
             cat("This function allows you to create statistics based on the statistic you select. 
             \n This Function finds a represention of peak amplification and or block 
             \n This function will take in what ever you are currently scrolling through
@@ -763,7 +763,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 dev.new(width=10,height=10)
                 density_win<-dev.cur()
             }else{}
-            bringToTop(-1)
+            tryCatch(bringToTop(-1), error=function(e)NULL)
             cat("What dataframe wil contain your stat? \n")
             dense_df_q<-select.list(names(dat))
             cat("What attribute would you like to see the distribution? \n")
@@ -860,11 +860,11 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
            cellTypeId <- grep('^cell',names(dat), value=T)
             if(length(cellTypeId)>0){
 				if(length(cellTypeId)>1){
-					bringToTop(-1)
+					tryCatch(bringToTop(-1), error=function(e)NULL)
 					cat('\n Select the cell type to load in \n')
 					cellTypeId <- select.list(cellTypeId, title="Select Cell Type")
 				}
-                bringToTop(-1)             
+                tryCatch(bringToTop(-1), error=function(e)NULL)             
                 cat("\nI have filled in your cell_types to choose by pressing \'P\' ENJOY!\n")
                 gt.names <- list()
                 for(i in 1:length(dat[[cellTypeId]])){
@@ -956,7 +956,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     BACKUP<<-gt.names 
     
     assign(dat.name,dat, envir=.GlobalEnv)
-    bringToTop(-1)
+    tryCatch(bringToTop(-1), error=function(e)NULL)
     if(save_question){
         print('Would y ou like to save you cell groups?')
         selection<-select.list(c('no','yes'),title='Save Groups?')

@@ -193,7 +193,7 @@ bp.selector<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T,save.bp=
     #text(levs.mean,ys,labels=names(levs.mean),pos=c(1,3),cex=1, srt=90)
     
     ###Selecting Control Windows
-    bringToTop(-1)
+    tryCatch(bringToTop(-1), error=function(e)NULL)
     cat("Choose one or more window regions for the denominator in the equations,
     
     Amplification-or-block = active.window / control.window
@@ -209,7 +209,7 @@ bp.selector<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T,save.bp=
     controlwindows<- levs[controlwindows]
     
     ###Selecting Active Windows
-    bringToTop(-1)
+    tryCatch(bringToTop(-1), error=function(e)NULL)
     cat("Choose one or more window regions for the numerator in the equations,
     
     Amplification-or-block = active.window / control.window
@@ -385,7 +385,7 @@ bp.selector.advanced<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T
     while(continue=="yes"){
 
         ###Selecting Control Windows
-        bringToTop(-1)
+        tryCatch(bringToTop(-1), error=function(e)NULL)
         cat("
         Choose the Pulse Following the compound of interest. 
         
@@ -405,7 +405,7 @@ bp.selector.advanced<-function(dat,cell=NULL,cells=NULL,dat.name=NULL,plot.new=T
         afterwindows<- levs[afterwindows]
         
         ###Selecting Active Windows
-        bringToTop(-1)
+        tryCatch(bringToTop(-1), error=function(e)NULL)
         cat("
         ###############################################
         Choose the Pulse Before the compound of interest.

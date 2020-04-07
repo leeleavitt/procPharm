@@ -263,7 +263,7 @@ TableBrewer<-function(dat, ct.names=NULL, save=T, xlsx=F){
         cellTypeId <- grep('^cell', names(dat), value=T)
         if(length(cellTypeId)>0){
 			if(length(cellTypeId)>1){
-				bringToTop(-1)
+				tryCatch(bringToTop(-1), error=function(e)NULL)
 				cat('\n Select the cell type to load in \n')
 				cellTypeId <- select.list(cellTypeId, title="Select Cell Type")
             }
@@ -394,7 +394,7 @@ gif_png_maker<-function(dense=200,fps=2,file.name=NULL){
 saveRD <- function(dat){
     cat("\nDO NOT CLOSE UNTIL I SAY YOU CAN!\nWait for the sound...")
     flush.console()
-    bringToTop(-1)
+    tryCatch(bringToTop(-1), error=function(e)NULL)
     Sys.sleep(1)
 
     #History Saver

@@ -2,7 +2,7 @@
 
 saveRD <- function(dat){
     cat("\nDO NOT CLOSE UNTIL I SAY YOU CAN!\nWait for the sound...")
-    bringToTop(-1)
+    tryCatch(tryCatch(tryCatch(bringToTop(-1), error=function(e)NULL), error=function(e)NULL)1), error=function(e)NULL)
     Sys.sleep(1)
 
     #History Saver
