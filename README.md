@@ -8,14 +8,16 @@ To install the package on your home computer follow the code below,
 ````
 # First install devtools to gain access to the function install_github
 install.packages("devtools")
-
-# load up all the devtools
-require(devtools)
-
-# Now install the package
-install_github("https://github.com/leeleavitt/procPharm.git")
+````
+On MAC, make sure to answer yes, if prompted.
 
 ````
+# Now install the package
+devtools::install_github("https://github.com/leeleavitt/procPharm.git")
+
+````
+
+Make Sure to read the consoel if any ERROR's arise. If so Close R and paste the commands again.
 ### Mac OS setup
 If you are working on a Mac, please follow these [instructions](./extras/procPharm_MacOS_setup.md) to set your computer up.
 
