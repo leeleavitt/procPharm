@@ -5,12 +5,13 @@
     if( systemType != "Windows" ){
         formals(tcd)$info <- F
         formals(tcd)$bcex <- 0.5
-
-        # packages = installed.packages()
-        # packages = packages[, "Package"]
-        # if (!"cairoDevice" %in% packages) {
-        #     install.packages("cairoDevice")
-        # }
+        
+        require(utils)
+        packages = installed.packages()
+        packages = packages[, "Package"]
+        if (!"cairoDevice" %in% packages) {
+            install.packages("cairoDevice")
+        }
 
         windows <- cairoDevice::Cairo
         formals(windows)$pointsize <- 9
