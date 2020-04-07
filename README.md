@@ -1,6 +1,6 @@
 # procPharm
 
-### General Install
+### General install
 Calcium Imaging Analysis
 This Package allows you tot view calcium imaging data along with visualize the cells. This package has not been released on CRAN yet, nor have the python components been released on PYPI.
 
