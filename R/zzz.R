@@ -6,7 +6,7 @@
         formals(tcd)$info <- F
         formals(tcd)$bcex <- 0.5
         
-        windows <- cairoDevice::Cairo
+        windows <<- cairoDevice::Cairo
         formals(windows)$pointsize <- 9
         formals(PeakFunc7)$bcex <- 1.5
         formals(RDView)$wh <- 11
