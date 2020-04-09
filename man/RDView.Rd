@@ -13,8 +13,8 @@ RDView(
   wr.i = "wr1",
   rd.name = NULL,
   rscale = F,
-  wh = 11,
-  hh = 6
+  wh = 14,
+  hh = 8
 )
 }
 \arguments{

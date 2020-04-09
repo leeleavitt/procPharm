@@ -10,9 +10,9 @@ This Package allows you to view calcium imaging data along with visualize the ce
 To install the package on your home computer follow the code below,
 ````
 # First install devtools to gain access to the function install_github
-install.packages("devtools")
+install.packages(c("devtools", "backports"))
 ````
-On MAC, make sure to answer yes, if prompted.
+On MAC, make sure to answer no, if prompted.
 
 ````
 # Now install the package
