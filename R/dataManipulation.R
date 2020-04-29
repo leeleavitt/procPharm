@@ -464,3 +464,31 @@ renamer <- function(){
     save(list=expName, file=paste0(expName,".Rdata") )
 }
 
+#' Legacy function to convert the census into binary collumns
+#' @export
+census_to_table<-function(dat){
+    census.df<-dat$bin
+    i<-1
+    while( is.na(dat$census[[i]]) ){
+        i<-i+1
+    }
+
+    (census.df.cn<-names(dat$census[[i]])[!is.na(names(dat$census[[i]]))])#census data frame column names)
+
+    for(i in 1:length(census.df.cn)){
+        census.df[census.df.cn[i]]<-0
+    }
+    
+    for(a in 1:length(dat$census)){
+        if(!is.na(dat$census[[a]])){
+            for(b in 1:length(census.df.cn)){
+                census.df[ dat$census[[a]][[b]],census.df.cn[b]]<-1
+            }
+        }
+    }
+
+    #census.df[is.na(census.df)]<-0#convert all NA to 0
+    dat$bin<-census.df
+        
+    return(dat)
+}

@@ -156,7 +156,7 @@ barPlotter <- function(dat = NULL, cols = 'YlOrRd', selectCT = T, horiz=T){
     if(!horiz){
         tablePercsMut <- as.matrix(rev(tablePercs[nrow(tablePercs):1,]))
         require(RColorBrewer)
-        cols <- rev(brewer.pal(5, cols))[length(tableList):1]
+        cols <- rev(brewer.pal(10, cols))[length(tableList):1]
         graphics.off()
         dev.new(width=5, height=12)
         par(mar=c(5,4,4,7))
@@ -205,7 +205,7 @@ barPlotter <- function(dat = NULL, cols = 'YlOrRd', selectCT = T, horiz=T){
         require(RColorBrewer)
         tablePercsMut <- as.matrix(tablePercs)
 
-        cols <- rev(brewer.pal(5, cols))[1:length(tableList)]
+        cols <- rev(brewer.pal(10, cols))[1:length(tableList)]
         graphics.off()
         dev.new(width=12, height=5)
         par(mar=c(5,5,5,2))

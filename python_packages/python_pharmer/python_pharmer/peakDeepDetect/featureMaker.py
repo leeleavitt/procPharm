@@ -64,17 +64,41 @@ def modelRunner(features, model):
     this_dir, this_filename = os.path.split(__file__)
     
     if model == 'aitc':
-        DATA_PATH = os.path.join(this_dir, "models", "AITC.100uM.h5")
+        DATA_PATH = os.path.join(this_dir, "models", "AITC_100uM_MAIN.h5")
     elif model == 'menthol':
-        DATA_PATH = os.path.join(this_dir, "models", "Menthol.400uM.h5")
+        DATA_PATH = os.path.join(this_dir, "models", "Menthol_400uM_MAIN.h5")
     elif model == 'capsaicin':
-        DATA_PATH = os.path.join(this_dir, "models", "Capsaicin.300nM.h5")
+        DATA_PATH = os.path.join(this_dir, "models", "Capsaicin_300nM_MAIN.h5")
     elif model == 'k40':
-        DATA_PATH = os.path.join(this_dir, "models", "K.40mM.h5")
+        DATA_PATH = os.path.join(this_dir, "models", "K_40mM_MAIN.h5")
+    elif model == 'gfp':
+        DATA_PATH = os.path.join(this_dir, "models", "gfp.h5")
+    elif model == 'cy5':
+        DATA_PATH = os.path.join(this_dir, "models", "cy5.h5")
 
     model = load_model(DATA_PATH)
-    scores = model.predict_classes(features)
+    scores = model.predict(features)
 
     return scores
     
+def modelLoader(features, model):
+    this_dir, this_filename = os.path.split(__file__)
+    
+    if model == 'aitc':
+        DATA_PATH = os.path.join(this_dir, "models", "AITC_100uM_MAIN.h5")
+    elif model == 'menthol':
+        DATA_PATH = os.path.join(this_dir, "models", "Menthol_400uM_MAIN.h5")
+    elif model == 'capsaicin':
+        DATA_PATH = os.path.join(this_dir, "models", "Capsaicin_300nM_MAIN.h5")
+    elif model == 'k40':
+        DATA_PATH = os.path.join(this_dir, "models", "K_40mM_MAIN.h5")
+    elif model == 'gfp':
+        DATA_PATH = os.path.join(this_dir, "models", "gfp.h5")
+    elif model == 'cy5':
+        DATA_PATH = os.path.join(this_dir, "models", "cy5.h5")
 
+    model = load_model(DATA_PATH)
+    #scores = model.predict(features)
+
+    return model
+    
