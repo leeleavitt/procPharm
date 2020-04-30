@@ -93,7 +93,7 @@ bscore2<-function(dat, levs.1=NULL, snr.min=2.8, max.min=.03, wm.min=0, wm.max=6
 
 #' Function to use the neural networks within the python package
 #' @param dat is the RD file input
-#' @export
+#'
 fancyBin <- function(dat){
     pyPharm <- reticulate::import('python_pharmer')
     print(pyPharm)

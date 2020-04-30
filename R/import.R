@@ -303,6 +303,14 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
 
         tmp.rd <- fancyBin(tmp.rd)
         tmp.rd <- c(tmp.rd, img_list)
+
+        # Add the models
+        tryCatch({
+            tmp.rd <- traceProbMaker(tmp.rd)
+            tmp.rd <- imageProbMaker(tmp.rd)
+            tmp.rd <- uncertaintyMaker(tmp.rd)
+        },error=function(e)print('Something wen wrong during your model making.'))
+
         rd.name <- rd.names[i]
         f.name <- paste(rd.name,".Rdata",sep="")
         assign(rd.name,tmp.rd)
