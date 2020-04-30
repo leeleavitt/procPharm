@@ -94,11 +94,11 @@ bscore2<-function(dat, levs.1=NULL, snr.min=2.8, max.min=.03, wm.min=0, wm.max=6
 #' Function to use the neural networks within the python package
 #' @param dat is the RD file input
 #' @export
-fancyBin<- function(dat){
+fancyBin <- function(dat){
     pyPharm <- reticulate::import('python_pharmer')
-
+    print(pyPharm)
     pulsesWithNN <- c('^[bB]ob.*', "^AITC.*", "^[cC]aps.*", "^[mM]enth.*", "[kK][.]40.*")
-    nnNames <- c('blob','aitc', 'menthol', 'capsaicin', 'k40')
+    nnNames <- c('blob','aitc','capsaicin', 'menthol', 'k40')
 
     for( i in 1:length(pulsesWithNN)){
         print(i)
@@ -115,17 +115,59 @@ fancyBin<- function(dat){
 
             # Now use the python score all the responses of interest
             featureFrame <- pyPharm$featureMaker(pulseToScore, 10)
-            featureScores <- pyPharm$modelRunner(featureFrame, nnNames[i])
-
-            # Transfer these scoring to the binary dataframe
-            binName <- grep(pulsesWithNN[i], names(dat$bin), value=T)
-            dat$bin[binName] <- featureScores
+            #tryCatch({
+                featureScores <- pyPharm$modelRunner(featureFrame, nnNames[i])
+                # Transfer these scoring to the binary dataframe
+                binName <- grep(pulsesWithNN[i], names(dat$bin), value=T)
+                dat$bin[binName] <- featureScores
+                #}
+            #    , error=function(e) print(paste("Could not score", pulsesWithNN[i]))
+            #)
         }
-
     }
     return(dat)
 }
 
+#' Function to return probability scores from the models
+#' @param dat is the RD file input
+#' @export
+probMaker <- function(dat){
+    pyPharm <- reticulate::import('python_pharmer')
+    pulsesWithNN <- c("^AITC.*", "^[cC]aps.*", "^[mM]enth.*", "[kK][.]40.*")
+    nnNames <- c('aitc','capsaicin', 'menthol', 'k40')
+
+    for( i in 1:length(pulsesWithNN)){
+        print(i)
+        
+        # Make sure the pulse exists
+        pulse <- grep(pulsesWithNN[i], dat$w.dat$wr1)
+        
+        if(length(pulse) > 0){
+            # Grab the model
+            model <- pyPharm$modelLoader(nnNames[i])
+            
+            # Snag the pulse for all cells
+            minWin <- min( pulse )
+            maxWin <- minWin + 119
+
+            pulseToScore <- as.data.frame(t(dat$blc[minWin:maxWin,-1]))
+
+
+            # Now use the python score all the responses of interest
+            tryCatch({
+                featureFrame <- pyPharm$featureMaker(pulseToScore, 10)
+                probs <- model$predict(featureFrame)
+                colnames(probs) <- c(0,1)
+                # Transfer these scoring to the binary dataframe
+                pulseName <- grep(pulsesWithNN[i], names(dat$bin), value=T)
+                dat[['probs']][[pulseName]] <- probs
+                }
+                , error=function(e) print(paste("Could not score", pulsesWithNN[i]))
+            )
+        }
+    }
+    return(dat)
+}
 
 #' calculate a table of cell characteristics globally and 
 #' within specific windows

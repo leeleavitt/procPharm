@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import os
 from tensorflow.keras.models import load_model
+#import tensorflow as tf
 import os
 
 # This creates features out of the traces imported to it
@@ -81,7 +82,7 @@ def modelRunner(features, model):
 
     return scores
     
-def modelLoader(features, model):
+def modelLoader(model):
     this_dir, this_filename = os.path.split(__file__)
     
     if model == 'aitc':

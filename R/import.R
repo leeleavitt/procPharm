@@ -276,10 +276,31 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
         bin <- bin[,levs]
         bin["drop"] <- 0 #maybe try to generate some drop criteria from the scp 
 
-        tmp.rd <- list(t.dat=t.dat,t.340=t.340,t.380=t.380, 
-        w.dat=w.dat,c.dat=c.dat, bin=bin, scp=scp, snr=pcp$snr, blc=pcp$blc, der=pcp$der) 
+        tmp.rd <- list(
+            t.dat=t.dat,
+            t.340=t.340,
+            t.380=t.380, 
+            w.dat=w.dat,
+            c.dat=c.dat, 
+            bin=bin, 
+            scp=scp, 
+            #snr=pcp$snr, 
+            blc=pcp$blc)
+            #der=pcp$der) 
         
         tmp.rd <- TraceBrewer(tmp.rd) 
+        tmp.rd <- list(
+            t.dat=t.dat,
+            t.340=t.340,
+            t.380=t.380, 
+            w.dat=w.dat,
+            c.dat=c.dat, 
+            bin=bin, 
+            scp=scp, 
+            #snr=pcp$snr, 
+            blc=pcp$blc)
+            #der=pcp$der) 
+
         tmp.rd <- fancyBin(tmp.rd)
         tmp.rd <- c(tmp.rd, img_list)
         rd.name <- rd.names[i]
@@ -914,3 +935,7 @@ WindowRenamer<-function(dat){
     return(dat)
 }
 
+ReadResponseWindowFile <- function(fname){
+    dat <- read.csv(fname)
+    return(dat)
+}
