@@ -28,8 +28,7 @@ traceProbMaker <- function(dat){
                 # Transfer these scoring to the binary dataframe
                 pulseName <- grep(pulsesWithNN[i], names(dat$bin), value=T)
                 dat[['probs']][[pulseName]] <- probs
-                dat$bin[binName] <- model$predict_classes(featureFrame)
-
+                dat$bin[,pulseName] <- model$predict_classes(featureFrame)
                 }
                 , error=function(e) print(paste("Could not score", pulsesWithNN[i]))
             )

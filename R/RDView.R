@@ -546,6 +546,8 @@ BackgroundRaster <- function(wt,ht,wd,col50,xlim,ylim){
 	return(tmp.png)			
 }
 
+# RDVIew but for traces, also identifies the score of the neurons
+# @export
 RDView_2<-function(dat, cells=NULL, levs=NULL){
     dat.name<-deparse(substitute(dat))
     cat(
@@ -589,7 +591,6 @@ RDView_2<-function(dat, cells=NULL, levs=NULL){
     }
     assign(dat.name,dat, envir=.GlobalEnv)
 }
-
 
 Trace_select_grid<-function(dat, x.names, levs=select.list(names(dat$bin)), t.type="blc", preselect=T, l.col="red", window.w=10, window.h=10, title1="hi"){
     
