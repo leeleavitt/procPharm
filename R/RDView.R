@@ -546,8 +546,11 @@ BackgroundRaster <- function(wt,ht,wd,col50,xlim,ylim){
 	return(tmp.png)			
 }
 
-# RDVIew but for traces, also identifies the score of the neurons
-# @export
+#' RDVIew but for traces, also identifies the score of the neurons
+#' @param dat is the RD.experiment
+#' @param cell are subsets of cell to incorporate
+#' @param levs this is the window region to update
+#' @export
 RDView_2<-function(dat, cells=NULL, levs=NULL){
     dat.name<-deparse(substitute(dat))
     cat(

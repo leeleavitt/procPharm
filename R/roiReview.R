@@ -97,6 +97,8 @@ SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed"
         }
         img.dat[img[,,1] < med.r] <- 0
         img.dat[img[,,2] < med.b] <- 0		
+
+        stain.name <- 'drop'
     }
     
     # Set up two devices
@@ -198,7 +200,11 @@ SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed"
     fg <- rep("black",length(all.x))
     fg[1:xn] <- "navy"
     cexr <- sl/.04
-    scoreLab <- paste0(stain.name, ".bin")
+    if(stain.name != 'drop'){
+        scoreLab <- paste0(stain.name, ".bin")
+    }else{
+        scoreLab <- stain.name
+    }
     
     if(scoreLab %in% names(tmp$bin)){
         score <- tmp$bin[x.names,scoreLab]
@@ -429,7 +435,7 @@ ROIreview <- function(tmp, x.names=NULL, pad=2, wh=7,hh=7, subset.n=500, roi.img
     }
 
     if(is.null(x.names)){x.names <- row.names(tmp$c.dat)}
-    x.names <- x.names[tmp$bin[x.names,"drop"]==0]
+    #x.names <- x.names[tmp$bin[x.names,"drop"]==0]
     if(is.na(subset.n) | subset.n > length(x.names)){subset.n=length(x.names)}
     subset.list <- dice(x.names,subset.n,subset.n/4)
     for(x.names in subset.list){

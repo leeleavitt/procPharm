@@ -36,7 +36,7 @@ load("./RD.200309.30.m.m3.p1.Rdata")
 
 
 
-tf <- import('tensorflow')
-aitcModel<-tf$keras$models$load_model("./python_packages/python_pharmer/python_pharmer/peakDeepDetect/models/AITC.100uM.h5")
+# tf <- import('tensorflow')
+# aitcModel<-tf$keras$models$load_model("./python_packages/python_pharmer/python_pharmer/peakDeepDetect/models/AITC.100uM.h5")
 
-aitcModel
+# aitcModel

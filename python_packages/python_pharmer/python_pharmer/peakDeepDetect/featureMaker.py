@@ -76,6 +76,9 @@ def modelRunner(features, model):
         DATA_PATH = os.path.join(this_dir, "models", "gfp.h5")
     elif model == 'cy5':
         DATA_PATH = os.path.join(this_dir, "models", "cy5.h5")
+    elif model == 'drop':
+        DATA_PATH = os.path.join(this_dir, "models", "drop.h5")
+
 
     model = load_model(DATA_PATH)
     scores = model.predict(features)
@@ -97,6 +100,8 @@ def modelLoader(model):
         DATA_PATH = os.path.join(this_dir, "models", "gfp.h5")
     elif model == 'cy5':
         DATA_PATH = os.path.join(this_dir, "models", "cy5.h5")
+    elif model == 'drop':
+        DATA_PATH = os.path.join(this_dir, "models", "drop.h5")
 
     model = load_model(DATA_PATH)
     #scores = model.predict(features)

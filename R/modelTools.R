@@ -123,6 +123,22 @@ imageProbMaker <- function(dat){
         dat[['probs']][['gfp']] <- predictedClassProbs
     }, error=function(e)print("Could not score GFP, you are most likely missing image 4"))
 
+    tryCatch({
+        image <- imageExtractor(dat, 'img8', c(1,2,3))
+        # grab correct model
+        model <- pyPharm$modelLoader('drop')
+        # predict classes
+        predictedClasses <- model$predict_classes(image$imageArray)
+        # assign classes
+        dat$bin[image$cellNames, 'drop'] <- predictedClasses
+        predictedClassProbs <- model$predict(image$imageArray)
+        predictedClassProbsDF <- dat$bin[, c(1,2)]
+        predictedClassProbsDF[,c(1,2)] <- NA
+        colnames(predictedClassProbsDF) <- c(0,1)
+        predictedClassProbsDF[image$cellNames,] <- predictedClassProbs
+        dat[['probs']][['drop']] <- predictedClassProbs
+    }, error=function(e)print("Could not score drop, you are most likely missing image 8"))
+
     return(dat)
 }
 
