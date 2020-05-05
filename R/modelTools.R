@@ -95,15 +95,17 @@ imageProbMaker <- function(dat){
         model <- pyPharm$modelLoader('cy5')
         # predict classes
         predictedClasses <- model$predict_classes(image$imageArray)
-        # obatin class prediciton probabilities
         # assign classes
-        dat$bin[image$cellNames, 'cy5.bin'] <- predictedClasses
+        dat$bin[image$cellNames, 'drop'] <- predictedClasses
+        
+        # Grab the probabilities
         predictedClassProbs <- model$predict(image$imageArray)
         predictedClassProbsDF <- dat$bin[, c(1,2)]
         predictedClassProbsDF[,c(1,2)] <- NA
         colnames(predictedClassProbsDF) <- c(0,1)
         predictedClassProbsDF[image$cellNames,] <- predictedClassProbs
-        dat[['probs']][['cy5']] <- predictedClassProbsDF
+
+        dat[['probs']][['drop']] <- predictedClassProbsDF
     },
     error=function(e) print("Could not score IB4, you are most likely missing image 3"))
 
@@ -114,13 +116,16 @@ imageProbMaker <- function(dat){
         # predict classes
         predictedClasses <- model$predict_classes(image$imageArray)
         # assign classes
-        dat$bin[image$cellNames, 'gfp.bin'] <- predictedClasses
+        dat$bin[image$cellNames, 'drop'] <- predictedClasses
+        
+        # Grab the probabilities
         predictedClassProbs <- model$predict(image$imageArray)
         predictedClassProbsDF <- dat$bin[, c(1,2)]
         predictedClassProbsDF[,c(1,2)] <- NA
         colnames(predictedClassProbsDF) <- c(0,1)
         predictedClassProbsDF[image$cellNames,] <- predictedClassProbs
-        dat[['probs']][['gfp']] <- predictedClassProbs
+
+        dat[['probs']][['drop']] <- predictedClassProbsDF
     }, error=function(e)print("Could not score GFP, you are most likely missing image 4"))
 
     tryCatch({
@@ -131,12 +136,15 @@ imageProbMaker <- function(dat){
         predictedClasses <- model$predict_classes(image$imageArray)
         # assign classes
         dat$bin[image$cellNames, 'drop'] <- predictedClasses
+        
+        # Grab the probabilities
         predictedClassProbs <- model$predict(image$imageArray)
         predictedClassProbsDF <- dat$bin[, c(1,2)]
         predictedClassProbsDF[,c(1,2)] <- NA
         colnames(predictedClassProbsDF) <- c(0,1)
         predictedClassProbsDF[image$cellNames,] <- predictedClassProbs
-        dat[['probs']][['drop']] <- predictedClassProbs
+
+        dat[['probs']][['drop']] <- predictedClassProbsDF
     }, error=function(e)print("Could not score drop, you are most likely missing image 8"))
 
     return(dat)

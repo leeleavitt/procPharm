@@ -2,7 +2,7 @@
 #pad is the extra amount of image to select around the cell e.g. 1 = at cell bondaries 1.05 = 5% extra
 #stain.name is the stain to display ("tritc","gfp","dapi") anything else defaults to yellow ROI boundaries
 #title1 will be the title of the grid selection window.
-SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed",window.h=7,window.w=7,l.col="red",roi.img=NULL){
+SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed",window.h=7,window.w=7,l.col="red",roi.img=NULL, n.col = 'grey'){
     # All images in the expeirment
     imgs <- grep("img",names(tmp),value=T)	
     
@@ -198,7 +198,7 @@ SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed"
     
     # Now to labels the box surrounding the cell
     fg <- rep("black",length(all.x))
-    fg[1:xn] <- "navy"
+    fg[1:xn] <- n.col
     cexr <- sl/.04
     if(stain.name != 'drop'){
         scoreLab <- paste0(stain.name, ".bin")
@@ -209,7 +209,7 @@ SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed"
     if(scoreLab %in% names(tmp$bin)){
         score <- tmp$bin[x.names,scoreLab]
         score[is.na(score)] <- 0
-        fg[1:xn][score == 0 ] <- 'navy'
+        fg[1:xn][score == 0 ] <- n.col
         fg[1:xn][score == 1] <- l.col
         fg[1:xn][is.na(score)] <- 'green'
         all.sel <- score
@@ -252,7 +252,7 @@ SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed"
     # None button
     if(sel.i == xn+3){
         all.sel[1:xn] <- 0
-        fg[1:xn] <- "navy"
+        fg[1:xn] <- n.col
     }
     # UpTo button
     if(sel.i == xn + 4){
@@ -266,7 +266,7 @@ SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed"
         all.sel[neg.i] <- 0
         pos.i <- sel.i:xn	
         all.sel[pos.i] <- 1
-        fg[neg.i] <- "navy"
+        fg[neg.i] <- n.col
         fg[pos.i] <- l.col
     }
 
@@ -290,7 +290,7 @@ SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed"
             fg[sel.i] <- l.col
         }else{
             all.sel[sel.i] <- 0
-            fg[sel.i] <- "navy"
+            fg[sel.i] <- n.col
         }
 
     }
@@ -321,7 +321,7 @@ SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed"
         # None button
         if(sel.i == xn+3){
             all.sel[1:xn] <- 0
-            fg[1:xn] <- "navy"
+            fg[1:xn] <- n.col
         }
         # UpTo button
         if(sel.i == xn + 4){
@@ -335,7 +335,7 @@ SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed"
             all.sel[neg.i] <- 0
             pos.i <- sel.i:xn	
             all.sel[pos.i] <- 1
-            fg[neg.i] <- "navy"
+            fg[neg.i] <- n.col
             fg[pos.i] <- l.col
         }
 
@@ -360,7 +360,7 @@ SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed"
                 fg[sel.i] <- l.col
             }else{
                 all.sel[sel.i] <- 0
-                fg[sel.i] <- "navy"
+                fg[sel.i] <- n.col
             }
         }
     }

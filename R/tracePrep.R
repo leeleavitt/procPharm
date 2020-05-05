@@ -5,18 +5,18 @@ smoothfunc <- function(y,ts,pts=min(13,sum(!is.na(y)))){
 }
 
 DespikeSmooth <- function(tmp,ulim=NULL,dlim= NULL){
-    print("Starting Despike-smooth timing")
+    #print("Starting Despike-smooth timing")
     start_time <- Sys.time()
     wt <- tmp$t.dat
     ts <- tmp$t.dat[,1]
     wtd <- wt[-1,] - wt[-nrow(wt),]
-    print(paste("step 1 time",Sys.time()-start_time))
+    #print(paste("step 1 time",Sys.time()-start_time))
         wtd <- sweep(wtd[,-1],1,wtd[,1],'/')
-    print(paste("step 2 time", Sys.time()-start_time))
+    #print(paste("step 2 time", Sys.time()-start_time))
         wtm <- wtd[-1,]*wtd[-nrow(wtd),]
-    print(paste("step 3 time", Sys.time()-start_time))
+    #print(paste("step 3 time", Sys.time()-start_time))
         wrb <- NumBlanks(tmp$w.dat[,"wr1"])
-    print(paste("step 4 time", Sys.time()-start_time)	)
+    #print(paste("step 4 time", Sys.time()-start_time)	)
         if(is.null(ulim) | is.null(dlim))
         {
             qvals <- quantile(
@@ -27,7 +27,7 @@ DespikeSmooth <- function(tmp,ulim=NULL,dlim= NULL){
                         )
                     ,probs=c(0,.001,.5,.999,1))
         }
-    print(paste("step 5 time",Sys.time()-start_time))
+    #print(paste("step 5 time",Sys.time()-start_time))
         if(is.null(dlim)){dlim <- qvals[2]}
         if(is.null(ulim)){ulim <- qvals[4]}	
         wtm.z <- wtm[1,]
@@ -38,7 +38,7 @@ DespikeSmooth <- function(tmp,ulim=NULL,dlim= NULL){
         wt <- wt[,-1]
         wt[wtrm] <- NA
         mp <- sapply(wt, smoothfunc, ts=x)
-    print(paste("step 6 time",Sys.time()-start_time))
+    #print(paste("step 6 time",Sys.time()-start_time))
         tmp$mp <- tmp$t.dat
         tmp$mp[,-1] <- mp
         return(tmp)
@@ -211,18 +211,18 @@ TraceBrewer<-function(dat){
     # Add a 3 point padding to the end of the experiment which return the trace back to baseline
     # This helps preserve the response shape
     tmp.rd<-PadTdat(tmp.rd)
-    print(paste("Completed Padding at:",(proc.time()-start.time))[3])
+    #print(paste("Completed Padding at:",(proc.time()-start.time))[3])
     # Kevin now uses this to despike and smooth the data
     tmp.rd<-DespikeSmooth(tmp.rd)
-    print(paste("Completed Despiking at:",(proc.time()-start.time)[3]))
+    #print(paste("Completed Despiking at:",(proc.time()-start.time)[3]))
     # Now what we need to do is provide the analysis with some type of normalized trace
     tmp.rd<-TraceNormal(tmp.rd,'mp')
-    print(paste("Completed Normalizing at:",(proc.time()-start.time)[3]))
+    #print(paste("Completed Normalizing at:",(proc.time()-start.time)[3]))
 
     # Now do a baseline correction based on the trace padding, and the despike smooth function, and
     # the normalized trace 
     pcp.tmp<-ProcConstPharm(tmp.rd$t.norm)
-    print(paste("Completed Baseline Correction at:",(proc.time()-start.time)[3]))
+    #print(paste("Completed Baseline Correction at:",(proc.time()-start.time)[3]))
     tmp.rd$blc<-pcp.tmp$blc
     tmp.rd$snr<-pcp.tmp$snr
     # Now perform trace statistics on the specified trace

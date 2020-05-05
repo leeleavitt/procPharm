@@ -2,3 +2,4 @@
 ^video 1001\.nd2$
 ^extras$
 ^/extras$
+^/python_packages

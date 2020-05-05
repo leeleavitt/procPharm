@@ -53,13 +53,13 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
         if( is.null(img_name_vec) ){
             img_name_vec<-c(
                 "bf.gfp.tritc.start.png",
-                "gfp.tritc.start.ci.ltl.rs.png",
-                "tritc.start.ci.ltl.rs.png",
-                "gfp.start.ci.ltl.rs.png",
+                "gfp.tritc.end.ci.ltl.rs.png",
+                "tritc.end.ci.ltl.rs.png",
+                "gfp.end.ci.ltl.rs.png",
                 "bf.start.lab.png",
                 "fura2.png",
                 "fura2.divide.start.png",
-                "roi.img.png")
+                "dapi.end.lab.png")
         }
         # Add images
         img_list<-list()
@@ -301,7 +301,7 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
             blc=pcp$blc)
             #der=pcp$der) 
 
-        tmp.rd <- fancyBin(tmp.rd)
+        #tmp.rd <- fancyBin(tmp.rd)
         tmp.rd <- c(tmp.rd, img_list)
 
         # Add the models
