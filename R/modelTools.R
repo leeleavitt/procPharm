@@ -70,7 +70,7 @@ traceProbMaker <- function(dat, minute = TRUE){
                 if(!minute){
                     featureFrame <- pyPharm$featureMaker(pulseToScore, 10)
                 }else{
-                    featureFram <- pyPharm$featureMaker2(pulseToScore, 12)
+                    featureFrame <- pyPharm$featureMaker2(pulseToScore, 12)
                 }
                 probs <- model$predict(featureFrame)
                 colnames(probs) <- c(0,1)
