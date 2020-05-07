@@ -260,10 +260,10 @@ traceSticher <- function(dat1Loc, dat2Loc, timeBuffer = 3, newName = NULL){
     dat1 <- get(load(dat1Loc))
     dat2 <- get(load(dat2Loc))
 
-    fName <- paste0(newName, ".Rdata")
-    assign(newName, dat1)
-    assign(newName, dat1, envir = .GlobalEnv)  
-    save(list = newName ,file=fName )
+    # fName <- paste0(newName, ".Rdata")
+    # assign(newName, dat1)
+    # assign(newName, dat1, envir = .GlobalEnv)  
+    # save(list = newName ,file=fName )
 
     #How long were your experiments seperated?
     #I think at least 7 min is mandatory

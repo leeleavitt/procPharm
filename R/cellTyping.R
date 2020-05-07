@@ -1,12 +1,13 @@
-#create a list that uses the names input for the names in the list
+#' create a list that uses the names input for the names in the list
+#' @export
 named.list<-function(...){
     bob<-list(...)
     names(bob)<-as.character(substitute((...)))[-1]
     return(bob)
-    }
+}
 
 
-    cell.ti<-function(dat, x.names, img=NULL){
+cell.ti<-function(dat, x.names, img=NULL){
     graphics.off()
     dev.new(width=15, height=5)
     PeakFunc5(dat, x.names)
@@ -18,7 +19,14 @@ named.list<-function(...){
 #' This is the old way to create a census! Recently updated though
 #' @export
 census.brewer<-function(dat){
-    cell.types<-dat$cell.types
+
+    cellTypesOptions <- grep('^cell', names(dat), value=TRUE)
+    if(length(cellTypesOptions) > 1){
+        correctCellTypesName <- select.list(cellTypesOptions, title='Select the correct Cell Types')
+    }else{
+        correctCellTypesName <- cellTypesOptions
+    }
+    cell.types <- dat[[correctCellTypesName]]
 
 
     dev.new(width=10, height=8)

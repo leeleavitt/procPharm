@@ -1,6 +1,7 @@
-#This peak func allows for multiple t.types to be plotted
-#170515: added pts and lns: (logical)
-#added dat.n for insertation of the name for the rd file
+#' This peak func allows for multiple t.types to be plotted
+#' 170515: added pts and lns: (logical)
+#' added dat.n for insertation of the name for the rd file
+#' @export
 PeakFunc7 <- function(dat,n.names,t.type="t.dat",Plotit.trace=T,Plotit.both=F, info=T,lmain=NULL, bcex=.7, yvar=T, ylim.max=NULL, zf=40, pts=T, lns=T, levs=NULL, underline=T, dat.n=""){
     dat.name<-deparse(substitute(dat))
     if(dat.name=="dat"){dat.name<-dat.n

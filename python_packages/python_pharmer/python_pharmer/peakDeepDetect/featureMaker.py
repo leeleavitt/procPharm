@@ -8,8 +8,6 @@ import os
 
 # This creates features out of the traces imported to it
 # The traces need to be of a total length of 120 points.
-#
-
 def featureMaker(traces, steps):
     '''
     Input to this function is
@@ -61,6 +59,56 @@ def featureMaker(traces, steps):
     
     return featureFrame
 
+# Function to create a specified number of features
+def featureMaker2(traces, numWindows = 12):
+    '''
+    Input to this function is
+    1: traces to calculate features
+    2: Size of Steps between the times
+
+    In This experiment we are going to attempt to extract some Features to see if this improves performance
+    On the last experiment our dataset was of the for
+    [A, B, C]
+    A: Number of traces/samples ~10,000
+    B: Number of TimeSteps 120
+    C: Number of features 1
+
+    For this experiment we want to reduce the number of timesteps while increasinG the number of Features
+    A: Numver of traces/samples ~10,000
+    B: Number of timeSteps 10
+    C: Number of Features 3
+
+    The features i would like to collect this time around are
+    1: Mean over 12 points
+    2: Standard Error over 12 points
+    3: Derivative over 12 Points
+    Function to create the above described features
+    '''    
+    #This need to be a 3 dimensional numpy array
+    traces = np.asarray(traces)
+    samples = traces.shape[0]
+
+    timeSteps = np.ceil(np.linspace(start = 0, stop = 48, num=12)).astype('int')
+
+    # Start my breaking up the traces into segments based on the
+    # number of points in the trace.
+    features = 4
+    featureFrame = np.empty([samples, len(timeSteps), features])
+
+    for i in range(len(timeSteps) - 1):
+        meanFeat = traces[:,timeSteps[i]:timeSteps[i+1]].mean(axis=1)
+        stdFeat = traces[:,timeSteps[i]:timeSteps[i+1]].std(axis=1)
+        semFeat = stats.sem(traces[:,timeSteps[i]:timeSteps[i+1]], axis=1)
+        derivFeat = np.mean(np.gradient(traces[:,timeSteps[i]:timeSteps[i+1]], axis=1), axis=1)
+
+        featureFrame[:, i, 0] = meanFeat
+        featureFrame[:, i, 1] = stdFeat
+        featureFrame[:, i, 2] = semFeat
+        featureFrame[:, i, 3] = derivFeat
+
+    return featureFrame
+
+# Function to Run the models
 def modelRunner(features, model):
     this_dir, this_filename = os.path.split(__file__)
     
@@ -84,7 +132,8 @@ def modelRunner(features, model):
     scores = model.predict(features)
 
     return scores
-    
+
+# Function to load the modesl    
 def modelLoader(model):
     this_dir, this_filename = os.path.split(__file__)
     

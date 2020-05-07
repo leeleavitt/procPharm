@@ -26,9 +26,9 @@ traceProbMaker <- function(dat){
                 probs <- model$predict(featureFrame)
                 colnames(probs) <- c(0,1)
                 # Transfer these scoring to the binary dataframe
-                pulseName <- grep(pulsesWithNN[i], names(dat$bin), value=T)
+                pulseName <- grep(pulsesWithNN[i], names(dat$bin), value=T)[1]
                 dat[['probs']][[pulseName]] <- probs
-                dat$bin[,pulseName] <- model$predict_classes(featureFrame)
+                dat$bin[,1] <- model$predict_classes(featureFrame)
                 }
                 , error=function(e) print(paste("Could not score", pulsesWithNN[i]))
             )
@@ -36,6 +36,59 @@ traceProbMaker <- function(dat){
     }
     return(dat)
 }
+
+#' This function creates the binary scores for AITC, menthol, capsaicin and K40
+#' @export
+traceProbMaker <- function(dat, minute = TRUE){
+    pyPharm <- reticulate::import('python_pharmer')
+    pulsesWithNN <- c("^AITC.*", "^[cC]aps.*", "^[mM]enth.*", "[kK][.]40.*")
+    nnNames <- c('aitc','capsaicin', 'menthol', 'k40')
+
+    for( i in 1:length(pulsesWithNN)){        
+        # Make sure the pulse exists
+        window <- grep(pulsesWithNN[i], unique(dat$w.dat$wr1), value=T)
+        pulseWindow <- dat$w.dat[dat$w.dat$wr1 == window,]
+        
+        if(dim(pulseWindow)[1] > 0){
+            # Grab the model
+            model <- pyPharm$modelLoader(nnNames[i])
+            
+            # Snag the pulse for all cells
+            if(!minute){
+                minWin <- min( pulseWindow$Time )
+                maxWin <- minWin + 119
+                pulseToScore <- as.data.frame(t(dat$blc[minWin:maxWin,-1]))
+            }else{
+                windowStart <- min(pulseWindow$Time)
+                windowEnd <- windowStart + 4
+                windowLogic <- dat$w.dat$Time > windowStart & dat$w.dat$Time < windowEnd
+                pulseToScore <- as.data.frame(t(dat$blc[windowLogic,-1]))
+            }
+
+            # Now use the python score all the responses of interest
+            tryCatch({
+                if(!minute){
+                    featureFrame <- pyPharm$featureMaker(pulseToScore, 10)
+                }else{
+                    featureFram <- pyPharm$featureMaker2(pulseToScore, 12)
+                }
+                probs <- model$predict(featureFrame)
+                colnames(probs) <- c(0,1)
+                # Transfer these scoring to the binary dataframe
+                pulseName <- grep(pulsesWithNN[i], names(dat$bin), value=T)[1]
+                dat[['probs']][[pulseName]] <- probs
+                dat$bin[,1] <- model$predict_classes(featureFrame)
+                }
+                , error=function(e) print(paste("Could not score", pulsesWithNN[i]))
+            )
+        }else{
+            print(paste("Could not score", pulsesWithNN[i])) 
+        }
+    }
+    return(dat)
+}
+
+
 
 #' Function to convert the full image into individual cell images.
 #' @param dat is the RD.experiment to load in. You should have images loaded into this list

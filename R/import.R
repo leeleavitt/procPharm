@@ -123,7 +123,9 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
 				}
 				# Now read in video Data
 				py_pharm$video_roi_extractor_faster(video)
-			}
+			}else{
+                video <- list.files(pattern="^[Vv]ideo.*nd2$")
+            }
 		}
 
         require(data.table)
@@ -854,7 +856,7 @@ RegionDeleter<-function(dat, cell=NULL, complete=T){
     tmp.rd$t.dat<-tmp.rd$t.dat<-dat$t.dat[-rows.to.remove,]
     tmp.rd$w.dat<-tmp.rd$w.dat<-dat$w.dat[-rows.to.remove,]
 
-    tmp.rd<-mp.brewer(tmp.rd)
+    tmp.rd<-TraceBrewer(tmp.rd)
     levs<-setdiff(unique(as.character(tmp.rd$w.dat$wr1)),"")
 
     #5 set the thresholds for scoring and run the automatic scoring
