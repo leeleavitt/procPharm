@@ -21,9 +21,9 @@ census.brewer<-function(dat){
     cell.types<-dat$cell.types
 
 
-    dev.new(width=10, height=5)
+    dev.new(width=10, height=8)
     stacked.traces<-dev.cur()
-    LinesEvery.5.1(dat, sample(row.names(dat$c.dat)[1:5]), plot.new=F, lmain="WAZZZUPPPP", t.type="t.dat", img=dat$img1)
+    LinesEvery.5(dat, sample(row.names(dat$c.dat))[1:10], plot.new=F, lmain="WAZZZUPPPP", t.type="t.dat", img='img1')
 
     cat("HOWDY PARTNER How Many groups to census?\n")
     tryCatch(bringToTop(-1), error=function(e)NULL)

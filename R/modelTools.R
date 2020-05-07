@@ -96,7 +96,7 @@ imageProbMaker <- function(dat){
         # predict classes
         predictedClasses <- model$predict_classes(image$imageArray)
         # assign classes
-        dat$bin[image$cellNames, 'drop'] <- predictedClasses
+        dat$bin[image$cellNames, 'cy5.bin'] <- predictedClasses
         
         # Grab the probabilities
         predictedClassProbs <- model$predict(image$imageArray)
@@ -105,7 +105,7 @@ imageProbMaker <- function(dat){
         colnames(predictedClassProbsDF) <- c(0,1)
         predictedClassProbsDF[image$cellNames,] <- predictedClassProbs
 
-        dat[['probs']][['drop']] <- predictedClassProbsDF
+        dat[['probs']][['cy5']] <- predictedClassProbsDF
     },
     error=function(e) print("Could not score IB4, you are most likely missing image 3"))
 
@@ -116,7 +116,7 @@ imageProbMaker <- function(dat){
         # predict classes
         predictedClasses <- model$predict_classes(image$imageArray)
         # assign classes
-        dat$bin[image$cellNames, 'drop'] <- predictedClasses
+        dat$bin[image$cellNames, 'gfp.bin'] <- predictedClasses
         
         # Grab the probabilities
         predictedClassProbs <- model$predict(image$imageArray)
@@ -125,7 +125,7 @@ imageProbMaker <- function(dat){
         colnames(predictedClassProbsDF) <- c(0,1)
         predictedClassProbsDF[image$cellNames,] <- predictedClassProbs
 
-        dat[['probs']][['drop']] <- predictedClassProbsDF
+        dat[['probs']][['gfp']] <- predictedClassProbsDF
     }, error=function(e)print("Could not score GFP, you are most likely missing image 4"))
 
     tryCatch({

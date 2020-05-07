@@ -36,7 +36,7 @@ This R package depends on some python processing. To install
 4. Install the python package with, 
 
 ````
-pip install -e "git+https://github.com/leeleavitt/procPharm/#egg=pkg&subdirectory=python_packages/python_pharmer"
+pip install "git+https://github.com/leeleavitt/procPharm/#egg=pkg&subdirectory=python_packages/python_pharmer"
 ````
 5. Computer will need a restart after this
 
