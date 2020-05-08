@@ -5,7 +5,7 @@
 \title{Function with 3 options_ Edit_ct, classify UL , classify thermos
 This follows Marios scheme for classifying our cell types}
 \usage{
-Cell_Typer_2(tmp_rd, edit_ct = F, UL_classify = T, GFP = T, cell_types = NULL)
+Cell_Typer_2(tmp_rd, edit_ct = F, UL_classify = T, GFP = T, cell_types = NA)
 }
 \arguments{
 \item{edit_ct}{Logical, if true each cell class will be double checked}
