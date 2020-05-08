@@ -32,11 +32,18 @@ If installing R on computers in the lab (these need to be connected to the netwo
 This R package depends on some python processing. To install
 1. Install the [anaconda distribution](https://www.anaconda.com/distribution/). From there you will need to use `pip` to install our software. 
 2. Now opn the *Anaconda Prompt*, from your programs
-3. Install git with `conda install git`
+3. Install git with 
+````
+conda install git tensorflow
+````
 4. Install the python package with, 
 
 ````
 pip install -e "git+https://github.com/leeleavitt/procPharm/#egg=pkg&subdirectory=python_packages/python_pharmer"
 ````
 5. Computer will need a restart after this
+6. Often times you will have problems this is most likely due to `setuptools` not being updated. Send the following command into the anaconda prompt,
+````
+conda upgrade setuptools
+````
 
