@@ -11,7 +11,7 @@ cell.ti<-function(dat, x.names, img=NA){
     graphics.off()
     dev.new(width=15, height=5)
     PeakFunc5(dat, x.names)
-    if(is.NA(img)){img<-dat$img1}else{img<-img}
+    if(is.null(img)){img<-dat$img1}else{img<-img}
     cell.view(dat,x.names,img)
     multi.pic.zoom(dat, x.names, img, zf=80)
 }
@@ -84,7 +84,7 @@ census.brewer<-function(dat){
 #' @export
 Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
     
-    if(is.NA(cell_types)){
+    if(is.na(cell_types)){
         large_cell_types_names <- NA
     }else{
         #If your cell_types is not NA do large celltyping
@@ -180,6 +180,7 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
         G7<-setdiff(G7, aitc_cells)
         #Create G7_capsaicin cells
         G7_c<-intersect(G7,cap_cells)
+		G7_m <- setdiff(G7, G7_c)
 
         # G8: gpf+, menthol negative, capsaicin only 
         G8<-intersect(green_cells, cap_cells)
@@ -316,6 +317,7 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
     
     # N15: menthol cells
     N15 <- union(N15, US_menth_cells)
+	N15_m <- setdiff(N15, c(N15_c, N15_a))
 
     #N16 unlabeled, capsaicin positive
     N16 <- US_cap_cells
@@ -403,6 +405,7 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
     if(GFP){
         gfp_ct<-named.list(
             G7,
+			G7_m,
             G7_c,
             G8,
             G9,
@@ -417,10 +420,10 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
         R13,
         N14,
         N15,
+		N15_a, 
+		N15_m,
         N15_c,
-        N15_a,
-        N16,
-        UC
+        N16
     )
     
     cell_types<-append(cell_types,red_ul_ct)

@@ -4,8 +4,12 @@
 \alias{traceProbMaker}
 \title{This function creates the binary scores for AITC, menthol, capsaicin and K40}
 \usage{
-traceProbMaker(dat)
+traceProbMaker(dat, minute = TRUE)
+
+traceProbMaker(dat, minute = TRUE)
 }
 \description{
+This function creates the binary scores for AITC, menthol, capsaicin and K40
+
 This function creates the binary scores for AITC, menthol, capsaicin and K40
 }
