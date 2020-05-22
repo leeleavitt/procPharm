@@ -194,20 +194,20 @@ bin<-pf.function(bin,levs)
 
 # Add images
 require(png)
-img1<-readPNG("bf.png")
-img2<-readPNG("gfp.png")
-img3<-readPNG("tritc.png")
-img4<-readPNG("bf.lab.png")
-img5<-readPNG("roi.img.png")
-img6<-readPNG("fura2.png")
+img1<-png::readPNG("bf.png")
+img2<-png::readPNG("gfp.png")
+img3<-png::readPNG("tritc.png")
+img4<-png::readPNG("bf.lab.png")
+img5<-png::readPNG("roi.img.png")
+img6<-png::readPNG("fura2.png")
 img7<-NULL
 img8<-NULL
 
 
-#img.t<-readPNG("tritc.png")
-#img.b<-readPNG("bf.png")
-#img.bl<-readPNG("bf.lab.png")
-#img.f<-readPNG("fura2.png")
+#img.t<-png::readPNG("tritc.png")
+#img.b<-png::readPNG("bf.png")
+#img.bl<-png::readPNG("bf.lab.png")
+#img.f<-png::readPNG("fura2.png")
 
 tmp.rd <- list(t.dat=t.dat,t.340=t.340,t.380=t.380,te.340=t.e.340,te.380=t.e.380, te.dat=t.e.dat,
 w.dat=w.dat,c.dat=c.dat, bin=bin, scp=scp, snr=pcp$snr, blc=pcp$blc, der=pcp$der, 

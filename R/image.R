@@ -16,7 +16,7 @@ ImageFiller<-function(dat){
         
         if(image.to.add==""){dat[[paste('img',i,sep='')]]<-NULL
         }else{
-            dat[[paste('img',i,sep='')]]<-readPNG(image.to.add)
+            dat[[paste('img',i,sep='')]]<-png::readPNG(image.to.add)
         }
     }
     return(dat)
@@ -45,7 +45,7 @@ ImageFillerv2 <- function(dat, img_name_vec){
     # Add images
     img_list<-list()
     for( j in 1:length(img_name_vec) ){
-        dat[[ paste0("img",j) ]] <- tryCatch(readPNG(img_name_vec[j]), error=function(e)NULL)
+        dat[[ paste0("img",j) ]] <- tryCatch(png::readPNG(img_name_vec[j]), error=function(e)NULL)
     }
     if(image_question == T){
         cat('\nThese are the images I have attempted to load for you\nIf any are NULL, and want to add different images say yes to the \nnext question. You will be asked to select a png image for each loaction.\n\n')
@@ -63,7 +63,7 @@ ImageFillerv2 <- function(dat, img_name_vec){
                 if(selection==0){
                     dat[[paste0("img",j)]] <- NULL
                 }else{
-                    dat[[paste0("img",j)]] <- readPNG(png_imgs[selection])
+                    dat[[paste0("img",j)]] <- png::readPNG(png_imgs[selection])
                 }
                 cat('\nI have added ', png_imgs[selection],' to position ',j,'\n')
             }

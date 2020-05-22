@@ -250,20 +250,20 @@ bin<-pf.function(bin,levs)
 
 # Add images
 require(png)
-img1<-tryCatch(readPNG(img1.1), error=function(e)NULL)
-img2<-tryCatch(readPNG(img2.1), error=function(e)NULL)
-img3<-tryCatch(readPNG(img3.1), error=function(e)NULL)
-img4<-tryCatch(readPNG(img4.1), error=function(e)NULL)
-img5<-tryCatch(readPNG(img5.1), error=function(e)NULL)
-img6<-tryCatch(readPNG(img6.1), error=function(e)NULL)
-img7<-tryCatch(readPNG(img7.1), error=function(e)NULL)
-img8<-tryCatch(readPNG(img8.1), error=function(e)NULL)
-#readPNG("bf.gfp.tritc.dapi.png")
+img1<-tryCatch(png::readPNG(img1.1), error=function(e)NULL)
+img2<-tryCatch(png::readPNG(img2.1), error=function(e)NULL)
+img3<-tryCatch(png::readPNG(img3.1), error=function(e)NULL)
+img4<-tryCatch(png::readPNG(img4.1), error=function(e)NULL)
+img5<-tryCatch(png::readPNG(img5.1), error=function(e)NULL)
+img6<-tryCatch(png::readPNG(img6.1), error=function(e)NULL)
+img7<-tryCatch(png::readPNG(img7.1), error=function(e)NULL)
+img8<-tryCatch(png::readPNG(img8.1), error=function(e)NULL)
+#png::readPNG("bf.gfp.tritc.dapi.png")
 
-#img.t<-readPNG("tritc.png")
-#img.b<-readPNG("bf.png")
-#img.bl<-readPNG("bf.lab.png")
-#img.f<-readPNG("fura2.png")
+#img.t<-png::readPNG("tritc.png")
+#img.b<-png::readPNG("bf.png")
+#img.bl<-png::readPNG("bf.lab.png")
+#img.f<-png::readPNG("fura2.png")
 
 tmp.rd <- list(t.dat=t.dat,t.340=t.340,t.380=t.380, 
 tlq.dat=tlq.dat, tlq.340=tlq.340,tlq.380=tlq.380,

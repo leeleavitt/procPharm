@@ -143,10 +143,10 @@ require(MALDIquant)
 		w.dat <- MakeWr(t.dat,wr)
 	}
 	
-	if(!is.null(img1)){img1<-readPNG(img1)}
-	if(!is.null(img2)){img2<-readPNG(img2)}
-	if(!is.null(img3)){img3<-readPNG(img3)}
-	if(!is.null(img4)){img4<-readPNG(img4)}
+	if(!is.null(img1)){img1<-png::readPNG(img1)}
+	if(!is.null(img2)){img2<-png::readPNG(img2)}
+	if(!is.null(img3)){img3<-png::readPNG(img3)}
+	if(!is.null(img4)){img4<-png::readPNG(img4)}
 	
 	if(is.null(rd.name)){rd.name <- paste("RD",make.names(date()),sep="")}
 	
@@ -372,14 +372,14 @@ if(!is.null(wrdef))
 	tmp.rd$blc<-pcp$blc
 	tmp.rd$der<-pcp$der
 	# Add images
-	if(!is.null(img1)){tmp.rd$img1<-readPNG(img1)}
-	if(!is.null(img2)){tmp.rd$img2<-readPNG(img2)}
-	if(!is.null(img3)){tmp.rd$img3<-readPNG(img3)}
-	if(!is.null(img4)){tmp.rd$img4<-readPNG(img4)}
-	if(!is.null(img5)){tmp.rd$img5<-readPNG(img5)}
-	if(!is.null(img6)){tmp.rd$img6<-readPNG(img6)}
-	if(!is.null(img7)){tmp.rd$img7<-readPNG(img7)}
-	if(!is.null(img8)){tmp.rd$img8<-readPNG(img8)}
+	if(!is.null(img1)){tmp.rd$img1<-png::readPNG(img1)}
+	if(!is.null(img2)){tmp.rd$img2<-png::readPNG(img2)}
+	if(!is.null(img3)){tmp.rd$img3<-png::readPNG(img3)}
+	if(!is.null(img4)){tmp.rd$img4<-png::readPNG(img4)}
+	if(!is.null(img5)){tmp.rd$img5<-png::readPNG(img5)}
+	if(!is.null(img6)){tmp.rd$img6<-png::readPNG(img6)}
+	if(!is.null(img7)){tmp.rd$img7<-png::readPNG(img7)}
+	if(!is.null(img8)){tmp.rd$img8<-png::readPNG(img8)}
 
 
 #####################################################
@@ -3478,7 +3478,7 @@ bpfunc.2<-function(dat,n.names, bp.pts=T){
 	
 	
 	dev.off()
-	tmp.png <- readPNG("tmp.png")
+	tmp.png <- png::readPNG("tmp.png")
 	dim(tmp.png)
 	unlink("tmp.png")
 	return(tmp.png)			
@@ -3552,7 +3552,7 @@ if(length(n.names)>4){
 	}}
 	if(print.out){
 		dev.off()
-		tmp.png <- readPNG("tmp.png")
+		tmp.png <- png::readPNG("tmp.png")
 		dim(tmp.png)
 		unlink("tmp.png")
 		return(tmp.png)		
@@ -4681,7 +4681,8 @@ Trace.Click<-function(dat, cells=NULL,img=dat$img1, yvar=FALSE, select.trace="t.
     dev.new(width=10,height=6)  
 	dev.new(width=8, height=8)
     if(is.null(cells)){c.names <- names(dat$t.dat[,-1])}
-	else{c.names<-cells}
+	else{c.names<-cells}
+
 	lines.flag <- 0
     cell.i <- 1
 	g.names<-NULL
@@ -5901,7 +5902,7 @@ for(i in 1:length(m.names)){
 		}
 	}
 }	
-	dev.off()
+	dev.off()png::readPNG
 	tmp.png <- readPNG("tmp.png")
 	unlink("tmp.png")
 	return(tmp.png)			

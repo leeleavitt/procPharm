@@ -542,7 +542,7 @@ BackgroundRaster <- function(wt,ht,wd,col50,xlim,ylim){
 	plot(wt[,1],wt[,2],xaxt="n",yaxt="n",ylim=ylim,xlim=xlim,type="n")
 	for(i in 2:ncol(wt)){lines(wt[,1],wt[,i],lwd=1,col=col50[i-1])}
 	dev.off()
-	tmp.png <- readPNG("tmp.png")
+	tmp.png <- png::readPNG("tmp.png")
 	return(tmp.png)			
 }
 
@@ -660,7 +660,7 @@ Trace_select_grid<-function(dat, x.names, levs=select.list(names(dat$bin)), t.ty
     require(png)
     start.time<-Sys.time()
     for(i in 1:xn){
-        tmp_img<-readPNG(png.name[i])
+        tmp_img<-png::readPNG(png.name[i])
         dim(tmp_img)
         
         xl <- all.x[i]-sl*.9
