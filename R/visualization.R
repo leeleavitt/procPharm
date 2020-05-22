@@ -128,19 +128,21 @@ density_ct_plotter<-function(dat, cells, cell_types,stat=dat$c.dat["area"],xlim_
 #' @param cols this is the colo.brewer pallette to use. \href{https://www.datanovia.com/en/wp-content/uploads/dn-tutorials/ggplot2/figures/0101-rcolorbrewer-palette-rcolorbrewer-palettes-colorblind-friendly-1.png}{click here}
 #' @param selectCT logical T or F for cleaning up cell types
 #' @param horiz logical T or F for how to plot the barplot
-#' @example
+#' @examples
 #' \dontrun{
 #' # First step make single csv files from each experiment. Follow this general pattern
 #' RD.experiment <- census_to_table(RD.experiment)
 #' # Only select a single thing. For example only select amp
 #' TableBrewer(RD.experiment)
+#' #
+#' #
 #' # Once it is saved, open the cvs and manually rename the amp/first row something like "CNF EP1 1uM"
 #' # additionally you have full control over the data in the cvs files. I warn against changing any numbers
 #' # unless you are summing together other tables.
+#' #
 #' # Once it is saved, open the cvs and manually rename the amp something like "CNF EP1 1uM"
-#' # additionally you have full control over the data in the cvs files. I warn against changing any numbers. 
-#' # Now that you ahve made you tables, or updated them with the correct values,
-#' # set the working directory to have the correct location. This will be where the files are located
+#' #
+#' # Set the working directory to have the correct location. This will be where the files are located
 #' # In the example you can see that i've set the working directory to 
 #' setwd('Y:/Cris Urcino/CNF experiments/Ep1/')
 #' # This means i can access each csv file in the following way
@@ -149,6 +151,8 @@ density_ct_plotter<-function(dat, cells, cell_types,stat=dat$c.dat["area"],xlim_
 #'     "./200209.M.31.m3.p1 3uM.Ep1/amp.csv",
 #'     "./200209.M.31.m3.p2 3uM.Ep1/amp.csv"
 #' )
+#' #
+#' # Now barPlotter() it,
 #' barPlotter(tables)
 #' }
 #' @export 
