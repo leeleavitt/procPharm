@@ -546,6 +546,17 @@ BackgroundRaster <- function(wt,ht,wd,col50,xlim,ylim){
 	return(tmp.png)			
 }
 
+dice <- function(x, n,min.n=10)
+{
+	x.lst <- split(x, as.integer((seq_along(x) - 1) / n))
+	x.i <- length(x.lst)
+	if(length(x.lst[x.i]) < min.n & x.i > 1)
+	{
+		x.lst[[x.i-1]] <- c(x.lst[[x.i-1]],x.lst[[x.i]])
+		x.lst <- x.lst[1:(x.i-1)]
+	}
+	return(x.lst)
+}
 #' RDVIew but for traces, also identifies the score of the neurons
 #' @param dat is the RD.experiment
 #' @param cell are subsets of cell to incorporate
