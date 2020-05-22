@@ -143,10 +143,10 @@ require(MALDIquant)
 		w.dat <- MakeWr(t.dat,wr)
 	}
 	
-	if(!is.null(img1)){img1<-readPNG(img1)}
-	if(!is.null(img2)){img2<-readPNG(img2)}
-	if(!is.null(img3)){img3<-readPNG(img3)}
-	if(!is.null(img4)){img4<-readPNG(img4)}
+	if(!is.null(img1)){img1<-png::readPNG(img1)}
+	if(!is.null(img2)){img2<-png::readPNG(img2)}
+	if(!is.null(img3)){img3<-png::readPNG(img3)}
+	if(!is.null(img4)){img4<-png::readPNG(img4)}
 	
 	if(is.null(rd.name)){rd.name <- paste("RD",make.names(date()),sep="")}
 	
@@ -333,10 +333,10 @@ if(!is.null(wrdef))
 	}
 	
 	# Add images
-	if(!is.null(img1)){img1<-readPNG(img1)}
-	if(!is.null(img2)){img2<-readPNG(img2)}
-	if(!is.null(img3)){img3<-readPNG(img3)}
-	if(!is.null(img4)){img4<-readPNG(img4)}
+	if(!is.null(img1)){img1<-png::readPNG(img1)}
+	if(!is.null(img2)){img2<-png::readPNG(img2)}
+	if(!is.null(img3)){img3<-png::readPNG(img3)}
+	if(!is.null(img4)){img4<-png::readPNG(img4)}
 	
 	# Initial Data processing
 	tmp.rd <- list(t.dat=t.dat,w.dat=w.dat,c.dat=c.dat)
@@ -2862,7 +2862,7 @@ bpfunc.2<-function(dat,n.names, bp.pts=T){
 	
 	
 	dev.off()
-	tmp.png <- readPNG("tmp.png")
+	tmp.png <- png::readPNG("tmp.png")
 	dim(tmp.png)
 	unlink("tmp.png")
 	return(tmp.png)			
@@ -3886,7 +3886,8 @@ Trace.Click.3<-function(dat, cells=NULL,img=NULL)
     dev.new(width=10,height=6)  
 	dev.new(width=8, height=8)
     if(is.null(cells)){c.names <- names(dat$t.dat[,-1])}
-	else{c.names<-cells}
+	else{c.names<-cells}
+
 	lines.flag <- 0
     cell.i <- 1
 	g.names<-NULL
@@ -5081,7 +5082,7 @@ png('tmp.png', res=70)
 			text(16.5, 6.5, labels=dat$c.dat[m.names[i], "mean.dapi"], col="blue")
 		}
 	}
-	dev.off()
+	dev.off()png::readPNG
 	tmp.png <- readPNG("tmp.png")
 	unlink("tmp.png")
 	return(tmp.png)			

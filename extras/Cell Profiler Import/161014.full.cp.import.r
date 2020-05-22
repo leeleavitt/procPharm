@@ -187,13 +187,13 @@ bin<-pf.function(bin,levs)
 
 # Add images
 require(png)
-img.gtd<-readPNG("gfp.tritc.dapi.png")
-if(length(grep("gfp.png", list.files()))>=1){img.g<-readPNG("gfp.png")
+img.gtd<-png::readPNG("gfp.tritc.dapi.png")
+if(length(grep("gfp.png", list.files()))>=1){img.g<-png::readPNG("gfp.png")
 }else{img.g<-NULL}
-img.t<-readPNG("tritc.png")
-img.b<-readPNG("bf.png")
-img.bl<-readPNG("bf.lab.png")
-img.f<-readPNG("fura2.png")
+img.t<-png::readPNG("tritc.png")
+img.b<-png::readPNG("bf.png")
+img.bl<-png::readPNG("bf.lab.png")
+img.f<-png::readPNG("fura2.png")
 
 tmp.rd <- list(t.dat=t.dat,t.340=t.340,t.380=t.380,te.340=t.e.340,te.380=t.e.380, 
 w.dat=w.dat,c.dat=c.dat, bin=bin, scp=scp, snr=pcp$snr, blc=pcp$blc, der=pcp$der, 

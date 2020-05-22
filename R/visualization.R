@@ -124,13 +124,54 @@ density_ct_plotter<-function(dat, cells, cell_types,stat=dat$c.dat["area"],xlim_
 }
 
 #' Display census in a barplot
+#' @param dat this can either be and experiment RD.experiment or a vector of file paths see example
+#' @param cols this is the colo.brewer pallette to use. \href{https://www.datanovia.com/en/wp-content/uploads/dn-tutorials/ggplot2/figures/0101-rcolorbrewer-palette-rcolorbrewer-palettes-colorblind-friendly-1.png}{click here}
+#' @param selectCT logical T or F for cleaning up cell types
+#' @param horiz logical T or F for how to plot the barplot
+#' @example
+#' \dontrun{
+#' # First step make single csv files from each experiment. Follow this general pattern
+#' RD.experiment <- census_to_table(RD.experiment)
+#' # Only select a single thing. For example only select amp
+#' TableBrewer(RD.experiment)
+#' # Once it is saved, open the cvs and manually rename the amp/first row something like "CNF EP1 1uM"
+#' # additionally you have full control over the data in the cvs files. I warn against changing any numbers
+#' # unless you are summing together other tables.
+#' # Once it is saved, open the cvs and manually rename the amp something like "CNF EP1 1uM"
+#' # additionally you have full control over the data in the cvs files. I warn against changing any numbers. 
+#' # Now that you ahve made you tables, or updated them with the correct values,
+#' # set the working directory to have the correct location. This will be where the files are located
+#' # In the example you can see that i've set the working directory to 
+#' setwd('Y:/Cris Urcino/CNF experiments/Ep1/')
+#' # This means i can access each csv file in the following way
+#' tables <- c(
+#'     "./190823.M.40.m3.p1 CNF-Ep1/amp.csv",
+#'     "./200209.M.31.m3.p1 3uM.Ep1/amp.csv",
+#'     "./200209.M.31.m3.p2 3uM.Ep1/amp.csv"
+#' )
+#' barPlotter(tables)
+#' }
 #' @export 
 barPlotter <- function(dat = NULL, cols = 'YlOrRd', selectCT = T, horiz=T){
     print(deparse(substitute(dat)))
     cat("\nREAD ME\nWelcome to barPlotter to use me,\nbarPlotter(dat=RD.experiment, col = \'YlOrRd\')\n\nCustomize your colors, TRY \n\n\'Set1\', \'Set2\', \'Pastel1\', \'Dark2\', \'PuBu\', \'Reds\'\n\nGo to this webpage to get other names \nhttps://www.datanovia.com/en/wp-content/uploads/dn-tutorials/ggplot2/figures/0101-rcolorbrewer-palette-rcolorbrewer-palettes-1.png")
 
     cat('\nSelect what you Want to be on your barPlot\n')
-    table <- TableBrewer(dat, ,F,F)
+
+    if( class(tables) == 'character' ){
+        tableList <- list()
+        for( i in 1:length(dat)){
+            table <- read.csv(dat[i], row.names = 1)
+            tableList[[ row.names(table)[2] ]] <- table
+        }        
+    }else{
+        table <- TableBrewer(dat, ,F,F)
+        # for each row except the first (this is the number of cells in each cell type)
+        tableList <- list()
+        for(i in 2:dim(table)[1]){
+            tableList[[ row.names(table)[i] ]] <- table[c(1,i),,drop=F]
+        }
+    }
 
     # Select the cell type to display
     if(selectCT){
@@ -140,11 +181,6 @@ barPlotter <- function(dat = NULL, cols = 'YlOrRd', selectCT = T, horiz=T){
         table <- table[tableNames]
     }
 
-    # for each row except the first (this is the number of cells in each cell type)
-    tableList <- list()
-    for(i in 2:dim(table)[1]){
-        tableList[[ row.names(table)[i] ]] <- table[c(1,i),,drop=F]
-    }
 
     #tableList[['ATP']] <- read.csv('./atp.csv', row.names=1)
     #tableList[['Ca-free ATP']] <- read.csv('./caFree.csv', row.names=1)

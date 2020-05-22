@@ -213,20 +213,20 @@ bin<-pf.function(bin,levs)
 
 # Add images
 require(png)
-img1<-readPNG("bf.gfp.tritc.start.png")
-img2<-readPNG("bf.start.lab.png")
-img3<-readPNG("gfp.start.ci.ltl.rs.png")
-img4<-readPNG("gfp.end.cs.ltl.rs.png")
-img5<-readPNG("tritc.start.ci.ltl.rs.png")
-img6<-readPNG("tritc.end.ci.ltl.rs.png")
-img7<-readPNG("fura2.png")
+img1<-png::readPNG("bf.gfp.tritc.start.png")
+img2<-png::readPNG("bf.start.lab.png")
+img3<-png::readPNG("gfp.start.ci.ltl.rs.png")
+img4<-png::readPNG("gfp.end.cs.ltl.rs.png")
+img5<-png::readPNG("tritc.start.ci.ltl.rs.png")
+img6<-png::readPNG("tritc.end.ci.ltl.rs.png")
+img7<-png::readPNG("fura2.png")
 img8<-NULL
-#readPNG("bf.gfp.tritc.dapi.png")
+#png::readPNG("bf.gfp.tritc.dapi.png")
 
-#img.t<-readPNG("tritc.png")
-#img.b<-readPNG("bf.png")
-#img.bl<-readPNG("bf.lab.png")
-#img.f<-readPNG("fura2.png")
+#img.t<-png::readPNG("tritc.png")
+#img.b<-png::readPNG("bf.png")
+#img.bl<-png::readPNG("bf.lab.png")
+#img.f<-png::readPNG("fura2.png")
 
 tmp.rd <- list(t.dat=t.dat,t.340=t.340,t.380=t.380, 
 tlq.dat=tlq.dat, tlq.340=tlq.340,tlq.380=tlq.380,

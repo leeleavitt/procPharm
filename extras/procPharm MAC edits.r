@@ -92,7 +92,7 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
         # Add images
         img_list<-list()
         for( j in 1:length(img_name_vec) ){
-            img_list[[ paste0("img",j) ]] <- tryCatch(readPNG(img_name_vec[j]), error=function(e)NULL)
+            img_list[[ paste0("img",j) ]] <- tryCatch(png::readPNG(img_name_vec[j]), error=function(e)NULL)
         }
         if(image_question == T){
             cat('\nThese are the images I have attempted to load for you\nIf any are NULL, and want to add different images say yes to the \nnext question. You will be asked to select a png image for each loaction.\n\n')
@@ -110,7 +110,7 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
                     if(selection==0){
                         img_list[[paste0("img",j)]] <- NULL
                     }else{
-                        img_list[[paste0("img",j)]] <- readPNG(png_imgs[selection])
+                        img_list[[paste0("img",j)]] <- png::readPNG(png_imgs[selection])
                     }
                     cat('\nI have added ', png_imgs[selection],' to position ',j,'\n')
                 }
@@ -450,10 +450,10 @@ ReadDataDump.se <- function(fname=NULL,wrdef=NULL, Wr=NULL, c.dat=NULL,img1=NULL
         w.dat <- MakeWr(t.dat,wr)
     }
     
-    if(!is.null(img1)){img1<-readPNG(img1)}
-    if(!is.null(img2)){img2<-readPNG(img2)}
-    if(!is.null(img3)){img3<-readPNG(img3)}
-    if(!is.null(img4)){img4<-readPNG(img4)}
+    if(!is.null(img1)){img1<-png::readPNG(img1)}
+    if(!is.null(img2)){img2<-png::readPNG(img2)}
+    if(!is.null(img3)){img3<-png::readPNG(img3)}
+    if(!is.null(img4)){img4<-png::readPNG(img4)}
     
     if(is.null(rd.name)){rd.name <- paste("RD",make.names(date()),sep="")}
     
@@ -677,14 +677,14 @@ ReadDataDump.lee <- function(rd.name=NULL,img1="bf.f2.png",img2="bf.f2.lab.png",
         tmp.rd$blc<-pcp$blc
         tmp.rd$der<-pcp$der
         # Add images
-        if(!is.null(img1)){tmp.rd$img1<-readPNG(img1)}
-        if(!is.null(img2)){tmp.rd$img2<-readPNG(img2)}
-        if(!is.null(img3)){tmp.rd$img3<-readPNG(img3)}
-        if(!is.null(img4)){tmp.rd$img4<-readPNG(img4)}
-        if(!is.null(img5)){tmp.rd$img5<-readPNG(img5)}
-        if(!is.null(img6)){tmp.rd$img6<-readPNG(img6)}
-        if(!is.null(img7)){tmp.rd$img7<-readPNG(img7)}
-        if(!is.null(img8)){tmp.rd$img8<-readPNG(img8)}
+        if(!is.null(img1)){tmp.rd$img1<-png::readPNG(img1)}
+        if(!is.null(img2)){tmp.rd$img2<-png::readPNG(img2)}
+        if(!is.null(img3)){tmp.rd$img3<-png::readPNG(img3)}
+        if(!is.null(img4)){tmp.rd$img4<-png::readPNG(img4)}
+        if(!is.null(img5)){tmp.rd$img5<-png::readPNG(img5)}
+        if(!is.null(img6)){tmp.rd$img6<-png::readPNG(img6)}
+        if(!is.null(img7)){tmp.rd$img7<-png::readPNG(img7)}
+        if(!is.null(img8)){tmp.rd$img8<-png::readPNG(img8)}
 
 
     #####################################################
@@ -921,14 +921,14 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
         tmp.rd<-TraceBrewer(tmp.rd)
 
         # Add images
-        if(!is.null(img1)){tmp.rd$img1<-readPNG(img1)}
-        if(!is.null(img2)){tmp.rd$img2<-readPNG(img2)}
-        if(!is.null(img3)){tmp.rd$img3<-readPNG(img3)}
-        if(!is.null(img4)){tmp.rd$img4<-readPNG(img4)}
-        if(!is.null(img5)){tmp.rd$img5<-readPNG(img5)}
-        if(!is.null(img6)){tmp.rd$img6<-readPNG(img6)}
-        if(!is.null(img7)){tmp.rd$img7<-readPNG(img7)}
-        if(!is.null(img8)){tmp.rd$img8<-readPNG(img8)}
+        if(!is.null(img1)){tmp.rd$img1<-png::readPNG(img1)}
+        if(!is.null(img2)){tmp.rd$img2<-png::readPNG(img2)}
+        if(!is.null(img3)){tmp.rd$img3<-png::readPNG(img3)}
+        if(!is.null(img4)){tmp.rd$img4<-png::readPNG(img4)}
+        if(!is.null(img5)){tmp.rd$img5<-png::readPNG(img5)}
+        if(!is.null(img6)){tmp.rd$img6<-png::readPNG(img6)}
+        if(!is.null(img7)){tmp.rd$img7<-png::readPNG(img7)}
+        if(!is.null(img8)){tmp.rd$img8<-png::readPNG(img8)}
 
 
     #####################################################
@@ -1199,14 +1199,14 @@ ReadDataDump.microglia <- function(rd.name=NULL,img1="bf.f2.png",img2="bf.f2.lab
         tmp.rd$blc<-pcp$blc
         tmp.rd$der<-pcp$der
         # Add images
-        if(!is.null(img1)){tmp.rd$img1<-readPNG(img1)}
-        if(!is.null(img2)){tmp.rd$img2<-readPNG(img2)}
-        if(!is.null(img3)){tmp.rd$img3<-readPNG(img3)}
-        if(!is.null(img4)){tmp.rd$img4<-readPNG(img4)}
-        if(!is.null(img5)){tmp.rd$img5<-readPNG(img5)}
-        if(!is.null(img6)){tmp.rd$img6<-readPNG(img6)}
-        if(!is.null(img7)){tmp.rd$img7<-readPNG(img7)}
-        if(!is.null(img8)){tmp.rd$img8<-readPNG(img8)}
+        if(!is.null(img1)){tmp.rd$img1<-png::readPNG(img1)}
+        if(!is.null(img2)){tmp.rd$img2<-png::readPNG(img2)}
+        if(!is.null(img3)){tmp.rd$img3<-png::readPNG(img3)}
+        if(!is.null(img4)){tmp.rd$img4<-png::readPNG(img4)}
+        if(!is.null(img5)){tmp.rd$img5<-png::readPNG(img5)}
+        if(!is.null(img6)){tmp.rd$img6<-png::readPNG(img6)}
+        if(!is.null(img7)){tmp.rd$img7<-png::readPNG(img7)}
+        if(!is.null(img8)){tmp.rd$img8<-png::readPNG(img8)}
 
 
     #####################################################
@@ -5491,7 +5491,7 @@ bpfunc.2<-function(dat,n.names, bp.pts=T){
     
     
     dev.off()
-    tmp.png <- readPNG("tmp.png")
+    tmp.png <- png::readPNG("tmp.png")
     dim(tmp.png)
     unlink("tmp.png")
     return(tmp.png)			
@@ -5560,7 +5560,7 @@ bpfunc.3<-function(dat,n.names=NULL, dat.select=NULL, parameters=NULL,bp.pts=F, 
     }
     if(print.out){
         dev.off()
-        tmp.png <- readPNG("tmp.png")
+        tmp.png <- png::readPNG("tmp.png")
         dim(tmp.png)
         unlink("tmp.png")
         return(tmp.png)		
@@ -9583,7 +9583,7 @@ ImageFiller<-function(dat){
         
         if(image.to.add==""){dat[[paste('img',i,sep='')]]<-NULL
         }else{
-            dat[[paste('img',i,sep='')]]<-readPNG(image.to.add)
+            dat[[paste('img',i,sep='')]]<-png::readPNG(image.to.add)
         }
     }
     return(dat)
@@ -9608,7 +9608,7 @@ ImageFillerv2 <- function(dat, img_name_vec){
     # Add images
     img_list<-list()
     for( j in 1:length(img_name_vec) ){
-        dat[[ paste0("img",j) ]] <- tryCatch(readPNG(img_name_vec[j]), error=function(e)NULL)
+        dat[[ paste0("img",j) ]] <- tryCatch(png::readPNG(img_name_vec[j]), error=function(e)NULL)
     }
     if(image_question == T){
         cat('\nThese are the images I have attempted to load for you\nIf any are NULL, and want to add different images say yes to the \nnext question. You will be asked to select a png image for each loaction.\n\n')
@@ -9626,7 +9626,7 @@ ImageFillerv2 <- function(dat, img_name_vec){
                 if(selection==0){
                     dat[[paste0("img",j)]] <- NULL
                 }else{
-                    dat[[paste0("img",j)]] <- readPNG(png_imgs[selection])
+                    dat[[paste0("img",j)]] <- png::readPNG(png_imgs[selection])
                 }
                 cat('\nI have added ', png_imgs[selection],' to position ',j,'\n')
             }
@@ -10216,7 +10216,7 @@ multi.pic.zoom.2<-function(dat, m.names, img, labs=F, zf=NULL, cols=NULL){
         }
     }	
         dev.off()
-        tmp.png <- readPNG("tmp.png")
+        tmp.png <- png::readPNG("tmp.png")
         unlink("tmp.png")
         return(tmp.png)			
 }
@@ -12002,7 +12002,7 @@ Trace_select_grid<-function(dat, x.names, levs=select.list(names(dat$bin)), t.ty
     require(png)
     start.time<-Sys.time()
     for(i in 1:xn){
-        tmp_img<-readPNG(png.name[i])
+        tmp_img<-png::readPNG(png.name[i])
         dim(tmp_img)
         
         xl <- all.x[i]-sl*.9

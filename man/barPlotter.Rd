@@ -6,6 +6,15 @@
 \usage{
 barPlotter(dat = NULL, cols = "YlOrRd", selectCT = T, horiz = T)
 }
+\arguments{
+\item{dat}{this can either be and experiment RD.experiment or a vector of file paths see example}
+
+\item{cols}{this is the colo.brewer pallette to use. \href{https://www.datanovia.com/en/wp-content/uploads/dn-tutorials/ggplot2/figures/0101-rcolorbrewer-palette-rcolorbrewer-palettes-colorblind-friendly-1.png}{click here}}
+
+\item{selectCT}{logical T or F for cleaning up cell types}
+
+\item{horiz}{logical T or F for how to plot the barplot}
+}
 \description{
 Display census in a barplot
 }

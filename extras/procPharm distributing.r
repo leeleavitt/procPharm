@@ -2637,7 +2637,7 @@ bpfunc.2<-function(dat,n.names, bp.pts=T){
     
     
     dev.off()
-    tmp.png <- readPNG("tmp.png")
+    tmp.png <- png::readPNG("tmp.png")
     dim(tmp.png)
     unlink("tmp.png")
     return(tmp.png)			
@@ -2706,7 +2706,7 @@ bpfunc.3<-function(dat,n.names=NULL, dat.select=NULL, parameters=NULL,bp.pts=F, 
     }
     if(print.out){
         dev.off()
-        tmp.png <- readPNG("tmp.png")
+        tmp.png <- png::readPNG("tmp.png")
         dim(tmp.png)
         unlink("tmp.png")
         return(tmp.png)		
@@ -4952,7 +4952,7 @@ multi.pic.zoom.2<-function(dat, m.names, img, labs=F, zf=NULL, cols=NULL){
         }
     }	
         dev.off()
-        tmp.png <- readPNG("tmp.png")
+        tmp.png <- png::readPNG("tmp.png")
         unlink("tmp.png")
         return(tmp.png)			
 }
@@ -5886,7 +5886,7 @@ Trace_select_grid<-function(dat, x.names, levs=select.list(names(dat$bin)), t.ty
     require(png)
     start.time<-Sys.time()
     for(i in 1:xn){
-        tmp_img<-readPNG(png.name[i])
+        tmp_img<-png::readPNG(png.name[i])
         dim(tmp_img)
         
         xl <- all.x[i]-sl*.9

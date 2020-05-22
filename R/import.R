@@ -64,7 +64,7 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
         # Add images
         img_list<-list()
         for( j in 1:length(img_name_vec) ){
-            img_list[[ paste0("img",j) ]] <- tryCatch(readPNG(img_name_vec[j]), error=function(e)NULL)
+            img_list[[ paste0("img",j) ]] <- tryCatch(png::readPNG(img_name_vec[j]), error=function(e)NULL)
         }
         if(image_question == T){
             cat('\nThese are the images I have attempted to load for you\nIf any are NULL, and want to add different images say yes to the \nnext question. You will be asked to select a png image for each loaction.\n\n')
@@ -82,7 +82,7 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
                     if(selection==0){
                         img_list[[paste0("img",j)]] <- NULL
                     }else{
-                        img_list[[paste0("img",j)]] <- readPNG(png_imgs[selection])
+                        img_list[[paste0("img",j)]] <- png::readPNG(png_imgs[selection])
                     }
                     cat('\nI have added ', png_imgs[selection],' to position ',j,'\n')
                 }
@@ -546,14 +546,14 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
         tmp.rd<-TraceBrewer(tmp.rd)
 
         # Add images
-        if(!is.null(img1)){tmp.rd$img1<-readPNG(img1)}
-        if(!is.null(img2)){tmp.rd$img2<-readPNG(img2)}
-        if(!is.null(img3)){tmp.rd$img3<-readPNG(img3)}
-        if(!is.null(img4)){tmp.rd$img4<-readPNG(img4)}
-        if(!is.null(img5)){tmp.rd$img5<-readPNG(img5)}
-        if(!is.null(img6)){tmp.rd$img6<-readPNG(img6)}
-        if(!is.null(img7)){tmp.rd$img7<-readPNG(img7)}
-        if(!is.null(img8)){tmp.rd$img8<-readPNG(img8)}
+        if(!is.null(img1)){tmp.rd$img1<-png::readPNG(img1)}
+        if(!is.null(img2)){tmp.rd$img2<-png::readPNG(img2)}
+        if(!is.null(img3)){tmp.rd$img3<-png::readPNG(img3)}
+        if(!is.null(img4)){tmp.rd$img4<-png::readPNG(img4)}
+        if(!is.null(img5)){tmp.rd$img5<-png::readPNG(img5)}
+        if(!is.null(img6)){tmp.rd$img6<-png::readPNG(img6)}
+        if(!is.null(img7)){tmp.rd$img7<-png::readPNG(img7)}
+        if(!is.null(img8)){tmp.rd$img8<-png::readPNG(img8)}
 
 
     #####################################################

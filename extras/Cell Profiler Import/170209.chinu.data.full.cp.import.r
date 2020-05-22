@@ -173,20 +173,20 @@ bin<-pf.function(bin,levs)
 
 # Add images
 require(png)
-img1<-readPNG("bf.gfp.tritc.png")
-img2<-readPNG("gfp.png")
-img3<-readPNG("tritc.png")
-img4<-readPNG("bf.lab.png")
-img5<-readPNG("roi.img.png")
-img6<-readPNG("fura2.png")
-img7<-readPNG("gfp.tritc.dapi.png")
-img8<-readPNG("bf.gfp.tritc.dapi.png")
+img1<-png::readPNG("bf.gfp.tritc.png")
+img2<-png::readPNG("gfp.png")
+img3<-png::readPNG("tritc.png")
+img4<-png::readPNG("bf.lab.png")
+img5<-png::readPNG("roi.img.png")
+img6<-png::readPNG("fura2.png")
+img7<-png::readPNG("gfp.tritc.dapi.png")
+img8<-png::readPNG("bf.gfp.tritc.dapi.png")
 
 
-#img.t<-readPNG("tritc.png")
-#img.b<-readPNG("bf.png")
-#img.bl<-readPNG("bf.lab.png")
-#img.f<-readPNG("fura2.png")
+#img.t<-png::readPNG("tritc.png")
+#img.b<-png::readPNG("bf.png")
+#img.bl<-png::readPNG("bf.lab.png")
+#img.f<-png::readPNG("fura2.png")
 
 tmp.rd <- list(t.dat=t.dat,t.340=t.340,t.380=t.380,
 w.dat=w.dat,c.dat=c.dat, bin=bin, scp=scp, snr=pcp$snr, blc=pcp$blc, der=pcp$der, 
