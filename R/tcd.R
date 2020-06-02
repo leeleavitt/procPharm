@@ -671,7 +671,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 dev.new(width=14, height=8)
                 #give this window a name
                 bp.selector.window<-dev.cur()
-            }else{}
+            }
             #give the focus to the new window
             dev.set(bp.selector.window)
             #empty gt.names[[12]]
@@ -680,24 +680,27 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
             #do the function bp.selector to gather data
             tryCatch(bringToTop(-1), error=function(e)NULL)
-            cat("This function allows you to create statistics based on the statistic you select. 
-            \n This Function finds a represention of peak amplification and or block 
-            \n This function will take in what ever you are currently scrolling through
-            \n You have the option to localize your boxplot. This means, select cells
-            \n specifically based on where you click on the boxplot. Two clicks means you need
-            \n to specigy the lower range followed by the upper range.
-            \n One click will take everything greater than your click
-            \n The Other option that will arise is, would you like the save the stat.
-            \n If you do, the console will prompt you to enter a name. Ensure no spaces in the name
-            \n The next option will be whether you would like to make another statistic.")
-            cat(" \n Would you like to localize your boxplot? \n")
+            cat("This function allows you to create statistics based on the statistic you select.\nThis Function finds a represention of peak amplification and or block \nThis function will take in what ever you are currently scrolling through\n\nYou have the option to localize your boxplot. This means, select cells\nspecifically based on where you click on the boxplot.\n\nTwo clicks means you need\n to specigy the lower range followed by the upper range.\nOne click will take everything greater than your click\n\nThe Other option that will arise is, would you like the save the stat.\nIf you do, the console will prompt you to enter a name. Ensure no spaces in the name\nThe next option will be whether you would like to make another statistic.\n")
+            cat("\nWould you like to localize your boxplot? \n")
             print("T=yes, F=no")
             localize_log<-scan(n=1,what="character")
-            print(localize_log != "T")
-            if(localize_log != "T"){localize_log<-"F"}
-            print(cnames[cell.i])
+            if( length(localize_log) == 0 ){
+                localize_log<-"F"
+            }else{ 
+                if(localize_log != "T"){
+                    localize_log<-"F"
+                }
+            }
             dev.set(bp.selector.window)
-            gt.names[[12]]<-bp.selector(dat,cnames[cell.i],cnames,plot.new=F,dat.name=NULL,env=environment(),localize=localize_log)
+            gt.names[[12]]<-bp.selector(dat,
+                cnames[cell.i],
+                cnames, 
+                groups = gt.names, 
+                plot.new=F,
+                dat.name=NULL,
+                env=environment(),
+                localize=localize_log,
+                statType = 'custom')
             #Now fill TCD with the cells just selected.
             cnames<-gt.names[[12]]	
             cell.i<-1
@@ -716,7 +719,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 dev.new(width=14, height=8)
                 #give this window a name
                 bp.selector.window<-dev.cur()
-            }else{}
+            }
             #give the focus to the new window
             dev.set(bp.selector.window)
             #empty gt.names[[12]]
@@ -725,20 +728,11 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
             #do the function bp.selector to gather data
             tryCatch(bringToTop(-1), error=function(e)NULL)
-            cat("This function allows you to create statistics based on the statistic you select. 
-            \n This Function finds a represention of peak amplification and or block 
-            \n This function will take in what ever you are currently scrolling through
-            \n You have the option to localize your boxplot. This means, select cells
-            \n specifically based on where you click on the boxplot. Two clicks means you need
-            \n to specigy the lower range followed by the upper range.
-            \n One click will take everything greater than your click
-            \n The Other option that will arise is, would you like the save the stat.
-            \n If you do, the console will prompt you to enter a name. Ensure no spaces in the name
-            \n The next option will be whether you would like to make another statistic.")
+            cat("This function allows you to create statistics based on the statistic you select.\nThis Function finds a represention of peak amplification and or block\nThis function will take in what ever you are currently scrolling through\n\nYou have the option to localize your boxplot. This means, select cells\nspecifically based on where you click on the boxplot.\nTwo clicks means you need to specigy the lower range followed by the upper range.\nOne click will take everything greater than your click\n The Other option that will arise is, 'would you like the save the stat?'\nIf you do, the console will prompt you to enter a name. Ensure no spaces in the name\nThe next option will be whether you would like to make another statistic."
+            )
             cat(" \n Would you like to localize your boxplot? \n")
             print("T=yes, F=no")
             localize_log<-scan(n=1,what="character")
-            print(localize_log != "T")
             if( length(localize_log) == 0 ){
                 localize_log<-"F"
             }else{ 
@@ -746,9 +740,16 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                     localize_log<-"F"
                 }
             }
-            print(cnames[cell.i])
             dev.set(bp.selector.window)
-            gt.names[[12]]<-bp.selector.advanced(dat,cnames[cell.i],cnames,plot.new=F,dat.name=NULL,env=environment(),localize=localize_log)
+            gt.names[[12]]<-bp.selector(dat,
+                cnames[cell.i],
+                cnames, 
+                groups = gt.names, 
+                plot.new=F,
+                dat.name=NULL,
+                env=environment(),
+                localize=localize_log,
+                statType = 'minMax')
             #Now fill TCD with the cells just selected.
             cnames<-gt.names[[12]]	
             cell.i<-1

@@ -11,7 +11,7 @@
 #' @param plot_new Will create a new window for this plot
 #' @param abline_loc where to display the added line to help display data better
 #' @export
-density_ct_plotter<-function(dat, cells, cell_types,stat=dat$c.dat["area"],xlim_top=NULL, xlim_bottom=NULL,overlay=T,dense_sep=T,plot_new=T,env=NULL,dat.name=NULL, abline_loc=0){	
+density_ct_plotter<-function(dat, cells, cell_types = NULL, stat=dat$c.dat["area"],xlim_top=NULL, xlim_bottom=NULL,overlay=T,dense_sep=T,plot_new=T,env=NULL,dat.name=NULL, abline_loc=0){	
     par(xpd=F)
     if(is.null(dat.name)){
         dat.name<-deparse(substitute(dat))
@@ -29,35 +29,36 @@ density_ct_plotter<-function(dat, cells, cell_types,stat=dat$c.dat["area"],xlim_
         #density_plot<-dev.cur()
     }
     #Now add a density plot per cell type to show the distribution of cell type effects
-    require(RColorBrewer)
-    color<-brewer.pal(8,"Dark2")
-    color<-rep(color,10)
-    #color<-sample(rainbow(length(cell_types),start=.2, end=.85))
+    color <- c(
+        "dodgerblue2", "#E31A1C", # red
+        "green4",
+        "#6A3D9A", # purple
+        "#FF7F00", # orange
+        "black", "gold1",
+        "skyblue2", "#FB9A99", # lt pink
+        "palegreen2",
+        "#CAB2D6", # lt purple
+        "#FDBF6F", # lt orange
+        "gray70", "khaki2",
+        "maroon", "orchid1", "deeppink1", "blue1", "steelblue4",
+        "darkturquoise", "green1", "yellow4", "yellow3",
+        "darkorange4", "brown"
+    )
     
     all.cells.density<-density(stat[,1])
     #Overlay plot used in bp.selector
     if(is.null(cell_types)){
-    
         if(!is.null(dat$cell_types)){
-            cell_types<-dat$cell_types
+            cell_types <- dat$cell_types
         }else{
             overlay=F
             dense_sep=F
         }
-        #perform a logical test to determine whether to plot the cells
-        #selected_cell_types<-list()
-        #for(i in 1:length(cell_types)){
-        #	print(paste(names(cell_types)[i],"=",length(cell_types[[i]])))
-        #	if(length(cell_types[[i]])>10){
-        #		selected_cell_types<-append(selected_cell_types,cell_types[i])
-        #	}
-        #}
-        #cell_types<-selected_cell_types
     }else{
-        tryCatch(bringToTop(-1), error=function(e)NULL)
-        print("which Cell Types would you like to view on the plotter")
-        selected_cell_types<-select.list(names(cell_types), multiple=T)
-        cell_types<-cell_types[selected_cell_types]
+        # tryCatch(bringToTop(-1), error=function(e)NULL)
+        # print("which Cell Types would you like to view on the plotter")
+        # selected_cell_types<-select.list(names(cell_types), multiple=T)
+        # cell_types<-cell_types[selected_cell_types]
     }
 
     if(dense_sep==T){
@@ -72,20 +73,23 @@ density_ct_plotter<-function(dat, cells, cell_types,stat=dat$c.dat["area"],xlim_
     if(is.null(xlim_bottom)){
         xlim_bottom<-min(stat[,1])
     }else{xlim_bottom<-xlim_bottom}
+
     density_window<-dev.cur()
-    xlim<-c(xlim_bottom,xlim_top)
+    xlim<-c(xlim_bottom, xlim_top)
     dev.set(density_window)
     plot(
         all.cells.density, 
+        xlab="",
         xlim=xlim, 
         ylim=c(0,max(all.cells.density$y)*1.5), 
         pch="",lwd=3, col="black",
-        main=names(stat)
+        #main=names(stat)
+        main = ""
     )
     polygon(all.cells.density,col="red",lwd=1)
 
-    
     #Provide density plots with lines overla
+    par(xpd=T)
     if(overlay==T){
         for(i in 1:length(cell_types)){
             if(length(cell_types[[i]])>2){
@@ -98,7 +102,6 @@ density_ct_plotter<-function(dat, cells, cell_types,stat=dat$c.dat["area"],xlim_
     }
     
     if(dense_sep){
-    par(xpd=T)
         for(i in 1:length(cell_types)){
             if(length(cell_types[[i]])>2){
                 cell_type_density<-density(stat[cell_types[[i]],])
@@ -108,12 +111,13 @@ density_ct_plotter<-function(dat, cells, cell_types,stat=dat$c.dat["area"],xlim_
                     xlim=xlim, 
                     ylim=c(0,max(all.cells.density$y)*1.5),
                     main=paste(names(cell_types[i])," n=",length(cell_types[[i]])),
-                    bty="l"
+                    bty="l",
+                    xlab = ''
                 )   
                 abline(v=abline_loc,col="red")
                 lines(cell_type_density, col=color[i], lwd=2) 
             }else{
-                plot(0,0,pch="",main=paste(names(cell_types[i])," n=",length(cell_types[[i]])),bty="l")
+                plot(0,0,pch="",main=paste(names(cell_types[i])," n=",length(cell_types[[i]])),bty="l", xlab='')
             }
         }
         plot(0,0,main=NULL,xlab=NULL,ylab=NULL,xaxt=NULL,yaxt=NULL,bty="n",pch="")
@@ -295,3 +299,44 @@ barPlotter <- function(dat = NULL, cols = 'YlOrRd', selectCT = T, horiz=T){
 
 }
 
+#' @export
+boxPlotter <- function(mat, ylim = c(0,3), activewindows, controlwindows ){
+    bpStats <- boxplot(
+        mat[,1], 
+        outline=F, 
+        ylim=ylim,
+        boxfill=rgb(1,1,1,.6,maxColorValue = 1), 
+        width=10, 
+        lty=1, 
+        lwd=3, 
+        main=paste(paste(activewindows, collapse = " + "), "/\n", paste(controlwindows, collapse = "+")), 
+        xlab="Active.Max/Control.Max", 
+        horizontal=T,
+        xaxt='n')
+    par(xpd=T)
+    
+    tryCatch({
+        # Jittered cell names to view ontop of boxplot
+        if( length(row.names(mat)) > 500 ){
+            abovequartiles <- 
+                mat[,1] < bpStats$stats[1,1] |
+                mat[,1] > bpStats$stats[5,1]
+
+            cellsToView <- row.names(mat)[abovequartiles]
+        }else{
+            cellsToView <- row.names(mat)
+        }
+        text(
+            jitter(
+                rep(
+                    1, 
+                    length(mat[cellsToView, 1])
+                ),10
+            )~mat[cellsToView,1], 
+            labels=row.names(mat[cellsToView,]), 
+            cex=.5, 
+            col=rgb(1,1,1,2, maxColorValue=10)
+        )#,ylim=c(0,2.5), add=T, vertical=T, method="jitter", jitter=.2)
+    }, error=function(e) NULL)
+
+}

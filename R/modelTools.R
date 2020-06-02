@@ -209,10 +209,14 @@ imageProbMaker <- function(dat){
 #' @param RD.experiment
 #' @export
 uncertaintyMaker <- function(dat){
-    for(i in 1:length(dat$probs)){
-        dat$probs[[i]][is.na(dat$probs[[i]])] <- .5
-        uncertainty <- sqrt(dat$probs[[i]][1]^2 + dat$probs[[i]][2]^2)
-        dat$scp[paste0(names(dat$probs),'.','unc')] <- uncertainty
-    }
-    return(dat)
+    tryCatch({
+        for(i in 1:length(dat$probs)){
+            dat$probs[[i]][is.na(dat$probs[[i]])] <- .5
+            uncertainty <- sqrt(dat$probs[[i]][1]^2 + dat$probs[[i]][2]^2)
+            dat$scp[paste0(names(dat$probs),'.','unc')] <- uncertainty
+        }
+        return(dat)
+    }, error = function(e)
+        cat("\n Probabilities have not bee created. Plese do both, \n imageProbMaker(RD.exerpiment) \n and \n traceProbMaker(RD.experiment)\n")
+    )
 }
