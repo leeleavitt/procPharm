@@ -113,5 +113,24 @@ The function additionally has a "boxPlotSelector" functionality. This means. one
 
 The user has the option to save the statistic. This appends the newly created statistic to the end of the **scp** data frame with the user input name. Once this statistic is saved the user has the option of sorting cells based on this stat. 
 
+Before starting this function, the cells currently selected will be the cells sent into this function. Meaning the output of this function is completely dependent on the input to this function.
+
+The workflow of this functionality is,
+    
+  1. Select the statistic to observe. For a description of these stats, please refer [here](../../extras/Documentation/RDcomp.md)
+  2. Select the control window region. This can be multiple and this will be the mean of these values
+  3. Select the active window. Once again multiple windows can be selected during this time.
+  4. Save the statistic? This option will allow you to add this stat to the scp.
+  5. Make a new stat? Here you can go immediately to creating another statistic immediately
+  6. Localize boxplot? This functionality allows you to subset the cells based on the box/density plot.
+      
+        1. The **one** option will return all cells above the click
+        2. The **two** option will return cell between the clicks. This helps to localize cell based on the statistic.
+
+Once complete the selected cells are now sorted based on this statistic and placed within the 12th group. To Select these cells press <kbd>shift</kbd><kbd>p</kbd>, and then select **g.names12** or the twelfth group regardless of the name. 
+
+Moving groups is also easy now. To move the group press <kbd>m</kbd>. The first question is, which group to move. The second question is the new group to move it to. This will over write the group.
+
+
 
 

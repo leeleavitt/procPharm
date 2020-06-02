@@ -124,7 +124,7 @@ boxPlotList<-function(dat,l.cells=NULL,dat.name="c.dat",col.name=NULL,jitter.f=.
 
 #' Interactive statistic maker. This creates a statistic based on peak heights or peak areas.
 #' @export
-bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,plot.new=T,save.bp=F,view.cells=F, env=NULL, localize=T, statType = "minMax"){
+bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,plot.new=T,save.bp=F,view.cells=F, env=NULL, statType = "minMax"){
     #print(environment())
     if(is.null(env)){
         env<-.GlobalEnv
@@ -162,11 +162,18 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
     #This region needs significant work to improve to all data aspects
     ###################################################################
     ## Selcet eith Area or Peak Height
-    type<-select.list(c("Peak Height", "Area"), multiple=F, title="Parameter?")
-    if(type=="Peak Height"){
-        type<-".max"
-    }else{
-        type<-".tot"
+    bringToTop(-1)
+    cat("\nSelect the statistic type to make the new statistic.\n")
+    sel <- c("Peak Height", "Area", "SNR", "WhereMax")
+    type <- sel[menu(sel, title=)]
+    if(type == "Peak Height" ){
+        type <- ".max"
+    }else if(type == "Area"){
+        type <- ".tot"
+    }else if(type == "SNR"){
+        type <- ".snr"
+    }else if(type == "WhereMax"){
+        type <- ".wm"
     }
     
     #Find the window regions
@@ -212,14 +219,8 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
             
             ###Selecting Control Windows
             tryCatch(bringToTop(-1), error=function(e)NULL)
-            cat("Choose one or more window regions for the numirator in the equations,
-            
-            Amplification-or-block = active.window / control.window
-            
-            CLICK LARGE BLACK DOTS to select
-            Click stop in the top left.
-            "
-            )
+            cat("Choose one or more window regions for the numirator in the equations,\n\nAmplification-or-block = active.window / control.window\n\nCLICK LARGE BLACK DOTS to select\nClick stop in the top left.\n")
+
             #Select windows to define numerator
             activewindows <- identify(x=levs.mean,y=ys,labels="X",plot=T, col="red", cex=1.5)
             #collect the names of what you have selected
@@ -227,14 +228,7 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
             
             ###Selecting Active Windows
             tryCatch(bringToTop(-1), error=function(e)NULL)
-            cat("Choose one or more window regions for the numerator in the equations,
-            
-            Amplification-or-block = active.window / control.window
-            
-            Click stop in the top left, and then STOP LOCATOR from the drop down
-            
-            "
-            )
+            cat("Choose one or more window regions for the numerator in the equations,\n\n Amplification-or-block = active.window / control.window\n\nClick stop in the top left, and then STOP LOCATOR from the drop down\n")
             
             #change focus back to the peakwindow for active window selection
             dev.set(peakfunc.window)
@@ -268,17 +262,20 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
             row.names(max_amp_mean_cells)<-cells
 
             # Calculate percent change and select for cells
-            cat("Would you like to save this statistic to scp? \n")
-            save_stat_op<-select.list(c("yes","no"), title="Save Stat?")
-            if(save_stat_op=="yes"){
+            cat("\nWould you like to save this statistic to scp? \n")
+            bringToTop(-1)
+            sel <- c("yes","no")
+            save_stat_op<- sel[menu(sel, title="Save Stat?")]
+            if(save_stat_op==1){
                 cat("Enter the name of the statistic to be added to scp \n")
                 stat.name<-scan(n=1, what='character')
                 dat$scp[stat.name]<-max_amp_mean
                 assign(dat.name,dat, envir=env)
             }
-            cat("
-            Make another stat?")
-            continue<-select.list(c("yes","no"), , title="Make new stat")
+            cat("Make another stat?\n")
+            bringToTop(-1)
+            sel <- c("yes","no")
+            continue <- sel[menu(sel)]
         }
     }else if(statType == 'minMax'){
         formals(density_ct_plotter)$xlim_top <<- 1
@@ -298,15 +295,7 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
         while(continue=="yes"){
             ###Selecting Control Windows
             tryCatch(bringToTop(-1), error=function(e)NULL)
-            cat("
-            Choose the Pulse Following the compound of interest. 
-            
-            This is the AFTER pulse
-            
-            CLICK LARGE BLACK DOTS to select
-            You Only Get one click.
-            
-            CLICK ANY KEY TO CONTINUE
+            cat("\nChoose the Pulse Following the compound of interest.\n\nThis is the AFTER pulse\n\nCLICK LARGE BLACK DOTS to select\nYou Only Get one click.\n\nCLICK ANY KEY TO CONTINUE\n
             "
             )
             
@@ -318,16 +307,7 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
             
             ###Selecting Active Windows
             tryCatch(bringToTop(-1), error=function(e)NULL)
-            cat("
-            ###############################################
-            Choose the Pulse Before the compound of interest.
-            
-            This is the BEFORE pulse
-            You only get one click.
-            
-            Press ENTER to continue
-            "
-            )
+            cat("\n###############################################\nChoose the Pulse Before the compound of interest.\n\nThis is the BEFORE pulse\nYou only get one click.\n\nPress ENTER to continue\n")
             #scan(n=1)
             #change focus back to the peakwindow for active window selection
             dev.set(peakfunc.window)
@@ -353,16 +333,20 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
             row.names(max_amp_mean_cells)<-cells
             
             # Calculate percent change and select for cells
+            bringToTop(-1)
             cat("Would you like to save this statistic to scp? \n")
-            save_stat_op<-select.list(c("yes","no"), title="Save Stat?")
+            sel <- c("yes","no")
+            save_stat_op<-sel[menu(sel)]
             if(save_stat_op=="yes"){
                 cat("Enter the name of the statistic to be added to scp \n")
                 stat.name<-scan(n=1, what='character')
                 dat$scp[stat.name]<-max_amp_mean
                 assign(dat.name,dat, envir=env)
             }
-            cat("Make another stat?")
-            continue<-select.list(c("yes","no"), , title="Make new stat")
+            bringToTop(-1)
+            cat("Make another stat?\n")
+            sel <- c("yes","no")
+            continue <- sel[menu(sel)]
         }
     }        
     
@@ -376,7 +360,6 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
     
     par(new = TRUE) 
     
-    print(controlwindows)
     boxPlotter(
         max_amp_mean_cells, 
         activewindows = activewindows, 
@@ -384,11 +367,29 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
 
     #170131 adding 2 point localization
     tryCatch({
+        bringToTop(-1)
+        sel <- c("yes", "no")
+        localize_log <- sel[menu(sel, title = "Would you like to localize your boxplot?")]
+        if( length(localize_log) == 0 ){
+            localize_log <- "F"
+        }else{ 
+            if(localize_log != "yes"){
+                localize_log<-"F"
+            }else{
+                localize_log <- "T"
+            }
+        }
+
+        localize <- as.logical(localize_log)
+
         if(localize){
-            selector<-select.list(c("one", "two"), title="Left side first!")
+            cat("\nTo localize the boxplot\n1:: Everything above click will be selected\n2:: Select the bottom range then the top range\n\n")
+            bringToTop(-1)
+            sel <- c("1", "2")
+            selector<- sel[menu(sel)]
             
-            if(selector=="one"){loc<-locator(n=1, type="p", pch=15, col="red")}
-            if(selector=="two"){loc<-locator(n=2, type="p", pch=15, col="red")}
+            if(selector=="1"){loc<-locator(n=1, type="p", pch=15, col="red")}
+            if(selector=="2"){loc<-locator(n=2, type="p", pch=15, col="red")}
 
             abline(v=loc$x,col="red")
             
@@ -403,230 +404,16 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
             }
         }else{
             x.names<-row.names(max_amp_mean_cells[order(max_amp_mean_cells[,1],decreasing=T),])
-            #print(x.names)
         }
         }, error=function(e) {x.names <<- row.names(max_amp_mean_cells[order(max_amp_mean_cells[,1],decreasing=T),])} 
     )
     if(view.cells){
-        continue<-select.list(c("Yes", "No"), multiple=F, title="View Selected Cells?")
+        bringToTop(-1)
+        sel <- c("Yes", "No")
+        continue<-sel[menu(sel, title="View Selected Cells?")]
     }else{continue<-"No"}
     
     if(continue=="Yes"){
-        #print(length(x.names))
-        #graphics.off()
-        real.cells<-tcd(dat, x.names,dat.name=dat.name)
-        return(real.cells)
-    }else{
-        return(x.names)
-    }
-}
-
-#' Interactive stat maker, min max normalization.
-#' @export 
-bp.selector.advanced<-function(dat,cell=NULL,cells=NULL, groups = NULL, dat.name=NULL,plot.new=T,save.bp=F,view.cells=F, env=NULL, localize=T){
-    if(is.null(env)){
-        env<-.GlobalEnv
-    }else{env<-env}
-    
-    if(is.null(dat.name)){
-        dat.name<-deparse(substitute(dat))
-    }else{dat.name<-dat.name}
-    
-    #grab the RD name from the RD
-    if(is.null(dat.name)){
-        dat.name<-deparse(substitute(dat))
-    }else{dat.name<-dat.name}
-    
-    #Make sure you have some type of cells
-    if(is.null(cells)){
-        cells<-dat$c.dat$id
-    }else{cells<-cells}
-    
-    #Choose a cell to display fro selecting stats
-    if(is.null(cell)){
-        cell<-dat$c.dat[1,'id']
-    }else{cell<-cell}
-    
-    if(!is.null(groups)){
-        formals(density_ct_plotter)$overlay <<- TRUE
-        formals(density_ct_plotter)$cell_types <<- groups
-
-    }else{
-        formals(density_ct_plotter)$overlay <<- FALSE
-    }
-
-    ###################################################################
-    #This region needs significant work to improve to all data aspects
-    ###################################################################
-    ## Selcet eith Area or Peak Height
-    type<-select.list(c("Peak Height", "Area"), multiple=F, title="Parameter?")
-    if(type=="Peak Height"){
-        type<-".max"
-    }else{
-        type<-".tot"
-    }
-
-    #Find the window regions
-    levs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
-    #Find the middle region of the windows
-    levs.mean<-sort(tapply(dat$t.dat[,"Time"], as.factor(dat$w.dat$wr1), mean))
-    #clean up the levs
-    levs<-setdiff(names(levs.mean),"")
-    #not sre
-    levs.mean<-levs.mean[levs]
-    #regional asignment for window region labeling
-    #ys<-rep(1.05*(max(dat$t.dat[,"X.1"])), length(levs))
-    
-    #Create a new plot
-    if(plot.new){
-        dev.new(width=14, height=8)
-    }else{}
-    #Define the layout of the window region
-    layout(matrix(c(1,1,2,2), 2, 2, byrow = TRUE))
-    par(bg="gray90")
-    #define the open window
-    peakfunc.window<-dev.cur()
-    #plot the trace specified at the beigning
-    PeakFunc7(dat,cell, lmain="  ",bcex=1.5, info=F)
-    
-    title("(After-Before)/(After+Before)")
-    
-    # add point to the plot to define buttons
-    ys<-rep(par("usr")[3],length(levs))
-
-    points(levs.mean, ys, pch=16, cex=2)
-    #label each point with levs text
-    #text(levs.mean,ys,labels=names(levs.mean),pos=c(1,3),cex=1, srt=90)
-    continue<-"yes"
-    
-    while(continue=="yes"){
-
-        ###Selecting Control Windows
-        tryCatch(bringToTop(-1), error=function(e)NULL)
-        cat("
-        Choose the Pulse Following the compound of interest. 
-        
-        This is the AFTER pulse
-        
-        CLICK LARGE BLACK DOTS to select
-        You Only Get one click.
-        
-        CLICK ANY KEY TO CONTINUE
-        "
-        )
-        
-        #scan(n=1)
-        #Select windows to define numerator
-        afterwindows <- identify(x=levs.mean,y=ys,labels="X",plot=T, col="red", cex=1.5,n=1)
-        #collect the names of what you have selected
-        afterwindows<- levs[afterwindows]
-        
-        ###Selecting Active Windows
-        tryCatch(bringToTop(-1), error=function(e)NULL)
-        cat("
-        ###############################################
-        Choose the Pulse Before the compound of interest.
-        
-        This is the BEFORE pulse
-        You only get one click.
-        
-        Press ENTER to continue
-        "
-        )
-        #scan(n=1)
-        #change focus back to the peakwindow for active window selection
-        dev.set(peakfunc.window)
-        controlwindows <- identify(x=levs.mean,y=ys,labels="X",plot=T, col="blue",cex=1.5,n=1)
-        controlwindows<-levs[controlwindows]
-        
-        #Find the scp collumn to provide the best stat
-        aftermax<-paste(afterwindows, type, sep="")
-        aftermaxmean<-dat$scp[aftermax]
-        
-        beforemax<-paste(controlwindows, type, sep="")
-        beforemaxmean<-dat$scp[beforemax]
-        
-        max_amp_mean<-(aftermaxmean-beforemaxmean)/(aftermaxmean+beforemaxmean)
-        max_amp_mean[,2]<-seq(from=1,to=dim(max_amp_mean)[1],by=1)
-        
-        max_amp_mean_cells<-(
-        ( data.frame(aftermaxmean[cells,])-data.frame(beforemaxmean[cells,]) )/
-        ( data.frame(aftermaxmean[cells,])+data.frame(beforemaxmean[cells,]) ) )
-        
-        max_amp_mean_cells[,2]<-seq(from=1,to=dim(max_amp_mean_cells)[1],by=1)
-        
-        row.names(max_amp_mean_cells)<-cells
-        
-        # Calculate percent change and select for cells
-        cat("Would you like to save this statistic to scp? \n")
-        save_stat_op<-select.list(c("yes","no"), title="Save Stat?")
-        if(save_stat_op=="yes"){
-            cat("Enter the name of the statistic to be added to scp \n")
-            stat.name<-scan(n=1, what='character')
-            dat$scp[stat.name]<-max_amp_mean
-            assign(dat.name,dat, envir=env)
-        }
-        cat("
-        Make another stat?")
-        continue<-select.list(c("yes","no"))
-    }
-    
-    density_ct_plotter(
-        dat, 
-        cells,  
-        stat = max_amp_mean[1],
-        xlim_top = 1,
-        xlim_bottom=-1, 
-        overlay=T,
-        dense_sep=F,
-        plot_new=F)
-    
-    par(new = TRUE) 
-    
-    boxPlotter(
-        max_amp_mean_cells, 
-        ylim = c(-1,1), 
-        afterwindows, 
-        controlwindows)
-
-    #170131 adding 2 point localization
-    tryCatch({
-        if(localize){
-            selector<-select.list(c("one", "two"), title="Left side first!")
-            
-            if(selector=="one"){loc<-locator(n=1, type="p", pch=15, col="red")}
-            if(selector=="two"){loc<-locator(n=2, type="p", pch=15, col="red")}
-
-            abline(v=loc$x,col="red")
-            
-            if(length(loc$x)==1){
-                #now we need to 
-                #1.select cells based on the first click on the boxplot graphic
-                
-                x.names<-row.names(which(max_amp_mean_cells[1]>loc$x, arr.ind=T, useNames=T))
-                #now that we have fouynd the cells which respond in these ways we will 
-                #sort the dataframe based on these stats
-                new_max_amp_mean_cells<-max_amp_mean_cells[x.names,]
-                x.names<-row.names(new_max_amp_mean_cells[order(new_max_amp_mean_cells[1], decreasing=T),])
-            }
-
-            if(length(loc$x)==2){
-                x.names<-row.names(which(max_amp_mean_cells[1]>loc$x[1] & max_amp_mean_cells[1]<loc$x[2], arr.ind=T,useNames=T))
-                new_max_amp_mean_cells<-max_amp_mean_cells[x.names,]
-                x.names<-row.names(new_max_amp_mean_cells[order(new_max_amp_mean_cells[1], decreasing=T),])
-            }
-        }else{
-            x.names<-row.names(max_amp_mean_cells[order(max_amp_mean_cells[,1],decreasing=T),])
-        }
-        }, error=function(e) {x.names <<- row.names(max_amp_mean_cells[order(max_amp_mean_cells[,1],decreasing=T),])} 
-    )
-    if(view.cells){
-        continue<-select.list(c("Yes", "No"), multiple=F, title="View Selected Cells?")
-    }else{continue<-"No"}
-    
-    if(continue=="Yes"){
-        print(length(x.names))
-        #graphics.off()
         real.cells<-tcd(dat, x.names,dat.name=dat.name)
         return(real.cells)
     }else{
