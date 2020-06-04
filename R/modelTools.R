@@ -206,7 +206,7 @@ imageProbMaker <- function(dat){
 #' This function calculates uncertainty for each probability data frame in the 
 #' RD.experiment. Use probMaker and imageProbMaker prior to this or you will
 #' get an error.
-#' @param RD.experiment
+#' @param dat this is the experiment list to add.
 #' @export
 uncertaintyMaker <- function(dat){
     tryCatch({

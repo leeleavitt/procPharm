@@ -2,7 +2,7 @@
 This is an interactive visualization, which is constantly under development (thus the dev). In general to use the function follow,
 
 ## Loading experiment data
-Loading the experiment is as easy as double clicking the `RD.experiment.Rdata` within the folder. Performing this action with automatically set the correct working directory.
+Loading the experiment is as easy as double clicking the `RD.experiment.Rdata1` within the folder. Performing this action with automatically set the correct working directory.
 
 If you would like to circumvent this, it is essential you set the correct working directory, then load the `RD.experiment.Rdata`. Below is an example, after opening the R console, or an R terminal.
 ```
@@ -101,11 +101,42 @@ In the example below,
    
    ![](../../extras/gifWT/advancedTraceFunctioning.gif)
 
+## Cell Group function
+
+One of the main functionalities of this software is to create groups. Combined with the custom statistics below, rapidly identifying cells pertaining to a specific response type is easy.
+
+Pressing any of these buttons will places cells into groups 1 through 12.
+
+<kbd>1,2,3,4,5,6,7,8,9,0,-,=</kbd>
+
+Pressing any of these keys will remove neurons from groups 1 through 12.
+
+<kbd> !, @, #, $, %, ^, &, *, (, ), _, + </kbd>
+
+<kbd>r</kbd> Rename: Groups are generically named `g.names#`. These names are uninformative. So, to changes these names pressing <kbd>r</kbd> will first ask which group to rename. Then the console will ask for the new name. 
+
+<kbd>m</kbd> Following the custom statistics and box-plot localization, cells are placed in `g.names12` or simply the 12th group regardless of the current composition of the group. So to move the new group into a better location pressing <kbd>m</kbd> will move the cells to the newly specified group.
+
+Importantly, on a rare occassion `tcd` will crash. This function has an `BACKUP` object created very often during the time spent in tcd. To resume from where you left off simply perform this,
+
+````
+tcd(RD.experiment, BACKUP)
+````
+
+To leace tcd press <kbd>q</kbd>. A question will prompt asking "*Would you like yo save your groups*". 
+  
+  * No, the groups will not be saved to the hard disk. 
+  * Yes, the groups will be saved as the name specified.
+
+  
+
+
+
 
 ## Custom Statistics
 Sorting traces based on non obvious characteristics is important. To capture these characteristics two functions have been created to make these statistics. These functions are encapsulated in the F1 and F2 key.
 
-<kbd>F1</kbd> 
+### <kbd>F1</kbd> Custom Statistic
     
 This function allows you to select various window regions to create a ratio. During the experiments we apply compounds which elicit amplification, block, or direct effects. Rapidly sorting the traces based on these effects is paramount for a rapid analysis. 
 
@@ -131,6 +162,24 @@ Once complete the selected cells are now sorted based on this statistic and plac
 
 Moving groups is also easy now. To move the group press <kbd>m</kbd>. The first question is, which group to move. The second question is the new group to move it to. This will over write the group.
 
+![](../../extras/gifWT/F1function.gif)
 
+### <kbd>F2</kbd> Min max normalization statistic
 
+This statistic follows closely what the F1 custom statistic does. The difference is only two windows are compare and a min max normalization is performed. This statistic creates a range between -1 and 1. Placing everythin within this range prevents missing out on extreme outliers. **This function does not require clicking the `stop locator` at the top left. 
+    
+    (Red + Blue) / (Red - Blue)
 
+The general work flow of this example is
+  
+  1. Find a representation of what I am looking for. Here I choose a neuron amplified by the compound R3J. 
+  2. Fill in all the group with cell_types by pressing <kbd>F7</kbd>
+  3. From there i select the window following the R3J application.
+  4. The window following the R3J is now selected.
+  5. Now the newly created stat is saved. With a Unique name. 
+  6. Making a new stat is skipped.
+  7. Localizing the box plot is invoked. The one method is selected and only the cells greater than the statistic are returned. These cell are placed into the 12th group, and sorted by the statistic.
+  8. To show this newly created statistic we sort the cells by this new stat, pressing <kbd>o</kbd>.
+
+![](../../extras/gifWT/F2function.gif)
+ 

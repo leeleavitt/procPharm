@@ -12,6 +12,8 @@
 #' @param abline_loc where to display the added line to help display data better
 #' @export
 density_ct_plotter<-function(dat, cells, cell_types = NULL, stat=dat$c.dat["area"],xlim_top=NULL, xlim_bottom=NULL,overlay=T,dense_sep=T,plot_new=T,env=NULL,dat.name=NULL, abline_loc=0){	
+    stat[is.na(stat)]<-0
+    
     par(xpd=F)
     if(is.null(dat.name)){
         dat.name<-deparse(substitute(dat))
@@ -62,7 +64,7 @@ density_ct_plotter<-function(dat, cells, cell_types = NULL, stat=dat$c.dat["area
     }
 
     if(dense_sep==T){
-        plot_sep<-ceiling(sqrt(length(cell_types)+1))
+        plot_sep<-ceiling(sqrt(length(cell_types)+2))
         par(mfrow=c(plot_sep,plot_sep),mai=c(.25,.25,.25,.25))
     }
     

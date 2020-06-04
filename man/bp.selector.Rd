@@ -8,12 +8,13 @@ bp.selector(
   dat,
   cell = NULL,
   cells = NULL,
+  groups = NULL,
   dat.name = NULL,
   plot.new = T,
   save.bp = F,
   view.cells = F,
   env = NULL,
-  localize = T
+  statType = "minMax"
 )
 }
 \description{

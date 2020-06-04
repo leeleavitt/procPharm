@@ -331,11 +331,34 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         
         ##Pic zoom
         if(window.flag==1){
-            dev.set(which=view.window)
-            tryCatch(cell.view(dat,cell=p.names, img=img,cols="Yellow",plot.new=F,cell.name=T, lmain=paste(gsub("[$]","",p.namez)), zoom=FALSE),error=function(e) print("You haven't collected cells to view"))
-            
-            dev.set(which=multipic.window)
-            tryCatch(multi.pic.zoom(dat,p.names,img, plot.new=F, zf=zf, labs=F) ,error=function(e) print("You haven't collected cells to view"))
+            if(length(p.names) > 500 ){
+                dev.set(which=view.window)
+                tryCatch(
+                    cell.view(dat,
+                        cell=p.names, 
+                        img=img,
+                        cols="Yellow",
+                        plot.new=F,
+                        cell.name=T, 
+                        lmain=paste(gsub("[$]","",p.namez)), 
+                        zoom=FALSE)
+                    ,error=function(e) print("You haven't collected cells to view")
+                )
+                
+                dev.set(which=multipic.window)
+                tryCatch(
+                    multi.pic.zoom(
+                        dat,
+                        p.names,
+                        img, 
+                        plot.new=F, 
+                        zf=zf, 
+                        labs=F)
+                    ,error=function(e) print("You haven't collected cells to view")
+                )
+            }else{
+                cat("\nThere are too many cells to view try again with less than 500 \n")
+            }
             window.flag <- 0
         }
         
@@ -665,74 +688,79 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         #F1: Simple bp.selector. Create the statistic labeled on the plot. The localize question
         #allows you to click the boxplot to select a subset of cells to observe
         if(keyPressed=="F1"){
-            #first open a new window
-            #after undergoing a logical test to see if it exists
-            if(length(ls(pattern='bp.selector.window'))==0){
-                dev.new(width=14, height=8)
-                #give this window a name
-                bp.selector.window<-dev.cur()
-            }
-            #give the focus to the new window
-            dev.set(bp.selector.window)
-            #empty gt.names[[12]]
-            gt.names[[12]]<-NA
-            #remove the NA, which will be repalced with a logical(0)
-            gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
-            #do the function bp.selector to gather data
-            tryCatch(bringToTop(-1), error=function(e)NULL)
-            cat("##############################################################################\nStat Maker: CUSTOM\n##############################################################################\n\nThis function allows you to create statistics based on the statistic you select.\nThis Function finds a represention of peak amplification and or block \nThis function will take in what ever you are currently scrolling through\n\nYou have the option to localize your boxplot. This means, select cells\nspecifically based on where you click on the boxplot.\n\nTwo clicks means you need\nto specify the lower range followed by the upper range.\nOne click will take everything greater than your click\n\nThe Other option that will arise is, would you like the save the stat.\nIf you do, the console will prompt you to enter a name. Ensure no spaces in the name\nThe next option will be whether you would like to make another statistic.\n")
-            dev.set(bp.selector.window)
-            gt.names[[12]]<-bp.selector(dat,
-                cnames[cell.i],
-                cnames, 
-                groups = gt.names, 
-                plot.new=F,
-                dat.name=NULL,
-                env=environment(),
-                statType = 'custom')
-            #Now fill TCD with the cells just selected.
-            cnames<-gt.names[[12]]	
-            cell.i<-1
-            lines.flag<-1
-            windows.flag<-1
+            tryCatch({
+                #first open a new window
+                #after undergoing a logical test to see if it exists
+                if(length(ls(pattern='bp.selector.window'))==0){
+                    dev.new(width=14, height=8)
+                    #give this window a name
+                    bp.selector.window<-dev.cur()
+                }
+                #give the focus to the new window
+                dev.set(bp.selector.window)
+                #empty gt.names[[12]]
+                gt.names[[12]]<-NA
+                #remove the NA, which will be repalced with a logical(0)
+                gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
+                #do the function bp.selector to gather data
+                tryCatch(bringToTop(-1), error=function(e)NULL)
+                cat("##############################################################################\nStat Maker: CUSTOM\n##############################################################################\n\nThis function allows you to create statistics based on the statistic you select.\nThis Function finds a represention of peak amplification and or block \nThis function will take in what ever you are currently scrolling through\n\nYou have the option to localize your boxplot. This means, select cells\nspecifically based on where you click on the boxplot.\n\nTwo clicks means you need\nto specify the lower range followed by the upper range.\nOne click will take everything greater than your click\n\nThe Other option that will arise is, would you like the save the stat.\nIf you do, the console will prompt you to enter a name. Ensure no spaces in the name\nThe next option will be whether you would like to make another statistic.\n")
+                dev.set(bp.selector.window)
+                gt.names[[12]]<-bp.selector(dat,
+                    cnames[cell.i],
+                    cnames, 
+                    groups = gt.names, 
+                    plot.new=F,
+                    dat.name=NULL,
+                    env=environment(),
+                    statType = 'custom')
+                #Now fill TCD with the cells just selected.
+                cnames<-gt.names[[12]]	
+                cell.i<-1
+                lines.flag<-1
+                windows.flag<-1
+            }, error = function(e) cat("\nDid not work. Review documentation\n")
+            )
         }
         
         #F2: Advanced Statistic maker This function uses the function (After-Before)/(After+Before)
         #this function allows you to save the stat.  This will be added to the scp dataframe at the bottom.
         #if you have created statistics, be sure to save your RD file before you close
         if(keyPressed=="F2"){
-        
-            #first open a new window
-            #after undergoing a logical test to see if it exists
-            if(length(ls(pattern='bp.selector.window'))==0){
-                dev.new(width=14, height=8)
-                #give this window a name
-                bp.selector.window<-dev.cur()
-            }
-            #give the focus to the new window
-            dev.set(bp.selector.window)
-            #empty gt.names[[12]]
-            gt.names[[12]]<-NA
-            #remove the NA, which will be repalced with a logical(0)
-            gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
-            #do the function bp.selector to gather data
-            tryCatch(bringToTop(-1), error=function(e)NULL)
-            cat("##############################################################################\nStat Maker: MinMaxnorm\n##############################################################################\n\nThis function allows you to create statistics based on the statistic you select.\nThis Function finds a represention of peak amplification and or block\nThis function will take in what ever you are currently scrolling through\n\nYou have the option to localize your boxplot. This means, select cells\nspecifically based on where you click on the boxplot.\nTwo clicks means you need to specigy the lower range followed by the upper range.\nOne click will take everything greater than your click\nThe Other option that will arise is, 'would you like the save the stat?'\nIf you do, the console will prompt you to enter a name. Ensure no spaces in the name\nThe next option will be whether you would like to make another statistic."
+            tryCatch({
+                #first open a new window
+                #after undergoing a logical test to see if it exists
+                if(length(ls(pattern='bp.selector.window'))==0){
+                    dev.new(width=14, height=8)
+                    #give this window a name
+                    bp.selector.window<-dev.cur()
+                }
+                #give the focus to the new window
+                dev.set(bp.selector.window)
+                #empty gt.names[[12]]
+                gt.names[[12]]<-NA
+                #remove the NA, which will be repalced with a logical(0)
+                gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
+                #do the function bp.selector to gather data
+                tryCatch(bringToTop(-1), error=function(e)NULL)
+                cat("##############################################################################\nStat Maker: MinMaxnorm\n##############################################################################\n\nThis function allows you to create statistics based on the statistic you select.\nThis Function finds a represention of peak amplification and or block\nThis function will take in what ever you are currently scrolling through\n\nYou have the option to localize your boxplot. This means, select cells\nspecifically based on where you click on the boxplot.\nTwo clicks means you need to specigy the lower range followed by the upper range.\nOne click will take everything greater than your click\nThe Other option that will arise is, 'would you like the save the stat?'\nIf you do, the console will prompt you to enter a name. Ensure no spaces in the name\nThe next option will be whether you would like to make another statistic."
+                )
+                dev.set(bp.selector.window)
+                gt.names[[12]]<-bp.selector(dat,
+                    cnames[cell.i],
+                    cnames, 
+                    groups = gt.names, 
+                    plot.new = F,
+                    dat.name=NULL,
+                    env=environment(),
+                    statType = 'minMax')
+                #Now fill TCD with the cells just selected.
+                cnames<-gt.names[[12]]	
+                cell.i<-1
+                lines.flag<-1
+                windows.flag<-1
+            }, error = function(e) cat("\nDid not work. Review documentation\n")
             )
-            dev.set(bp.selector.window)
-            gt.names[[12]]<-bp.selector(dat,
-                cnames[cell.i],
-                cnames, 
-                groups = gt.names, 
-                plot.new=F,
-                dat.name=NULL,
-                env=environment(),
-                statType = 'minMax')
-            #Now fill TCD with the cells just selected.
-            cnames<-gt.names[[12]]	
-            cell.i<-1
-            lines.flag<-1
-            windows.flag<-1
         }
         
 
@@ -751,15 +779,16 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 
             #define the top xlim value
             cat("Define Top xlim value \n")
-            cat("Enter 0 to allow default Max value \n")
+            cat("Enter n to allow default Max value \n")
             xlim_top<-scan(n=1)
-            if(xlim_top==0){
+            if(xlim_top == 'n' ){
                 xlim_top<-max(dat[[dense_df_q]][dense_df_att])
             }
             
             cat("Define bottom xlim value \n")
+            cat("Enter n to allow default Max value \n")
             xlim_bottom<-scan(n=1)
-            if(xlim_bottom==0){
+            if(xlim_bottom == 'n'){
                 xlim_bottom<-min(dat[[dense_df_q]][dense_df_att])
             }
             
@@ -768,26 +797,68 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             lines.flag<-1
         }
         
-        #F4: Utilizing Topview
+        # #F4: Utilizing Topview
+        # if(keyPressed=="F4"){
+        #     p.namez<-paste(select.list(names(gt.names)),sep="")
+        #     p.names<-gt.names[[p.namez]]
+
+        #     aux_var<-c('area')
+
+        #     #What i need to do is selectively import gfp and tritc variables into the 
+        #     #topview function
+        #     #this means search in the bin data frame for ib4 and gfp
+        #     add_vars <- grep('mcherry|cy5|gfp|drop', names(dat$bin),value=T)
+        #     aux_var<-c(aux_var, add_vars)
+        #     TopView(dat, p.names, 12, 6, dat_name=dat.name, aux.var=aux_var)
+        # }
+        
         if(keyPressed=="F4"){
-            p.namez<-paste(select.list(names(gt.names)),sep="")
-            p.names<-gt.names[[p.namez]]
+            if(length(ls(pattern="density_win"))==0){
+                dev.new(width=10,height=10)
+                density_win<-dev.cur()
+            }else{}
+            tryCatch(bringToTop(-1), error=function(e)NULL)
+            cat("What dataframe wil contain your stat? \n")
+            dense_df_q<-select.list(names(dat))
+            cat("What attribute would you like to see the distribution? \n")
+            dense_df_att<-menu(names(dat[[dense_df_q]]))
+            statz<-dat[[dense_df_q]][dense_df_att]
 
-            aux_var<-c('area')
+            #define the top xlim value
+            cat("Define Top xlim value \n")
+            cat("Enter n to allow default Max value \n")
+            xlim_top<-scan(n=1)
+            if(xlim_top == 'n' ){
+                xlim_top<-max(dat[[dense_df_q]][dense_df_att])
+            }
+            
+            cat("Define bottom xlim value \n")
+            cat("Enter n to allow default Max value \n")
+            xlim_bottom<-scan(n=1)
+            if(xlim_bottom == 'n'){
+                xlim_bottom<-min(dat[[dense_df_q]][dense_df_att])
+            }
+            
+            dev.set(density_win)
+            density_ct_plotter(dat, 
+                cnames, 
+                cell_types = gt.names, 
+                stat=statz,
+                overlay=T, 
+                dense_sep=False,
+                plot_new=F,
+                xlim_top=xlim_top,
+                xlim_bottom=xlim_bottom,
+                dat.name=dat.name)
 
-            #What i need to do is selectively import gfp and tritc variables into the 
-            #topview function
-            #this means search in the bin data frame for ib4 and gfp
-            add_vars <- grep('mcherry|cy5|gfp|drop', names(dat$bin),value=T)
-            aux_var<-c(aux_var, add_vars)
-            TopView(dat, p.names, 12, 6, dat_name=dat.name, aux.var=aux_var)
+            lines.flag<-1
         }
 
         #F5: Censusus Viewer
         if(keyPressed=="F5"){
+            cat("\nSelect a binary column to add to the 12th group\n")
 			cnames_orig <- cnames
-			tryCatch(
-            {
+			tryCatch({
                 cells_to_view <- census_viewer(dat)
                 
                 if( is.na(cells_to_view) ){
@@ -798,10 +869,13 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 }else{ 
                     cell.i<-1
                     cnames <- cells_to_view$cells
+
+                    oldName <- names(gt.names)[12]
                     gt.names[[12]] <- cells_to_view$cells
                     names(gt.names)[12] <- cells_to_view$name
                     p.namez <- cells_to_view$name
                     p.names <- gt.names[[12]]
+                    cat("/nThe group ", oldName, ' has been replaced by ', names(gt.names)[12], "\n")
                     lines.flag<-1
                 }
             },
@@ -813,6 +887,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         
         #F6: Censusus Viewer
         if(keyPressed=="F6"){
+            cat("\n This is a temporary function to view the responses per cell class.\n")
+
 			cnames_orig <- cnames
             cat("Please select the collumn you would like to view\n")
 			cells_to_view <- cellzand_tcd(dat$bin)
