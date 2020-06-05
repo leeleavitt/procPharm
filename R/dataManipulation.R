@@ -234,6 +234,7 @@ c.sort<-function(dat,char=NULL){
     return(bob)
 }
 
+#' Function to smart sort
 #' @export
 c.sort.2<-function(dat,cells=NULL,collumn=NULL){
     if(class(dat)=="list"){

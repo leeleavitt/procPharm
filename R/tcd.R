@@ -12,8 +12,19 @@ onKeybd <- function(key){
     keyPressed <<- key
 }
 
+# Fucntion to sample it but maintain current order
+mySample <- function(values,N){
+        size <- length(values)
 
-#' TraceClick.dev(tcd)
+        values[sapply(1:size, function(i){
+                    select <- as.logical(rbinom(1,1,N/(size+1-i)))
+                    if(select) N <<- N - 1
+                    select
+        })]
+}
+
+#' TraceClick.d
+#' ev(tcd)
 #' 
 #' This function is an interactive dashboard for viewing your exeriments.
 #'
@@ -167,20 +178,20 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     tryCatch(windows(width=14,height=4,xpos=0, ypos=50), error=function(e) windows(width=14,height=4))
     click.window<-dev.cur()
     
-    tryCatch(windows(width=10,height=6,xpos=0, ypos=450), error=function(e) windows(width=14,height=4))
-    lines.window<-dev.cur()
+    # tryCatch(windows(width=10,height=6,xpos=0, ypos=450), error=function(e) windows(width=14,height=4))
+    # lines.window<-dev.cur()
     
-    dimx<-dim(img)[2]
-    dimy<-dim(img)[1]
-    haight<-10*dimy/dimx
-    tryCatch(windows(width=haight*dimx/dimy, height=haight,xpos=1130, ypos=200), error=function(e) windows(width=haight*dimx/dimy, height=haight))
-    view.window<-dev.cur()
+    # dimx<-dim(img)[2]
+    # dimy<-dim(img)[1]
+    # haight<-10*dimy/dimx
+    # tryCatch(windows(width=haight*dimx/dimy, height=haight,xpos=1130, ypos=200), error=function(e) windows(width=haight*dimx/dimy, height=haight))
+    # view.window<-dev.cur()
     
-    tryCatch(windows(width=8, height=8,xpos=1130, ypos=0), error=function(e) windows(width=8, height=8))
-    multipic.window<-dev.cur()
+    # tryCatch(windows(width=8, height=8,xpos=1130, ypos=0), error=function(e) windows(width=8, height=8))
+    # multipic.window<-dev.cur()
     
-    tryCatch(windows(width=12, height=2,xpos=0, ypos=550), error=function(e) windows(width=12, height=2))
-    traceimpute.window<-dev.cur()
+    # tryCatch(windows(width=12, height=2,xpos=0, ypos=550), error=function(e) windows(width=12, height=2))
+    # traceimpute.window<-dev.cur()
     
     window.flag<-0
     lines.flag <- 0
@@ -277,61 +288,69 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         p1.par<-par()
         
         ##LinesEvery
-        if(lines.flag==1){
-            #if(length(p.names)<100){
+        if(lines.flag == 1){
+            if(length(p.names) < 500){
                 if(length(p.names)>11){
-                    dev.off(which=lines.window)
+                    tryCatch(dev.off(which=lines.window), error=function(e)NULL)
                     tryCatch(windows(width=10,height=12,xpos=0, ypos=100), error=function(e)windows(width=10,height=12))
                     lines.window<-dev.cur()
                 }else{
-                    dev.off(which=lines.window)
+                    tryCatch(dev.off(which=lines.window), error=function(e)NULL)
                     tryCatch(windows(width=10,height=7,xpos=0, ypos=250) , error=function(e)windows(width=10,height=7))
                     lines.window<-dev.cur()
                 }
                 dev.set(which=lines.window)
                 tryCatch(LinesEvery.5(dat,p.names,plot.new=F, img=l.img,lmain=paste(gsub("[$]","",p.namez), 'n=',length(p.names)), t.type=t.type, lw=lw, col=lines.color, lns=lns, levs=levs, bcex=1, underline=underline, dat.n=dat.name, zf=zf, sf=sf, values=values),error=function(e) print("You haven't stacked traces yet, yo."))
                 lines.flag <- 0
-            #}
-        }
-        
-        if(lines.flag==2){
-            sample.to.display<-as.numeric(select.list(as.character(c(5,10,20,50,70,100))),title='Sample Number?')
-            tryCatch(dev.off(which=lines.window.2), error=function(e) print("this windows hasn't been opened yet"))
-            
-            if(sample.to.display > 20){
-                tryCatch(windows(width=10,height=12,xpos=0, ypos=250), error=function(e)windows(width=10,height=12))
-            }else{
-                tryCatch(windows(width=10,height=7,xpos=0, ypos=250), error=function(e)windows(width=10,height=7))
             }
-            lines.window.2<-dev.cur()
-            dev.set(which=lines.window.2)
-            
-            tryCatch(
-                LinesEvery.5(
-                    dat,
-                    sample(p.names)[1:sample.to.display],
-                    plot.new=F,
-                    lmain=paste("Sample",sample.to.display,"out of",length(p.names)), 
-                    img=l.img, lw=lw, t.type=t.type, col="black", lns=lns, levs=levs, bcex=1, underline=underline, dat.n=dat.name, zf=zf,sf=sf, values=values)
-            ,error=function(e) print("You haven't stacked traces yet, yo."))
-            lines.flag <- 0
-        }
-
-        ##Pulse Imputer
-        if(lines.flag==3){
-
-            #dev.off(which=traceimpute.window)
-            #windows(width=2*length(klevs),height=2,xpos=0, ypos=550) 
-            #traceimpute.window<-dev.cur()
-            
-            dev.set(which=traceimpute.window)
-            tryCatch(PulseImputer(dat,cell.pick,levs,sf=sf),error=function(e) print("You haven't stacked traces yet, yo."))
-            lines.flag <- 0
         }
         
+        if(lines.flag == 2){
+            sample.to.display <- as.numeric(select.list(as.character(c(5,10,20,50,70,100))),title='Sample Number?')
+            
+            print(p.names)
+            print(sample.to.display)
+            if(sample.to.display < length(p.names)){
+                if(sample.to.display > 20){
+                    tryCatch(dev.off(which=lines.window.2), error=function(e)NULL)
+                    tryCatch(windows(width=10,height=12,xpos=0, ypos=100), error=function(e)windows(width=10,height=12))
+                    lines.window.2<-dev.cur()
+                }else{
+                    tryCatch(dev.off(which=lines.window.2), error=function(e)NULL)
+                    tryCatch(windows(width=10,height=7,xpos=0, ypos=100), error=function(e)windows(width=10,height=12))
+                    lines.window.2<-dev.cur()
+                }
+
+                tryCatch(
+                    LinesEvery.5(
+                        dat,
+                        mySample(p.names, sample.to.display),
+                        plot.new=F,
+                        lmain=paste("Sample",sample.to.display,"out of",length(p.names)), 
+                        img=l.img, lw=lw, t.type=t.type, col="black", lns=lns, levs=levs, bcex=1, underline=underline, dat.n=dat.name, zf=zf,sf=sf, values=values)
+                ,error=function(e) print("You haven't stacked traces yet, yo."))
+                lines.flag <- 0
+            }else{
+                lines.flag <- 1
+            }
+        }
+
         ##Pic zoom
-        if(window.flag==1){
-            if(length(p.names) > 500 ){
+        if(window.flag == 1){
+            tryCatch(dev.off(which=view.window), error=function(e)NULL)
+            tryCatch({
+                dimx<-dim(img)[2]
+                dimy<-dim(img)[1]
+                haight<-10*dimy/dimx
+                tryCatch(windows(width=haight*dimx/dimy, height=haight,xpos=1130, ypos=200), error=function(e) windows(width=haight*dimx/dimy, height=haight))
+            }, error = function(e)NULL)
+            view.window <- dev.cur()
+
+            tryCatch(dev.off(which=mulitpic.window), error=function(e)NULL)
+            tryCatch(windows(width=8, height=8,xpos=1130, ypos=0), error=function(e) windows(width=8, height=8))
+            multipic.window<-dev.cur()
+            
+            if(length(p.names) < 500 ){
                 dev.set(which=view.window)
                 tryCatch(
                     cell.view(dat,
@@ -362,10 +381,9 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             window.flag <- 0
         }
         
-        if(lines.flag==0){
-            #dev.set(dev.list()[1]) 
+        #if(lines.flag==0){
             dev.set(which=click.window)
-        }		
+        #}		
         
         #title(sub=paste("Group ",group.i," n=",g.num," Cell ",cell.i,sep=""))
         ## How many cells are you looking at
@@ -520,9 +538,12 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }	
     #O: order cells in Stacked Traces and multiview
         if(keyPressed=="O"){
-            tryCatch(p.names<-c.sort.2(dat,p.names),error=function(e) print("You have not stacked traces yet."))
-            lines.flag<-1
-            window.flag<-1
+            tryCatch({
+                    p.names <- c.sort.2(dat, p.names)
+                    lines.flag <- 1
+                    window.flag <- 1
+                },error=function(e) print("You have not stacked traces yet.")
+            )
         }	
     #p: Toggles points on graph
         if(keyPressed=="p"){
@@ -532,28 +553,32 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     #P: Pick a group/cells to click through
         if(keyPressed=="P"){
             tryCatch(bringToTop(-1), error=function(e)NULL)
-            print("Pick a Group of cells or a single cell to observe \nIf you Click cancel, all cells will be returned")
+            cat("\nPick a Group of cells or a single cell to observe \nIf you Click cancel, all cells will be returned\n")
             selection<-select.list(c("group","cells"))
             if(selection=="group"){
                 gt.to.click<-select.list(names(gt.names), multiple=F)
                 if( is.null(gt.names[[gt.to.click]]) | is.logical( gt.names[[gt.to.click]]) ){
                     tryCatch(bringToTop(-1), error=function(e)NULL)
-                    print("Nothing is in this Group")
+                    cat("\nNothing is in this Group\n")
                 }else{
                     cell.i<-1
                     print(gt.to.click)
-                    cnames<-gt.names[[gt.to.click]]
-                    tryCatch(
-                        cnames<-c.sort.2(dat[[datfram]],cnames,collumn=collumn),
+                    cnames <- gt.names[[gt.to.click]]
+                    tryCatch({
+                        cnames <- c.sort.2(dat[[datfram]],cnames,collumn=collumn)
+                    },
                     error=function(e) print("Something went wrong try again") )
+                    p.names <- cnames
                     print(cnames)
                 }
             }
             if(selection=="cells"){
                 cell.i<-1
                 cnames<-select.list(as.character(dat$c.dat$id), multiple=T)
-                tryCatch(cnames<-c.sort.2(dat[[datfram]],cnames,collumn=collumn),error=function(e) print("Something went wrong try again"))
-
+                tryCatch({
+                    cnames <- c.sort.2(dat[[datfram]],cnames,collumn=collumn)
+                },error=function(e) print("Something went wrong try again"))
+                p.names <- cnames
             }
             if(selection==""){
                 cell.i<-1
@@ -587,21 +612,19 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     #s: stack selected groups
         if(keyPressed=="s"){
             p.namez<-paste(select.list(names(gt.names)),sep="")
-            print(p.namez)
             p.names<-gt.names[[p.namez]]
             #p.names<-get(ls(pattern=p.namez))
-            print(p.names)
             lines.flag<-1
         }
         
     #S: Sample selected groups
         if(keyPressed=="S"){
-            p.namez<-paste(select.list(names(gt.names)),sep="")
-            print(p.namez)
-            p.names<-gt.names[[p.namez]]
-            #p.names<-get(ls(pattern=p.namez))
-            print(p.names)
-            lines.flag<-2
+            # p.namez<-paste(select.list(names(gt.names)),sep="")
+            # print(p.namez)
+            # p.names<-gt.names[[p.namez]]
+            # #p.names<-get(ls(pattern=p.namez))
+            # print(p.names)
+            lines.flag <- 2
         }
     #t: brings up list of RD file. Select Trace (anything starting with t or mp)
         if(keyPressed=="t"){
@@ -769,7 +792,11 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             if(length(ls(pattern="density_win"))==0){
                 dev.new(width=10,height=10)
                 density_win<-dev.cur()
-            }else{}
+            }else{
+                dev.off(density_win)
+                dev.new(width=10,height=10)
+                density_win<-dev.cur()
+            }
             tryCatch(bringToTop(-1), error=function(e)NULL)
             cat("What dataframe wil contain your stat? \n")
             dense_df_q<-select.list(names(dat))
@@ -780,20 +807,44 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             #define the top xlim value
             cat("Define Top xlim value \n")
             cat("Enter n to allow default Max value \n")
-            xlim_top<-scan(n=1)
+            xlim_top<-scan(n=1, what = 'raw')
             if(xlim_top == 'n' ){
                 xlim_top<-max(dat[[dense_df_q]][dense_df_att])
+            }else{
+                xlim_top <- as.numeric(xlim_top)
             }
             
             cat("Define bottom xlim value \n")
             cat("Enter n to allow default Max value \n")
-            xlim_bottom<-scan(n=1)
+            xlim_bottom<-scan(n=1, what = 'raw')
             if(xlim_bottom == 'n'){
                 xlim_bottom<-min(dat[[dense_df_q]][dense_df_att])
+            }else{
+                xlim_bottom <- as.numeric(xlim_bottom)
             }
             
+            cat("\nSeperate the density plots?")
+            sel <- c('yes', 'no')
+            sel <- sel[menu(sel)]
+
+            if(sel == 'yes'){
+                formals(density_ct_plotter)$dense_sep <- T
+            }else if(sel == 'no'){
+                formals(density_ct_plotter)$dense_sep <- F
+            }
+
             dev.set(density_win)
-            density_ct_plotter(dat,g.names,cell_types=NULL, stat=statz,overlay=T, dense_sep=TRUE,plot_new=F,xlim_top=xlim_top,xlim_bottom=xlim_bottom,dat.name=dat.name)
+            density_ct_plotter(
+                dat,
+                g.names,
+                cell_types=NULL, 
+                stat=statz,
+                overlay=T, 
+                plot_new=F,
+                xlim_top=xlim_top,
+                xlim_bottom=xlim_bottom,
+                dat.name=dat.name)
+
             lines.flag<-1
         }
         
@@ -827,16 +878,20 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             #define the top xlim value
             cat("Define Top xlim value \n")
             cat("Enter n to allow default Max value \n")
-            xlim_top<-scan(n=1)
+            xlim_top<-scan(n=1, what = 'raw')
             if(xlim_top == 'n' ){
                 xlim_top<-max(dat[[dense_df_q]][dense_df_att])
+            }else{
+                xlim_top <- as.numeric(xlim_top)
             }
             
             cat("Define bottom xlim value \n")
             cat("Enter n to allow default Max value \n")
-            xlim_bottom<-scan(n=1)
+            xlim_bottom<-scan(n=1, what = 'raw')
             if(xlim_bottom == 'n'){
                 xlim_bottom<-min(dat[[dense_df_q]][dense_df_att])
+            }else{
+                xlim_bottom <- as.numeric(xlim_bottom)
             }
             
             dev.set(density_win)
@@ -845,7 +900,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 cell_types = gt.names, 
                 stat=statz,
                 overlay=T, 
-                dense_sep=False,
+                dense_sep=F,
                 plot_new=F,
                 xlim_top=xlim_top,
                 xlim_bottom=xlim_bottom,
@@ -921,6 +976,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 				}
                 tryCatch(bringToTop(-1), error=function(e)NULL)             
                 cat("\nI have filled in your cell_types to choose by pressing \'P\' ENJOY!\n")
+                flush.console()
+                Sys.sleep(0.5)
                 gt.names <- list()
                 for(i in 1:length(dat[[cellTypeId]])){
                     #Fill in the gt.names with each cell type
@@ -995,12 +1052,14 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(keyPressed=="q")
         {
             #graphics.off()
-            dev.off(which=click.window)
-            dev.off(which=lines.window)
-            tryCatch(dev.off(which=lines.window.2), error=function(e) print("this windows hasn't been opened yet"))			
-            dev.off(which=view.window)
-            dev.off(which=multipic.window)
-            dev.off(which=traceimpute.window)
+            tryCatch({
+                dev.off(which=click.window)
+                dev.off(which=lines.window)
+                dev.off(which=lines.window.2)			
+                dev.off(which=view.window)
+                dev.off(which=multipic.window)
+                dev.off(which=traceimpute.window)
+            }, error=function(e) print("this windows hasn't been opened yet"))
 
         }
     }
