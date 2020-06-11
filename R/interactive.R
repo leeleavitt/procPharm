@@ -122,19 +122,18 @@ boxPlotList<-function(dat,l.cells=NULL,dat.name="c.dat",col.name=NULL,jitter.f=.
 
 }
 
+# dat <- tmpRD
+# cell <- NULL
+# cells <- tmpRD$cell_types$neurons
+# groups <- NULL
+# dat.name <- NULL
+# plot.new=T
+# save.bp=F
+# view.cells=F
+# env=NULL
+# statType = "minMax"
 #' Interactive statistic maker. This creates a statistic based on peak heights or peak areas.
 #' @export
-dat <- tmpRD
-cell <- NULL
-cells <- tmpRD$cell_types$neurons
-groups <- NULL
-dat.name <- NULL
-plot.new=T
-save.bp=F
-view.cells=F
-env=NULL
-statType = "minMax"
-
 bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,plot.new=T,save.bp=F,view.cells=F, env=NULL, statType = "minMax"){
     #print(environment())
     if(is.null(env)){

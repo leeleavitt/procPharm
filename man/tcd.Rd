@@ -2,7 +2,8 @@
 % Please edit documentation in R/tcd.R
 \name{tcd}
 \alias{tcd}
-\title{TraceClick.dev(tcd)}
+\title{TraceClick.d
+ev(tcd)}
 \usage{
 tcd(
   dat,

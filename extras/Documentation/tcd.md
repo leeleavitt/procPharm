@@ -69,6 +69,8 @@ Additionally the cells can be viewed using,
 
 <kbd>i</kbd> select the image to display next to the stacked traces. Can be multiple
 
+<kbd>p</kbd> The traces are a combination of points and line. To toggle the points press this button.
+
 ![](../../extras/gifWT/tcdImage.gif)
 
 ## Advanced Trace view
@@ -90,6 +92,8 @@ Visualizing traces has many more options.
 <kbd>u</kbd> Underline toggle for both stacked traces and single trace view
 
 <kbd>l</kbd> Select the window regions to display. Any or all can be observed.
+
+<kbd>w</kbd> To change the line width of the traces pressing this button will allow you to enter in a line width. Default value is 2.
 
 In the example below,
    * A new group is chosen using <kbd>shift</kbd><kbd>p</kbd>
@@ -170,7 +174,7 @@ This statistic follows closely what the F1 custom statistic does. The difference
     
     (Red + Blue) / (Red - Blue)
 
-The general work flow of this example is
+The general work flow of this example is,
   
   1. Find a representation of what I am looking for. Here I choose a neuron amplified by the compound R3J. 
   2. Fill in all the group with cell_types by pressing <kbd>F7</kbd>
