@@ -198,9 +198,10 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
         ########################################################\
         c.dat<-read.delim(cell_data_name, header=T, sep="\t")
         #Now use the neewly created roi_checker i built in python
-        roiToRemove <- py_pharm$roi_checker()
+        roiToRemove <- Reduce(c,py_pharm$roi_checker()) + 1
         if(length(roiToRemove)>0){
-            cat("\nremoving ROI:", roiToRemove,'\n')
+            cat("\nremoving ROI:\n")
+            print(roiToRemove)
             c.dat <- c.dat[-roiToRemove,]
         }
 
@@ -586,7 +587,7 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
 
 #IMPORT DOCX tables
 docx.wr1.importer<-function(file.name='wr1.docx'){
-    if( !library(docxtractr, logical.return=T) ){install.packages(docxtractr)}else{}
+    if( !library(docxtractr, logical.return=T) ){install.packages('docxtractr')}else{}
     #read in docx
     wr1<-read_docx(file.name)
     #Extract each table

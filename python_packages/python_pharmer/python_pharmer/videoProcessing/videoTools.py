@@ -32,7 +32,7 @@ def roi_checker():
         for i in range(len(roiToRemove)):
             roiByeLoc.append(np.where(roi2048unique == roiToRemove[i])[0][0])
 
-    return roiByeLoc
+        return roiByeLoc
 
 #######################################
 #Find Video

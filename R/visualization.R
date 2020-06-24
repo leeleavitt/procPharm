@@ -168,7 +168,7 @@ barPlotter <- function(dat = NULL, cols = 'YlOrRd', selectCT = T, horiz=T){
 
     cat('\nSelect what you Want to be on your barPlot\n')
 
-    if( class(tables) == 'character' ){
+    if( class(dat) == 'character' ){
         tableList <- list()
         for( i in 1:length(dat)){
             table <- read.csv(dat[i], row.names = 1)
