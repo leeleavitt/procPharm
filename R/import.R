@@ -94,7 +94,7 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
         ########################################################
         #VIDEO PROCESSING
         ########################################################
-        c_dat_make<-file.info(cell_data_name)$mtime
+        c_dat_make <- file.info(cell_data_name)$mtime
         video_data_name <- list.files(pattern="[vV]ideo.*[.]txt$")
         video_dat_make <- file.info(video_data_name)$mtime
 
@@ -137,6 +137,7 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
         t.380 <- dcast(data = f2_img, ImageNumber ~ ObjectNumber, value.var = 'Intensity_MeanIntensity_f2_380')
         t.dat <- t.340/t.380
         print(Sys.time()-start_time)
+        
         ###################################################
         #TIME INFO EXTRACTION
         ###################################################
