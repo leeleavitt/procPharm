@@ -80,7 +80,9 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     print(environment())
     if(is.null(dat.name)){
         dat.name<-deparse(substitute(dat))
-    }else{dat.name<-dat.name}
+    }else{
+        dat.name<-dat.name
+    }
     if(view_func_description){
     cat(
     "
@@ -274,11 +276,17 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     
     keyPressed <- "z"
     #group.names<-NULL
-    if(is.null(levs)){levs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
-    }else{levs<-levs}
+    if(is.null(levs)){
+        levs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
+    }else{
+        levs<-levs
+    }
     
-    if(is.null(klevs)){klevs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
-    }else{klevs<-levs}
+    if(is.null(klevs)){
+        klevs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
+    }else{
+        klevs<-levs
+    }
     
     while(keyPressed!="q"){
         cell.pick <- cnames[cell.i]
@@ -455,7 +463,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     #This function will allow you to fix the region you click on
         # if(keyPressed === 'f'){
             # #first find the middle region of each levs to correct the scoring
-            # levsMiddle <- tapply(            levsMiddle <- tapply(dat$w.dat[,1], as.factor(dat$w.dat$wr1),mean)[levs]
+            # levsMiddle <- tapply(levsMiddle <- tapply(dat$w.dat[,1], as.factor(dat$w.dat$wr1),mean)[levs]
             # yLocation <- rep(par('usr')[4] + yinch(.5), length(levsMiddle))
             # par(xpd=T)
 
