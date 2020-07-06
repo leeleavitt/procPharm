@@ -30,7 +30,7 @@ If installing R on computers in the lab (these need to be connected to the netwo
 
 This R package depends on some python processing. To install
 1. Install the [anaconda distribution](https://www.anaconda.com/distribution/). Make sure to select for a single user during this installation. From there you will need to use `pip` to install our software. 
-2. Now opn the *Anaconda Prompt*, from your programs
+2. Now opn the *Anaconda Prompt*, from your programs. This means click the windows logo and type `anaconda prompt`. Double click this and a terminal window will open.
 3. Install git with 
 ````
 conda install git tensorflow
