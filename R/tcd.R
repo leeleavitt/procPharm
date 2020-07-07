@@ -23,6 +23,20 @@ mySample <- function(values,N){
         })]
 }
 
+# Functions to read the mouse and keyboard during fixes!
+mouseDownFixer <- function(buttons, x, y){
+    mouseReturn <- list(
+        buttons =  buttons,
+        x = x,
+        y=y
+     )
+    return(mouseReturn)
+}
+
+keybdFixer <- function(key){
+    return(key)
+}
+
 #' TraceClick.d
 #' ev(tcd)
 #' 
@@ -51,6 +65,7 @@ mySample <- function(values,N){
 #' @param D LinesEvery seperation	
 #' @param f New trace fitting for pottassium pulses
 #' @param F New smoothing factor for fit trace
+#' @param ctrl-F function to correct the scoring
 #' @param i Select image to display on Stacked Traces
 #' @param I image for Multiview
 #' @param l choose window region to display on stack trace plot
@@ -455,30 +470,48 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             if(sf==0){sf<-.001}
             lines.flag<-1
         }
-    # #f: New trace fitting for pottassium pulses
-    #     if(keyPressed=="f"){
-    #         lines.flag<-3
-    #     }
-    #f: Fixes the scoring
-    #This function will allow you to fix the region you click on
-        # if(keyPressed === 'f'){
-            # #first find the middle region of each levs to correct the scoring
-            # levsMiddle <- tapply(levsMiddle <- tapply(dat$w.dat[,1], as.factor(dat$w.dat$wr1),mean)[levs]
-            # yLocation <- rep(par('usr')[4] + yinch(.5), length(levsMiddle))
-            # par(xpd=T)
+    # ctrl-F: Fixes the scoring
+    # This function will allow you to fix the region you click on
+        if(keyPressed == 'ctrl-F'){
 
-            # points(levsMiddle, yLocation, pch=7))
-            # identify(levsMiddle, yLocation, n=1)
+            #First input a nonsense press to get the party started
+            press = 'hibob'
+            options(warn = -1)
+            # Remain within the scoring function until ctrl-F is pressed
+            while(press != 'ctrl-F'){
+                # Update the plot to include all windows and the info
+                dev.set(which=click.window)
+                p1 <- PeakFunc7(dat, cell.pick, t.type=t.type, yvar=yvar, info=T, bcex=bcex, pts=pts, lns=lns, levs=klevs, underline=underline, dat.n=dat.name, zf=zf)
 
+                # Add the Buttons to Click
+                xLoc <- tapply(dat$w.dat[,1], as.factor(dat$w.dat$wr1),mean)[levs]
+                yLoc <- rep(par('usr')[3] + yinch(.1), length(xLoc))
+                points(xLoc, yLoc, pch=19, cex = 1.5)
+                points(xLoc, yLoc, pch=19, cex = 1, col='white')
+                points(xLoc, yLoc, pch=19, cex = .5, col='black')
 
-
-            # par(xpd=F)
-            # }
-
-
-        # }
-
-
+                # Identify the buttons/
+                # Now pay attention to the user input.
+                press <- getGraphicsEvent('Select Windows to correct scoring. Press ctrl-F to exit this mode', 
+                    onMouseDown = mouseDownFixer, 
+                    onKeybd = keybdFixer)
+                
+                if(class(press) == "list"){
+                    # Convert the click into something more useful
+                    buttonLoc <- grconvertX(press$x, 'ndc', 'user')
+                    pressedButton <- which.min(sqrt((buttonLoc - xLoc)^2))
+                    levSel <- klevs[pressedButton]
+                    # Change the score
+                    score <- dat$bin[cell.pick, levSel]
+                    if(score == 0){
+                        dat$bin[cell.pick, levSel] <- 1
+                    }else if(score == 1){
+                        dat$bin[cell.pick, levSel] <- 0
+                    }
+                }
+            }
+        options(warn = 0)
+        }
 
     #F: New smoothing factor for fit trace
         if(keyPressed=="F"){
