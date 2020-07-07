@@ -6,7 +6,7 @@ If you are working on a Mac. First follow these [instructions](./extras/procPhar
 ### General install
 This Package allows you to view calcium imaging data along with visualize the cells. This package has not been released on CRAN yet, nor have the python components been released on PYPI.
 
-To install the package on your home computer follow the code below,
+To install the package on your home computer. First open `R`. If R is not installed make sure to install now [here](https://cran.r-project.org/bin/windows/base/old/3.5.3/). While install select **custom installation** and select the **multiple windows** option.
 ````
 # First install devtools to gain access to the function 
 install.packages(c("devtools", "backports", "fs"))
@@ -29,8 +29,8 @@ If installing R on computers in the lab (these need to be connected to the netwo
 2. If you are installing this software to look at traces.
 
 This R package depends on some python processing. To install
-1. Install the [anaconda distribution](https://www.anaconda.com/distribution/). From there you will need to use `pip` to install our software. 
-2. Now opn the *Anaconda Prompt*, from your programs
+1. Install the [anaconda distribution](https://www.anaconda.com/distribution/). Make sure to select for a single user during this installation. From there you will need to use `pip` to install our software. 
+2. Now opn the *Anaconda Prompt*, from your programs. This means click the windows logo and type `anaconda prompt`. Double click this and a terminal window will open.
 3. Install git with 
 ````
 conda install git tensorflow
