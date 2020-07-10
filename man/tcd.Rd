@@ -50,6 +50,8 @@ tcd(
 
 \item{F}{New smoothing factor for fit trace}
 
+\item{ctrl-F}{function to correct the scoring}
+
 \item{i}{Select image to display on Stacked Traces}
 
 \item{I}{image for Multiview}

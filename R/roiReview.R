@@ -414,13 +414,20 @@ image.selector<-function(tmp.rd, multi=T){
 #' @param subset.n is number of cells to review at once instead of all at once.
 #' @export
 ROIreview <- function(tmp, x.names=NULL, pad=2, wh=7,hh=7, subset.n=500, roi.img=NULL){	
+    time1 <- proc.time()
+
     print(names(tmp$c.dat)[1:20])
-    choices<-select.list(
+    choices <- select.list(
         title="Score what?", 
         choices=c("CGRP.GFP", "IB4.TRITC", "IB4.CY5", "NF200.TRITC", "MCHERRY", "Drops"), 
         multiple=T)
+    additionalInfo <- choices
     print("how to display ROI")
-    if(is.null(roi.img)){roi.img<-image.selector(tmp)}else{roi.img<-roi.img}
+    if(is.null(roi.img)){
+        roi.img<-image.selector(tmp)
+    }else{
+        roi.img<-roi.img
+    }
 
     dice <- function(x, n,min.n=10)
     {
@@ -532,5 +539,9 @@ ROIreview <- function(tmp, x.names=NULL, pad=2, wh=7,hh=7, subset.n=500, roi.img
     }
 
     graphics.off()
+
+    functionName <- as.character(match.call())[1]
+    timeInFunction <- (proc.time() - time1)[3]
+    logger(functionName, timeInFunction, additionalInfo)
     return(tmp)			
 }
