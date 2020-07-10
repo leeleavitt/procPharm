@@ -368,7 +368,7 @@ SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed"
     
 #}
 
-image.selector<-function(tmp.rd, multi=T){
+image.selector <- function(tmp.rd, multi=T){
     img.names<-grep(names(tmp.rd),pattern="img", value=T)
     
     null.images<-vector()

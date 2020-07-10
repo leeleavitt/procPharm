@@ -1,10 +1,13 @@
 
 readkeygraph <- function(prompt){
-    getGraphicsEvent(prompt = prompt, 
-                 onMouseDown = NULL, onMouseMove = NULL,
-                 onMouseUp = NULL, onKeybd = onKeybd,
-                 consolePrompt = "uh")
-    Sys.sleep(0.01)
+    responses <- c("hey", "hi", "hello", "ouch", "tumbs-up")
+    keyPressed <- getGraphicsEvent(prompt = prompt, 
+                 onMouseDown = mouseDownFixer, 
+                 onMouseMove = NULL,
+                 onMouseUp = NULL, 
+                 onKeybd = onKeybd,
+                 consolePrompt = responses[sample(length(responses))[1]])
+    #Sys.sleep(0.01)
     return(keyPressed)
 }
 
@@ -430,6 +433,21 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         #click.i <- identify(x=xs,y=ys,n=1,plot=F)
         
         keyPressed <- readkeygraph("[press any key to continue]")
+        if(class(keyPressed) == 'list'){
+            keyPressed <- keyPressed$buttons
+            if(keyPressed == 0){
+                keyPressed <- "Up"
+            }else if(keyPressed == 2){
+                keyPressed <- "Down"
+            }else if(keyPressed == 1){
+                keyPressed <- "Up"
+            }
+        }
+
+        cat('\n###############################################\nKey pressed : ')
+        cat(keyPressed)
+        cat('\n\n')
+
         additionalInfo <- c(additionalInfo, keyPressed)
         
         if(keyPressed=="Up")
@@ -698,7 +716,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #u: Underlines the Trace
         if(keyPressed=="u"){
-            if(underline){SETTINGS$underline=F}else{SETTINGS$underline=T}
+            if(SETTINGS$underline){SETTINGS$underline=F}else{SETTINGS$underline=T}
             lines.flag<-1
         }
     #v: Show where cells are located and give zoomed in view
@@ -898,7 +916,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             density_ct_plotter(
                 dat,
                 g.names,
-                cell_types=NULL, 
+                cell_types=gt.names, 
                 stat=statz,
                 overlay=T, 
                 plot_new=F,
@@ -1131,14 +1149,6 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     BACKUP<<-gt.names 
     dat$SETTINGS <- SETTINGS
 
-    if(track){
-        tryCatch({
-            functionName <- as.character(match.call())[1]
-            timeInFunction <- (proc.time() - time1)[3]
-            logger(functionName, timeInFunction, additionalInfo)
-        }, error = function(e) print("Could not Spy on you :/"))
-    }
-
     assign(dat.name, dat, envir=.GlobalEnv)
     tryCatch(bringToTop(-1), error=function(e)NULL)
     if(save_question){
@@ -1154,10 +1164,27 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             gt.names<<-gt.names
         }else{
             gt.names<<-gt.names
+            
+            if(track){
+                tryCatch({
+                    functionName <- as.character(match.call())[1]
+                    timeInFunction <- (proc.time() - time1)[3]
+                    logger(functionName, timeInFunction, additionalInfo)
+                }, error = function(e) print("Could not Spy on you :/"))
+            }
+
             return(gt.names)
         }
     }else{
         gt.names<<-gt.names
+        if(track){
+            tryCatch({
+                functionName <- as.character(match.call())[1]
+                timeInFunction <- (proc.time() - time1)[3]
+                logger(functionName, timeInFunction, additionalInfo)
+            }, error = function(e) print("Could not Spy on you :/"))
+        }
+
         return(gt.names)
     }
     #print(rd.name)
