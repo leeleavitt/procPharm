@@ -294,6 +294,7 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
     
     #N15_c Menthol capsaicin
     N15_c <- intersect(N15, cap_cells)
+    R11 <- setdiff(R11, N15_c)
     
     #Now create an unlabeled large group of cells
     UL<- intersect(large_cells_330, unlabeled)
