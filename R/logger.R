@@ -2,8 +2,12 @@
 #' The goal is to append a line to the log with 
 #' 
 #' Needs to happen before the function goes
-#' functionName <- as.character(match.call())
+#' time1 <- proc.time()
+#' additionalInfo <- choices
 #' timeInFunction <- (proc.time() - time1)[3]
+#' functionName <- as.character(match.call())[1]
+#' additionalInfo <- choices
+#' logger(functionName, timeInFunction, additionalInfo)
 #' @export
 logger <- function(functionName, timeInFunction, additionalInfo = NA){
     pathSplit <- strsplit(getwd(), "/")[[1]]
