@@ -61,9 +61,8 @@ RDView <- function(tmp,c.i=NULL,wr.i="wr1",rd.name=NULL,rscale=F,wh=14,hh=8){
 	tryCatch({
 		functionName <- as.character(match.call())[1]
 		timeInFunction <- (proc.time() - time1)[3]
-		additionalInfo <- choices
 		logger(functionName, timeInFunction, additionalInfo)
-	}, error = function(e)"Could not Log")
+	}, error = function(e) print("Could not Spy on you :/"))
 
 	return(tmp)
 }
