@@ -543,7 +543,7 @@ ROIreview <- function(tmp, x.names=NULL, pad=2, wh=7,hh=7, subset.n=500, roi.img
         functionName <- as.character(match.call())[1]
         timeInFunction <- (proc.time() - time1)[3]
         logger(functionName, timeInFunction, additionalInfo)
-    }, error = function(e) print("Could not Spy on you :/"))
-    
+    }, error = function(e){ print("Could not Spy on you :/")})
+
     return(tmp)			
 }

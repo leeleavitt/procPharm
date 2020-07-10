@@ -3,6 +3,7 @@
 #' 
 #' Needs to happen before the function goes
 #' time1 <- proc.time()
+#' Fill up your additional info...
 #' additionalInfo <- choices
 #' timeInFunction <- (proc.time() - time1)[3]
 #' functionName <- as.character(match.call())[1]

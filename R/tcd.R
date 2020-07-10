@@ -288,26 +288,39 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         cnames<-cells
     }
     
-    
+    # Look for a setting portion of the RD.experiment.
+    # what we need to track are
+    # levs
+    # underline
+    # zoom factor
+    # selected trace
+    # selected images
+    if( ! "SETTINGS" %in% names(dat)){
+        SETTINGS <- list()
+        SETTINGS$levs <- levs
+        SETTINGS$l.img <- l.img
+        SETTINGS$img <- img
+        SETTINGS$underline <- underline
+        SETTINGS$t.type <- t.type
+        dat$SETTINGS <- SETTINGS
+    }else{
+        SETTINGS <- dat$SETTINGS
+    }
+
+
     keyPressed <- "z"
-    #group.names<-NULL
-    if(is.null(levs)){
-        levs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
-    }else{
-        levs<-levs
+
+    if(is.null(SETTINGS$levs)){
+        SETTINGS$levs <- setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
     }
     
-    if(is.null(klevs)){
-        klevs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
-    }else{
-        klevs<-levs
-    }
+    klevs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
     
     while(keyPressed!="q"){
         cell.pick <- cnames[cell.i]
         
         dev.set(which=click.window)
-        p1 <- PeakFunc7(dat,cell.pick, t.type=t.type, yvar=yvar, info=info, bcex=bcex, pts=pts, lns=lns, levs=levs, underline=underline, dat.n=dat.name, zf=zf)
+        p1 <- PeakFunc7(dat,cell.pick, t.type=t.type, yvar=yvar, info=info, bcex=bcex, pts=pts, lns=lns, levs=SETTINGS$levs, underline=SETTINGS$underline, dat.n=dat.name, zf=zf)
         p1.par<-par()
         
         ##LinesEvery
@@ -323,7 +336,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                     lines.window<-dev.cur()
                 }
                 dev.set(which=lines.window)
-                tryCatch(LinesEvery.5(dat,p.names,plot.new=F, img=l.img,lmain=paste(gsub("[$]","",p.namez), 'n=',length(p.names)), t.type=t.type, lw=lw, col=lines.color, lns=lns, levs=levs, bcex=1, underline=underline, dat.n=dat.name, zf=zf, sf=sf, values=values),error=function(e) print("You haven't stacked traces yet, yo."))
+                tryCatch(LinesEvery.5(dat,p.names,plot.new=F, img=SETTINGS$l.img,lmain=paste(gsub("[$]","",p.namez), 'n=',length(p.names)), t.type=SETTINGS$t.type, lw=lw, col=lines.color, lns=lns, levs=SETTINGS$levs, bcex=1, underline=SETTINGS$underline, dat.n=dat.name, zf=zf, sf=sf, values=values),error=function(e) print("You haven't stacked traces yet, yo."))
                 lines.flag <- 0
             }
         }
@@ -350,7 +363,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                         mySample(p.names, sample.to.display),
                         plot.new=F,
                         lmain=paste("Sample",sample.to.display,"out of",length(p.names)), 
-                        img=l.img, lw=lw, t.type=t.type, col="black", lns=lns, levs=levs, bcex=1, underline=underline, dat.n=dat.name, zf=zf,sf=sf, values=values)
+                        img=SETTINGS$l.img, lw=lw, t.type=SETTINGS$t.type, col="black", lns=lns, levs=SETTINGS$levs, bcex=1, underline=SETTINGS$underline, dat.n=dat.name, zf=zf,sf=sf, values=values)
                 ,error=function(e) print("You haven't stacked traces yet, yo."))
                 lines.flag <- 0
             }else{
@@ -362,8 +375,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(window.flag == 1){
             tryCatch(dev.off(which=view.window), error=function(e)NULL)
             tryCatch({
-                dimx<-dim(img)[2]
-                dimy<-dim(img)[1]
+                dimx<-dim(SETTINGS$img)[2]
+                dimy<-dim(SETTINGS$img)[1]
                 haight<-10*dimy/dimx
                 tryCatch(windows(width=haight*dimx/dimy, height=haight,xpos=1130, ypos=200), error=function(e) windows(width=haight*dimx/dimy, height=haight))
             }, error = function(e)NULL)
@@ -378,7 +391,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 tryCatch(
                     cell.view(dat,
                         cell=p.names, 
-                        img=img,
+                        img=SETTINGS$img,
                         cols="Yellow",
                         plot.new=F,
                         cell.name=T, 
@@ -392,7 +405,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                     multi.pic.zoom(
                         dat,
                         p.names,
-                        img, 
+                        SETTINGS$img, 
                         plot.new=F, 
                         zf=zf, 
                         labs=F)
@@ -481,10 +494,10 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             while(press != 'ctrl-F'){
                 # Update the plot to include all windows and the info
                 dev.set(which=click.window)
-                p1 <- PeakFunc7(dat, cell.pick, t.type=t.type, yvar=yvar, info=T, bcex=bcex, pts=pts, lns=lns, levs=klevs, underline=underline, dat.n=dat.name, zf=zf)
+                p1 <- PeakFunc7(dat, cell.pick, t.type=SETTINGS$t.type, yvar=yvar, info=T, bcex=bcex, pts=pts, lns=lns, levs=klevs, underline=SETTINGS$underline, dat.n=dat.name, zf=zf)
 
                 # Add the Buttons to Click
-                xLoc <- tapply(dat$w.dat[,1], as.factor(dat$w.dat$wr1),mean)[levs]
+                xLoc <- tapply(dat$w.dat[,1], as.factor(dat$w.dat$wr1),mean)[klevs]
                 yLoc <- rep(par('usr')[3] + yinch(.1), length(xLoc))
                 points(xLoc, yLoc, pch=19, cex = 1.5)
                 points(xLoc, yLoc, pch=19, cex = 1, col='white')
@@ -530,20 +543,23 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #i: Select image to display on Stacked Traces
         if(keyPressed=="i"){
-            l.img<-image.selector(dat)
+            SETTINGS$l.img<-image.selector(dat)
             lines.flag<-1
         }
     #I: image for Multiview
         if(keyPressed=="I"){
-            img<-dat[[image.selector(dat, multi=F)]]
+            SETTINGS$img<-dat[[image.selector(dat, multi=F)]]
             #lines.flag<-1
             window.flag<-1
         }
     #l: choose window region to display on stack trace plot
         if(keyPressed=="l"){
             #if(lns){lns<-FALSE}else{lns<-TRUE}
-            levs<-select.list(setdiff(unique(as.character(dat$w.dat[,"wr1"])),""), multiple=T)
-            if( (levs=="") || identical(levs,character(0)) ){levs<-NULL}#levs<-setdiff(unique(as.character(dat$w.dat$wr1)),"")}
+            SETTINGS$levs <- select.list(
+                setdiff(unique(as.character(dat$w.dat[,"wr1"])),""), 
+                multiple=T,
+                preselect = SETTINGS$levs)
+            if( (SETTINGS$levs=="") || identical(SETTINGS$levs,character(0)) ){SETTINGS$levs<-NULL}
             lines.flag<-1
         }
     #m: Move groups to another group
@@ -671,14 +687,14 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(keyPressed=="t"){
             toMatch<-c("t[.]","blc","snr","mp")
             trace_dat<-grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
-            t.type1<-t.type
-            t.type<-select.list(trace_dat)
-            if(t.type==""){t.type<-t.type1}
+            t.type1<-SETTINGS$t.type
+            SETTINGS$t.type<-select.list(trace_dat)
+            if(SETTINGS$t.type==""){SETTINGS$t.type<-t.type1}
             lines.flag<-1
         }
     #u: Underlines the Trace
         if(keyPressed=="u"){
-            if(underline){underline=F}else{underline=T}
+            if(underline){SETTINGS$underline=F}else{SETTINGS$underline=T}
             lines.flag<-1
         }
     #v: Show where cells are located and give zoomed in view
@@ -1109,8 +1125,9 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     #assign(rd.name, dat, envir=.GlobalEnv)
     #gt.names<-list(g.names1=g.names1, g.names2=g.names2, g.names3=g.names3, g.names4=g.names4, g.names5=g.names5, g.names6=g.names6, g.names7=g.names7, g.names8=g.names8,g.names9=g.names9, g.names10=g.names10, g.names11=g.names11, g.names12=g.names12, g.names=g.names)
     BACKUP<<-gt.names 
-    
-    assign(dat.name,dat, envir=.GlobalEnv)
+    dat$SETTINGS <- SETTINGS
+
+    assign(dat.name, dat, envir=.GlobalEnv)
     tryCatch(bringToTop(-1), error=function(e)NULL)
     if(save_question){
         print('Would y ou like to save you cell groups?')
