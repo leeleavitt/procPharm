@@ -90,7 +90,10 @@ keybdFixer <- function(key){
 #' @param F3 Density plot visualization
 #' @param F5 does something
 #' @export
-tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type="t.dat", plot.new=F, info=T, pts=T, lns=T, bcex=1, levs=NULL, klevs=NULL, sft=NULL, underline=T, zf=20, lw=2, sf=1, dat.name=NULL, view_func_description=F, save_question = T){
+tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type="t.dat", plot.new=F, info=T, pts=T, lns=T, bcex=1, levs=NULL, klevs=NULL, sft=NULL, underline=T, zf=20, lw=2, sf=1, dat.name=NULL, view_func_description=F, save_question = T, track = T){
+    time1 <- proc.time()
+	additionalInfo <- c()
+
     graphics.off()
     print(environment())
     if(is.null(dat.name)){
@@ -427,6 +430,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         #click.i <- identify(x=xs,y=ys,n=1,plot=F)
         
         keyPressed <- readkeygraph("[press any key to continue]")
+        additionalInfo <- c(additionalInfo, keyPressed)
         
         if(keyPressed=="Up")
         {cell.i <- cell.i + 1;if(cell.i>length(cnames)){cell.i<-1};lines.flag<-0}
@@ -1126,6 +1130,14 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     #gt.names<-list(g.names1=g.names1, g.names2=g.names2, g.names3=g.names3, g.names4=g.names4, g.names5=g.names5, g.names6=g.names6, g.names7=g.names7, g.names8=g.names8,g.names9=g.names9, g.names10=g.names10, g.names11=g.names11, g.names12=g.names12, g.names=g.names)
     BACKUP<<-gt.names 
     dat$SETTINGS <- SETTINGS
+
+    if(track){
+        tryCatch({
+            functionName <- as.character(match.call())[1]
+            timeInFunction <- (proc.time() - time1)[3]
+            logger(functionName, timeInFunction, additionalInfo)
+        }, error = function(e) print("Could not Spy on you :/"))
+    }
 
     assign(dat.name, dat, envir=.GlobalEnv)
     tryCatch(bringToTop(-1), error=function(e)NULL)
