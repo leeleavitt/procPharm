@@ -402,7 +402,11 @@ saveRD <- function(dat){
     experimentorsName <- strsplit(getwd(),'/')[[1]][2]
     historyName <- paste(experimentorsName, Sys.time(), 'History.r')
     historyName <- gsub(":", '_',historyName)
-    savehistory(historyName)
+
+    tryCatch(
+        savehistory(historyName),
+        error = function(e) cat("\nUnable to save the History. BUY A PC\n")
+    )
 
     #Exp Saver
     expName <- deparse(substitute(dat))

@@ -68,13 +68,17 @@ density_ct_plotter<-function(dat, cells, cell_types = NULL, stat=dat$c.dat["area
         par(mfrow=c(plot_sep,plot_sep),mai=c(.25,.25,.25,.25))
     }
     
-    if(is.null(xlim_top)){
+    if( is.null(xlim_top) ){
         xlim_top<-max(stat[,1])
-    }else{xlim_top<-xlim_top}
+    }else{
+        xlim_top<-xlim_top
+    }
     
-    if(is.null(xlim_bottom)){
+    if( is.null(xlim_bottom) ){
         xlim_bottom<-min(stat[,1])
-    }else{xlim_bottom<-xlim_bottom}
+    }else{
+        xlim_bottom<-xlim_bottom
+    }
 
     density_window<-dev.cur()
     xlim<-c(xlim_bottom, xlim_top)
@@ -85,10 +89,10 @@ density_ct_plotter<-function(dat, cells, cell_types = NULL, stat=dat$c.dat["area
         xlim=xlim, 
         ylim=c(0,max(all.cells.density$y)*1.5), 
         pch="",lwd=3, col="black",
-        #main=names(stat)
-        main = ""
+        main=names(stat)
+        #main = ""
     )
-    polygon(all.cells.density,col="red",lwd=1)
+    polygon(all.cells.density,col=rgb(1, 0, 0 ,0.2),lwd=1)
 
     #Provide density plots with lines overla
     par(xpd=T)

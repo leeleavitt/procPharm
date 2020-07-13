@@ -870,18 +870,18 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(keyPressed=="F3"){
             if(length(ls(pattern="density_win"))==0){
                 dev.new(width=10,height=10)
-                density_win<-dev.cur()
+                density_win <- dev.cur()
             }else{
                 dev.off(density_win)
                 dev.new(width=10,height=10)
-                density_win<-dev.cur()
+                density_win <- dev.cur()
             }
             tryCatch(bringToTop(-1), error=function(e)NULL)
             cat("What dataframe wil contain your stat? \n")
-            dense_df_q<-select.list(names(dat))
+            dense_df_q <- select.list(names(dat))
             cat("What attribute would you like to see the distribution? \n")
-            dense_df_att<-menu(names(dat[[dense_df_q]]))
-            statz<-dat[[dense_df_q]][dense_df_att]
+            dense_df_att <- menu(names(dat[[dense_df_q]]))
+            statz <- dat[[dense_df_q]][, dense_df_att, drop = F]
 
             #define the top xlim value
             cat("Define Top xlim value \n")

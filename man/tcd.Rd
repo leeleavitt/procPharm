@@ -26,7 +26,8 @@ tcd(
   sf = 1,
   dat.name = NULL,
   view_func_description = F,
-  save_question = T
+  save_question = T,
+  track = T
 )
 }
 \arguments{
