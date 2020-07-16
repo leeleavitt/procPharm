@@ -787,7 +787,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         #	print(paste("You Dropped Cell",cnames[cell.i]))
         #}
         
-        #F1: Simple bp.selector. Create the statistic labeled on the plot. The localize question
+    #F1: Simple bp.selector. Create the statistic labeled on the plot. The localize question
         #allows you to click the boxplot to select a subset of cells to observe
         if(keyPressed=="F1"){
             tryCatch({
@@ -825,7 +825,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             )
         }
         
-        #F2: Advanced Statistic maker This function uses the function (After-Before)/(After+Before)
+    #F2: Advanced Statistic maker This function uses the function (After-Before)/(After+Before)
         #this function allows you to save the stat.  This will be added to the scp dataframe at the bottom.
         #if you have created statistics, be sure to save your RD file before you close
         if(keyPressed=="F2"){
@@ -848,7 +848,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 cat("##############################################################################\nStat Maker: MinMaxnorm\n##############################################################################\n\nThis function allows you to create statistics based on the statistic you select.\nThis Function finds a represention of peak amplification and or block\nThis function will take in what ever you are currently scrolling through\n\nYou have the option to localize your boxplot. This means, select cells\nspecifically based on where you click on the boxplot.\nTwo clicks means you need to specigy the lower range followed by the upper range.\nOne click will take everything greater than your click\nThe Other option that will arise is, 'would you like the save the stat?'\nIf you do, the console will prompt you to enter a name. Ensure no spaces in the name\nThe next option will be whether you would like to make another statistic."
                 )
                 dev.set(bp.selector.window)
-                gt.names[[12]]<-bp.selector(dat,
+                gt.names[[12]] <- bp.selector(dat,
                     cnames[cell.i],
                     cnames, 
                     groups = gt.names, 
@@ -857,7 +857,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                     env=environment(),
                     statType = 'minMax')
                 #Now fill TCD with the cells just selected.
-                cnames<-gt.names[[12]]	
+                cnames <- gt.names[[12]]	
                 cell.i<-1
                 lines.flag<-1
                 windows.flag<-1
@@ -866,7 +866,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
         
 
-        #F3: Plotting the Density plots.  There are many options for this plot
+    #F3: Plotting the Density plots.  There are many options for this plot
         if(keyPressed=="F3"){
             if(length(ls(pattern="density_win"))==0){
                 dev.new(width=10,height=10)
@@ -988,7 +988,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             lines.flag<-1
         }
 
-        #F5: Censusus Viewer
+    #F5: Censusus Viewer
         if(keyPressed=="F5"){
             cat("\nSelect a binary column to add to the 12th group\n")
 			cnames_orig <- cnames
@@ -1162,10 +1162,18 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             assign(save.names , gt.names)
             save(list = save.names ,file=paste(save_label,'.Rdata',sep=''))
             gt.names<<-gt.names
+            
+            if(track & length(additionalInfo)>40){
+                tryCatch({
+                    functionName <- as.character(match.call())[1]
+                    timeInFunction <- (proc.time() - time1)[3]
+                    logger(functionName, timeInFunction, additionalInfo)
+                }, error = function(e) print("Could not Spy on you :/"))
+            }
         }else{
             gt.names<<-gt.names
             
-            if(track){
+            if(track & length(additionalInfo)>40){
                 tryCatch({
                     functionName <- as.character(match.call())[1]
                     timeInFunction <- (proc.time() - time1)[3]
@@ -1177,7 +1185,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     }else{
         gt.names<<-gt.names
-        if(track){
+        if(track & length(additionalInfo)>40){
             tryCatch({
                 functionName <- as.character(match.call())[1]
                 timeInFunction <- (proc.time() - time1)[3]

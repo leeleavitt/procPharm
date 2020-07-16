@@ -404,7 +404,7 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
     }else{continue<-"No"}
     
     if(continue=="Yes"){
-        real.cells<-tcd(dat, x.names,dat.name=dat.name, track = F)
+        real.cells <- tcd(dat, x.names,dat.name=dat.name, track = F)
         return(real.cells)
     }else{
         return(x.names)
