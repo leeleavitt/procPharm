@@ -276,7 +276,7 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
         snr.lim=5; hab.lim=.05; sm=2; ws=3; blc="SNIP"
         pcp <- ProcConstPharm(tmp.rd,sm,ws,blc)
         scp <- ScoreConstPharm(tmp.rd,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
-        bin <- bScore(pcp$blc,pcp$snr,snr.lim,hab.lim,levs,tmp.rd$w.dat[,"wr1"])
+        bin <- bScore(pcp$blc, pcp$snr, snr.lim, hab.lim, levs, tmp.rd$w.dat[,"wr1"])
         bin <- bin[,levs]
         bin["drop"] <- 0 #maybe try to generate some drop criteria from the scp 
 
@@ -300,9 +300,9 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
             w.dat=w.dat,
             c.dat=c.dat, 
             bin=bin, 
-            scp=scp, 
+            scp=tmp.rd$scp, 
             #snr=pcp$snr, 
-            blc=pcp$blc)
+            blc=tmp.rd$blc)
             #der=pcp$der) 
 
         #tmp.rd <- fancyBin(tmp.rd)

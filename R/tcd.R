@@ -326,7 +326,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         cell.pick <- cnames[cell.i]
         
         dev.set(which=click.window)
-        p1 <- PeakFunc7(dat,cell.pick, t.type=t.type, yvar=yvar, info=info, bcex=bcex, pts=pts, lns=lns, levs=SETTINGS$levs, underline=SETTINGS$underline, dat.n=dat.name, zf=zf)
+        p1 <- PeakFunc7(dat,cell.pick, t.type=SETTINGS$t.type, yvar=yvar, info=info, bcex=bcex, pts=pts, lns=lns, levs=SETTINGS$levs, underline=SETTINGS$underline, dat.n=dat.name, zf=zf)
         p1.par<-par()
         
         ##LinesEvery
@@ -709,9 +709,9 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(keyPressed=="t"){
             toMatch<-c("t[.]","blc","snr","mp")
             trace_dat<-grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
-            t.type1<-SETTINGS$t.type
-            SETTINGS$t.type<-select.list(trace_dat)
-            if(SETTINGS$t.type==""){SETTINGS$t.type<-t.type1}
+            t.type1 <- SETTINGS$t.type
+            SETTINGS$t.type <- select.list(trace_dat)
+            if(SETTINGS$t.type==""){SETTINGS$t.type <- t.type1}
             lines.flag<-1
         }
     #u: Underlines the Trace
