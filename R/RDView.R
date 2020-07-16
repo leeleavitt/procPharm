@@ -12,37 +12,58 @@
 #' @param hh is the window width (why the hell did I name it hh?)
 #' @export 
 RDView <- function(tmp,c.i=NULL,wr.i="wr1",rd.name=NULL,rscale=F,wh=14,hh=8){
-	if(!is.element("bin",names(tmp))){stop("No bin ")}
-	if(!is.element("drop",names(tmp$bin))){tmp$bin[,"drop"] <- 0}
+	time1 <- proc.time()
+	additionalInfo <- c()
+
+	if(!is.element("bin",names(tmp))){
+		stop("No bin ")
+	}
+	if(!is.element("drop",names(tmp$bin))){
+		tmp$bin[,"drop"] <- 0
+	}
+	
 	col50 <- SetShades(tmp,trans=200/(nrow(tmp$bin)^1.5))
 	tlevs <- unique(tmp$w.dat[,wr.i])
  	tlevs <- tlevs[tlevs!=""]
  	tlevs <- intersect(tlevs,names(tmp$bin))
-	if(!is.element("ignore",names(tmp$w.dat)))
-	{
+	
+	if(!is.element("ignore",names(tmp$w.dat))){
 		tmp$w.dat[,"ignore"] <- 0
 	}
 	sel.i <- 1
-    #if(!is.element("grps",names(tmp))){tmp$grps <- tmp$bin[,tlevs];tmp$grps[] <- NA}
-
+    
 	while(sel.i != 0)
 	{
+		cat('\nSelect a window to review\nTo Exit: PRESS 0\n')
 		sel.i <- menu(tlevs,,title="Select Window To Review")
-		if(sel.i > 0)
-		{
+		if(sel.i > 0){
 			r.i <- tmp$w.dat[,wr.i]==tlevs[sel.i]
-			if(is.null(c.i)){c.i <- row.names(tmp$bin)[tmp$bin[,"drop"]==0]}
-			if(is.element("mp",names(tmp)))
-				{wt <- tmp$mp[r.i,c("Time",c.i)]}
-			else
-				{wt <- tmp$t.dat[r.i,c("Time",c.i)]}
-			if(rscale){wt <- sweep(wt,2,apply(wt,2,min),"-")}
+			
+			additionalInfo <- c(additionalInfo, tlevs[sel.i])
+			if(is.null(c.i)){
+				c.i <- row.names(tmp$bin)[tmp$bin[,"drop"]==0]
+			}
+			
+			if(is.element("mp",names(tmp))){
+				wt <- tmp$mp[r.i,c("Time",c.i)]
+			}else{
+				wt <- tmp$t.dat[r.i,c("Time",c.i)]
+			}
+			if(rscale){
+				wt <- sweep(wt,2,apply(wt,2,min),"-")
+			}
 			wt.sl <- ScoreLev(wt,tmp$bin[c.i,tlevs[sel.i]],tmp$w.dat[r.i,"ignore"],col50,main.lab=tlevs[sel.i],rd.name=rd.name,wh=wh,hh=hh)
 			tmp$bin[c.i,tlevs[sel.i]] <- wt.sl$bin
 			tmp$w.dat[r.i,"ignore"] <- wt.sl$ignore
 			tmp$grps <- wt.sl[["groups"]]
 		}
-	}		
+	}
+	tryCatch({
+		functionName <- as.character(match.call())[1]
+		timeInFunction <- (proc.time() - time1)[3]
+		logger(functionName, timeInFunction, additionalInfo)
+	}, error = function(e) print("Could not Spy on you :/"))
+
 	return(tmp)
 }
 
@@ -546,6 +567,17 @@ BackgroundRaster <- function(wt,ht,wd,col50,xlim,ylim){
 	return(tmp.png)			
 }
 
+dice <- function(x, n,min.n=10)
+{
+	x.lst <- split(x, as.integer((seq_along(x) - 1) / n))
+	x.i <- length(x.lst)
+	if(length(x.lst[x.i]) < min.n & x.i > 1)
+	{
+		x.lst[[x.i-1]] <- c(x.lst[[x.i-1]],x.lst[[x.i]])
+		x.lst <- x.lst[1:(x.i-1)]
+	}
+	return(x.lst)
+}
 #' RDVIew but for traces, also identifies the score of the neurons
 #' @param dat is the RD.experiment
 #' @param cell are subsets of cell to incorporate

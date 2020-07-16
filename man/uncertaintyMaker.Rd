@@ -8,6 +8,9 @@ get an error.}
 \usage{
 uncertaintyMaker(dat)
 }
+\arguments{
+\item{dat}{this is the experiment list to add.}
+}
 \description{
 This function calculates uncertainty for each probability data frame in the 
 RD.experiment. Use probMaker and imageProbMaker prior to this or you will

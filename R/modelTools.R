@@ -1,41 +1,41 @@
-#' This function creates the binary scores for AITC, menthol, capsaicin and K40
-#' @export
-traceProbMaker <- function(dat){
-    pyPharm <- reticulate::import('python_pharmer')
-    pulsesWithNN <- c("^AITC.*", "^[cC]aps.*", "^[mM]enth.*", "[kK][.]40.*")
-    nnNames <- c('aitc','capsaicin', 'menthol', 'k40')
+# #' This function creates the binary scores for AITC, menthol, capsaicin and K40
+# #' @export
+# traceProbMaker <- function(dat){
+#     pyPharm <- reticulate::import('python_pharmer')
+#     pulsesWithNN <- c("^AITC.*", "^[cC]aps.*", "^[mM]enth.*", "[kK][.]40.*")
+#     nnNames <- c('aitc','capsaicin', 'menthol', 'k40')
 
-    for( i in 1:length(pulsesWithNN)){        
-        # Make sure the pulse exists
-        pulse <- grep(pulsesWithNN[i], dat$w.dat$wr1)
+#     for( i in 1:length(pulsesWithNN)){        
+#         # Make sure the pulse exists
+#         pulse <- grep(pulsesWithNN[i], dat$w.dat$wr1)
         
-        if(length(pulse) > 0){
-            # Grab the model
-            model <- pyPharm$modelLoader(nnNames[i])
+#         if(length(pulse) > 0){
+#             # Grab the model
+#             model <- pyPharm$modelLoader(nnNames[i])
             
-            # Snag the pulse for all cells
-            minWin <- min( pulse )
-            maxWin <- minWin + 119
+#             # Snag the pulse for all cells
+#             minWin <- min( pulse )
+#             maxWin <- minWin + 119
 
-            pulseToScore <- as.data.frame(t(dat$blc[minWin:maxWin,-1]))
+#             pulseToScore <- as.data.frame(t(dat$blc[minWin:maxWin,-1]))
 
 
-            # Now use the python score all the responses of interest
-            tryCatch({
-                featureFrame <- pyPharm$featureMaker(pulseToScore, 10)
-                probs <- model$predict(featureFrame)
-                colnames(probs) <- c(0,1)
-                # Transfer these scoring to the binary dataframe
-                pulseName <- grep(pulsesWithNN[i], names(dat$bin), value=T)[1]
-                dat[['probs']][[pulseName]] <- probs
-                dat$bin[,1] <- model$predict_classes(featureFrame)
-                }
-                , error=function(e) print(paste("Could not score", pulsesWithNN[i]))
-            )
-        }
-    }
-    return(dat)
-}
+#             # Now use the python score all the responses of interest
+#             tryCatch({
+#                 featureFrame <- pyPharm$featureMaker(pulseToScore, 10)
+#                 probs <- model$predict(featureFrame)
+#                 colnames(probs) <- c(0,1)
+#                 # Transfer these scoring to the binary dataframe
+#                 pulseName <- grep(pulsesWithNN[i], names(dat$bin), value=T)[1]
+#                 dat[['probs']][[pulseName]] <- probs
+#                 dat$bin[,1] <- model$predict_classes(featureFrame)
+#                 }
+#                 , error=function(e) print(paste("Could not score", pulsesWithNN[i]))
+#             )
+#         }
+#     }
+#     return(dat)
+# }
 
 #' This function creates the binary scores for AITC, menthol, capsaicin and K40
 #' @export
@@ -87,8 +87,6 @@ traceProbMaker <- function(dat, minute = TRUE){
     }
     return(dat)
 }
-
-
 
 #' Function to convert the full image into individual cell images.
 #' @param dat is the RD.experiment to load in. You should have images loaded into this list
@@ -206,13 +204,17 @@ imageProbMaker <- function(dat){
 #' This function calculates uncertainty for each probability data frame in the 
 #' RD.experiment. Use probMaker and imageProbMaker prior to this or you will
 #' get an error.
-#' @param RD.experiment
+#' @param dat this is the experiment list to add.
 #' @export
 uncertaintyMaker <- function(dat){
-    for(i in 1:length(dat$probs)){
-        dat$probs[[i]][is.na(dat$probs[[i]])] <- .5
-        uncertainty <- sqrt(dat$probs[[i]][1]^2 + dat$probs[[i]][2]^2)
-        dat$scp[paste0(names(dat$probs),'.','unc')] <- uncertainty
-    }
-    return(dat)
+    tryCatch({
+        for(i in 1:length(dat$probs)){
+            dat$probs[[i]][is.na(dat$probs[[i]])] <- .5
+            uncertainty <- sqrt(dat$probs[[i]][1]^2 + dat$probs[[i]][2]^2)
+            dat$scp[paste0(names(dat$probs),'.','unc')] <- uncertainty
+        }
+        return(dat)
+    }, error = function(e)
+        cat("\n Probabilities have not bee created. Plese do both, \n imageProbMaker(RD.exerpiment) \n and \n traceProbMaker(RD.experiment)\n")
+    )
 }

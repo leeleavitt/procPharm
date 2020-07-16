@@ -34,7 +34,7 @@ ConvertTime <- function(x){
 
 pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", area_conversion=1.625, img_name_vec = NULL, image_question=T){
     cat('#########################################\nPHARM HARVEST\n#########################################\n')
-    tryCatch(cat(readLines("Y:/Box Sync/procpharm/farm.txt"),sep='\n'), error=function(e) cat('\nPHARM ON PHARM ANIMAL\n'))
+    cat(readLines( "Z:/farm.txt"),sep='\n')
     cat('\nI am your data harvester. In this function I will\nextract data from any video files you have, and package everything together\n')
     #MAIN DIRECTORY SELECTION
     if(is.null(main_dir)){
@@ -92,7 +92,7 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
         # Add images
         img_list<-list()
         for( j in 1:length(img_name_vec) ){
-            img_list[[ paste0("img",j) ]] <- tryCatch(png::readPNG(img_name_vec[j]), error=function(e)NULL)
+            img_list[[ paste0("img",j) ]] <- tryCatch(readPNG(img_name_vec[j]), error=function(e)NULL)
         }
         if(image_question == T){
             cat('\nThese are the images I have attempted to load for you\nIf any are NULL, and want to add different images say yes to the \nnext question. You will be asked to select a png image for each loaction.\n\n')
@@ -110,7 +110,7 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
                     if(selection==0){
                         img_list[[paste0("img",j)]] <- NULL
                     }else{
-                        img_list[[paste0("img",j)]] <- png::readPNG(png_imgs[selection])
+                        img_list[[paste0("img",j)]] <- readPNG(png_imgs[selection])
                     }
                     cat('\nI have added ', png_imgs[selection],' to position ',j,'\n')
                 }
@@ -123,7 +123,7 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
         #VIDEO PROCESSING
         ########################################################
         c_dat_make<-file.info(cell_data_name)$mtime
-        video_data_name <- list.files(pattern="[vV]ideo.*[.]txt$")
+        video_data_name <- list.files(pattern="video.*[.]txt$")
         video_dat_make <- file.info(video_data_name)$mtime
 
         #If the video was make before the c.dat then you need to make the video_data.txt
@@ -132,7 +132,7 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
 
         if(length(video_data_name) < 1 ){
             py_pharm <- import('python_pharmer')
-            video <- list.files(pattern="^[Vv]ideo.*nd2$")
+            video <- list.files(pattern="^video.*nd2$")
             if( length(video) > 1 ){
                 cat("\nSelect your video to process\n")
                 video_num <- menu(video)
@@ -143,7 +143,7 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
         }else{
 			if(time_since_make < 0){
 				py_pharm <- import('python_pharmer')
-				video <- list.files(pattern="^[Vv]ideo.*nd2$")
+				video <- list.files(pattern="^video.*nd2$")
 				if( length(video) > 1 ){
 					cat("\nSelect your video to process\n")
 					video_num <- menu(video)
@@ -170,11 +170,8 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
         #until then the researcher will need to expor the time information before they start
         #this function. The funciton will sense whether the file is present or not.
 		py_pharm <- import('python_pharmer')
-		#video <- list.files(pattern="^[Vv]ideo.*nd2$")
-		
-		if( length(list.files(pattern = "^time.*txt$")) < 1 ){
-			py_pharm$time_info_gather( video )
-		}
+		video <- list.files(pattern="^video.*nd2$")
+		py_pharm$time_info_gather( video )
 		time_info <- read.delim("time.info.txt", sep="\t")
 		time_min <- round(time_info[2]/1000/60, digits=3)
         # Create row.names
@@ -192,11 +189,12 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
         ########################################################
         # wr1 import
         ########################################################
+        
+		
 		wrdef <- "wr1.docx"
         wrdef <- list.files(pattern = '^wr1')
 		wrdef_logic <- grep(".docx", wrdef, ignore.case=T, value=T)
-		# If it is a wr1.docx, continue
-        if( length(wrdef_logic) == 1 ){
+		if( length(wrdef_logic) == 1 ){
 			require(docxtractr)
 			wr <- docx.wr1.importer(wrdef)
 			w.dat <- MakeWr.docx(t.dat, wr)		
@@ -210,26 +208,14 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
 			}
 
 		}else{
-            tryCatch(
-                wr <- ReadResponseWindowFile(wrdef)
-                , error=function(e) print("YOU NEED A wr1.docx or wr1.csv")
-            )
-            #Wr<-length(wr[,1])#complete and revise this section
-            wr['at'] <- wr['at'] - (10/60)
-
-            w.dat <- MakeWr(t.dat,wr)
+            wr <- ReadResponseWindowFile(wrdef)
+            Wr<-length(wr[,1])#complete and revise this section
+			w.dat <- MakeWr(t.dat,wr)
 		}
         ########################################################
         #CELL DATA PROCESSING
         ########################################################\
         c.dat<-read.delim(cell_data_name, header=T, sep="\t")
-        #Now use the neewly created roi_checker i built in python
-        roiToRemove <- py_pharm$roi_checker()
-        if(length(roiToRemove)>0){
-            cat("\nremoving ROI:", roiToRemove,'\n')
-            c.dat <- c.dat[-roiToRemove,]
-        }
-
         #These are the collumns needed for analysis
         c_dat_names<-c(
             "ObjectNumber", 
@@ -242,7 +228,6 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
             "Intensity_MeanIntensity_CGRP_end_ci",
             "Intensity_MeanIntensity_IB4_start_ci",
             "Intensity_MeanIntensity_IB4_end_ci",
-			"Intensity_MeanIntensity_TRITC_end_ci",
             "Intensity_MeanIntensity_BF_start",
             "Intensity_MeanIntensity_BF_end",
             "Intensity_MeanIntensity_DAPI_ci",
@@ -261,7 +246,6 @@ pharming_harvest <- function(main_dir="Y:/Mario Giacobassi/Manjus experiments", 
             "mean.gfp.end",
             "mean.cy5.start",
             "mean.cy5.end",
-			"mean.tritc.end",
             "mean.bf.start",
             "mean.bf.end",
             "mean.dapi",
@@ -450,10 +434,10 @@ ReadDataDump.se <- function(fname=NULL,wrdef=NULL, Wr=NULL, c.dat=NULL,img1=NULL
         w.dat <- MakeWr(t.dat,wr)
     }
     
-    if(!is.null(img1)){img1<-png::readPNG(img1)}
-    if(!is.null(img2)){img2<-png::readPNG(img2)}
-    if(!is.null(img3)){img3<-png::readPNG(img3)}
-    if(!is.null(img4)){img4<-png::readPNG(img4)}
+    if(!is.null(img1)){img1<-readPNG(img1)}
+    if(!is.null(img2)){img2<-readPNG(img2)}
+    if(!is.null(img3)){img3<-readPNG(img3)}
+    if(!is.null(img4)){img4<-readPNG(img4)}
     
     if(is.null(rd.name)){rd.name <- paste("RD",make.names(date()),sep="")}
     
@@ -677,14 +661,14 @@ ReadDataDump.lee <- function(rd.name=NULL,img1="bf.f2.png",img2="bf.f2.lab.png",
         tmp.rd$blc<-pcp$blc
         tmp.rd$der<-pcp$der
         # Add images
-        if(!is.null(img1)){tmp.rd$img1<-png::readPNG(img1)}
-        if(!is.null(img2)){tmp.rd$img2<-png::readPNG(img2)}
-        if(!is.null(img3)){tmp.rd$img3<-png::readPNG(img3)}
-        if(!is.null(img4)){tmp.rd$img4<-png::readPNG(img4)}
-        if(!is.null(img5)){tmp.rd$img5<-png::readPNG(img5)}
-        if(!is.null(img6)){tmp.rd$img6<-png::readPNG(img6)}
-        if(!is.null(img7)){tmp.rd$img7<-png::readPNG(img7)}
-        if(!is.null(img8)){tmp.rd$img8<-png::readPNG(img8)}
+        if(!is.null(img1)){tmp.rd$img1<-readPNG(img1)}
+        if(!is.null(img2)){tmp.rd$img2<-readPNG(img2)}
+        if(!is.null(img3)){tmp.rd$img3<-readPNG(img3)}
+        if(!is.null(img4)){tmp.rd$img4<-readPNG(img4)}
+        if(!is.null(img5)){tmp.rd$img5<-readPNG(img5)}
+        if(!is.null(img6)){tmp.rd$img6<-readPNG(img6)}
+        if(!is.null(img7)){tmp.rd$img7<-readPNG(img7)}
+        if(!is.null(img8)){tmp.rd$img8<-readPNG(img8)}
 
 
     #####################################################
@@ -711,9 +695,9 @@ ReadDataDump.lee <- function(rd.name=NULL,img1="bf.f2.png",img2="bf.f2.lab.png",
         #save as RD file
     }
 
-#HAS TRACEBREWER
-ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=NULL,img5=NULL, img6=NULL, img7=NULL, img8=NULL, fancy=F,fname="Data (full).txt",wrdef="wr1.docx", Wr=NULL, c.dat="ROI Data.txt" ,sep="\t")
-{
+    #HAS TRACEBREWER
+    ReadDataDump.lee.2 <- function(rd.name=NULL,img1="bf.f2.png",img2="bf.f2.lab.png",img3=NULL,img4=NULL,img5=NULL, img6=NULL, img7=NULL, img8=NULL, fancy=F,fname="Data (full).txt",wrdef="wr1.docx", Wr=NULL, c.dat="ROI Data.txt" ,sep="\t")
+    {
     require(png)
     require(MALDIquant)
 
@@ -921,14 +905,14 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
         tmp.rd<-TraceBrewer(tmp.rd)
 
         # Add images
-        if(!is.null(img1)){tmp.rd$img1<-png::readPNG(img1)}
-        if(!is.null(img2)){tmp.rd$img2<-png::readPNG(img2)}
-        if(!is.null(img3)){tmp.rd$img3<-png::readPNG(img3)}
-        if(!is.null(img4)){tmp.rd$img4<-png::readPNG(img4)}
-        if(!is.null(img5)){tmp.rd$img5<-png::readPNG(img5)}
-        if(!is.null(img6)){tmp.rd$img6<-png::readPNG(img6)}
-        if(!is.null(img7)){tmp.rd$img7<-png::readPNG(img7)}
-        if(!is.null(img8)){tmp.rd$img8<-png::readPNG(img8)}
+        if(!is.null(img1)){tmp.rd$img1<-readPNG(img1)}
+        if(!is.null(img2)){tmp.rd$img2<-readPNG(img2)}
+        if(!is.null(img3)){tmp.rd$img3<-readPNG(img3)}
+        if(!is.null(img4)){tmp.rd$img4<-readPNG(img4)}
+        if(!is.null(img5)){tmp.rd$img5<-readPNG(img5)}
+        if(!is.null(img6)){tmp.rd$img6<-readPNG(img6)}
+        if(!is.null(img7)){tmp.rd$img7<-readPNG(img7)}
+        if(!is.null(img8)){tmp.rd$img8<-readPNG(img8)}
 
 
     #####################################################
@@ -949,8 +933,7 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
     
     
     f.name <- paste(rd.name,".Rdata",sep="")
-    assign(rd.name, tmp.rd, envir=.GlobalEnv)
-	assign(rd.name,tmp.rd)
+    assign(rd.name,tmp.rd)
     save(list=rd.name,file=f.name)
     return(paste(nrow(tmp.rd$c.dat),"traces read saved to ",f.name))
     #save as RD file
@@ -1199,14 +1182,14 @@ ReadDataDump.microglia <- function(rd.name=NULL,img1="bf.f2.png",img2="bf.f2.lab
         tmp.rd$blc<-pcp$blc
         tmp.rd$der<-pcp$der
         # Add images
-        if(!is.null(img1)){tmp.rd$img1<-png::readPNG(img1)}
-        if(!is.null(img2)){tmp.rd$img2<-png::readPNG(img2)}
-        if(!is.null(img3)){tmp.rd$img3<-png::readPNG(img3)}
-        if(!is.null(img4)){tmp.rd$img4<-png::readPNG(img4)}
-        if(!is.null(img5)){tmp.rd$img5<-png::readPNG(img5)}
-        if(!is.null(img6)){tmp.rd$img6<-png::readPNG(img6)}
-        if(!is.null(img7)){tmp.rd$img7<-png::readPNG(img7)}
-        if(!is.null(img8)){tmp.rd$img8<-png::readPNG(img8)}
+        if(!is.null(img1)){tmp.rd$img1<-readPNG(img1)}
+        if(!is.null(img2)){tmp.rd$img2<-readPNG(img2)}
+        if(!is.null(img3)){tmp.rd$img3<-readPNG(img3)}
+        if(!is.null(img4)){tmp.rd$img4<-readPNG(img4)}
+        if(!is.null(img5)){tmp.rd$img5<-readPNG(img5)}
+        if(!is.null(img6)){tmp.rd$img6<-readPNG(img6)}
+        if(!is.null(img7)){tmp.rd$img7<-readPNG(img7)}
+        if(!is.null(img8)){tmp.rd$img8<-readPNG(img8)}
 
 
     #####################################################
@@ -1350,7 +1333,6 @@ docx.wr1.importer<-function(file.name='wr1.docx'){
     
     print(paste("You have a total of",error,"errors")) 
     if(error>0){
-        alarm()
         print("Fix these Errors")
         print("PRESS ANY KEY TO CONTINUE")
         scan(n=1)
@@ -1415,7 +1397,7 @@ MakeWr <- function(t.dat,wr1,padL=0,padR=0)
     for(i in 1:nrow(wr1))
     {
         x1 <- which.min(abs(wr1[i,"at"]-t.dat[,"Time"]))
-        x2 <- which.min(abs((wr1[i,"at"] + wr1[i,"duration"]) - t.dat[,"Time"]))
+        x2 <- which.min(abs((wr1[i,"at"]+wr1[i,"duration"])-t.dat[,"Time"]))
         w.dat[max((x1-padL),1):min((x2+padR),nrow(t.dat)),"wr1"] <- as.character(wr1[i,"treatment"])
     }
     return(w.dat)
@@ -1586,14 +1568,12 @@ WindowRepair<-function(dat, complete=T){
     #Now do all of this to tmp.rd
     wrdef<-"wr1.csv"
     t.dat<-tmp.rd$t.dat
-    if(!is.null(wrdef)){
+    if(!is.null(wrdef))
+        {
             wr <- ReadResponseWindowFile(wrdef)
             Wr<-length(wr[,1])#complete and revise this section
             if(length(colnames(wr))<2){w.dat<-WrMultiplex(t.dat,wr,n=Wr)}
-            else{
-                wr['at'] <- wr['at'] - (10/60)
-                w.dat <- MakeWr(t.dat,wr)
-            }
+            else{w.dat <- MakeWr(t.dat,wr)}
             tmp.rd$w.dat<-w.dat
         }
     levs<-setdiff(unique(as.character(tmp.rd$w.dat$wr1)),"")
@@ -1650,8 +1630,7 @@ WindowRepair<-function(dat, complete=T){
 #then make complete F.  This will allow you to select the windows that need reapri
 #if the naming is off, then make complete=F.  You will need to do a complete reapri
 # you will lose all information from RDView
-
-WindowRepair_docx<-function(dat, complete=F, trace_brew=F){
+WindowRepair_docx<-function(dat, complete=F){
     require(docxtractr)
     tmp<-dat #first create a tmp to repair
     tmp.rd<-dat # then create a tmp.rd to completely screwup for repairs
@@ -1677,7 +1656,7 @@ WindowRepair_docx<-function(dat, complete=F, trace_brew=F){
     snr.lim <- 4 #signal to noise threshold
     hab.lim <- .05 #height above baseline threshold
     blc="SNIP"
-    
+
     pcp <- ProcConstPharm(tmp.rd,sm,ws,blc)
     scp <- ScoreConstPharm(tmp.rd,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
     bin <- bScore(pcp$blc,pcp$snr,snr.lim,hab.lim,levs,tmp.rd$w.dat[,"wr1"])
@@ -1695,11 +1674,8 @@ WindowRepair_docx<-function(dat, complete=F, trace_brew=F){
     #Now surgically add the selected corrected data from tmp.rd to the tmp
     #starting with the window region
     tmp$w.dat$wr1<-tmp.rd$w.dat$wr1
+    tmp.rd <- TraceBrewer(tmp.rd) 
     
-	if(length(summary(names(tmp.rd)=='t.norm')) == 2 | trace_brew ){
-        tmp.rd <- TraceBrewer(tmp.rd)
-    }
-
     #select the window region you want to repair
     if(complete==T){
         tmp$scp<-tmp.rd$scp
@@ -2596,7 +2572,7 @@ col_binner<-function(dat,cells){
 #dAT IS THE rd. INPUT
 #LEVS, IS AN OPTIONAL ARGUEMENT, IF LEFT BLACK THE FUNCTION WILL LOOK IN THE BIN DATA.FRAME COLLUMN ANMES
 # TO ALLOW TO MANUALLY SECT THE COLLUMNS YOU WANT TO COMBINE
-combinner<-function(dat, levs=NULL, bin_it=T){     
+combinner<-function(dat, levs=NULL){     
     tmp<-dat$bin
     if(is.null(levs)){
         levs<-select.list(names(dat$bin), multiple=T)
@@ -2614,12 +2590,7 @@ combinner<-function(dat, levs=NULL, bin_it=T){
     dat$bin<-tmp
     cat("We have added this barcode to the scp dataframes","\n")
     cat(newcolnames,"\n")
-    cat(sort(summary(dat$scp[newcolnames], maxsum=1500), T), sep="\n" )
-
-    if(bin_it){
-        dat <- pf_summary(dat,,ncol(dat$scp))
-    }
-
+    cat(summary(dat$scp[newcolnames]), sep="\n" )
     return(dat)
 }
 
@@ -2654,11 +2625,9 @@ bin_to_group<-function(dat){
 
 #This takes a pf and allows you to create a binarry table based on the barcode
 #Created in pf.function
-pf_summary<-function(dat, response_classes = NULL, pf_col = NULL){
-    if(is.null(pf_col)){
-        pf_col <- menu( colnames(dat$scp) )
-    }else{ pf_col <- pf_col }
-
+pf.summary<-function(dat, response_classes = NULL){
+    pf_col <- menu( colnames(dat$scp) )
+    
     if(is.null(response_classes)){
         response_classes <- unique(dat$scp[,pf_col])
     }else{}
@@ -4080,8 +4049,8 @@ LinesEvery.5 <- function(dat,m.names, img="img1",channel=NULL,pic.plot=TRUE,zf=N
  
             xinch(length(img))
             par(xpd=FALSE,mai=c(2,.5+(.5*length(img.l)), 1, 0.6*length(values)), bty="l")
-            plot(xseq,t.dat[,m.names[1]],ylim=c(0,hbc),xlab="",main=lmain,type="n",yaxt="n",xlim=c(min(xseq)-1.5,max(xseq)), ylab="")#-sf
-            #axis(1, at=seq(floor(min(t.dat[,1])),ceiling(max(t.dat[,1])), 1))
+            plot(xseq,t.dat[,m.names[1]],ylim=c(0,hbc),xlab="",main=lmain,type="n", xaxt="n",yaxt="n",xlim=c(min(xseq)-1.5,max(xseq)), ylab="")#-sf
+            axis(1, at=seq(floor(min(t.dat[,1])),ceiling(max(t.dat[,1])), 1))
             #axis(2, 1.4, )
             #Label cell names
             text(rep(0,length(m.names))-xinch(.1),seq(1,length(m.names))*sf+t.dat[1,m.names],m.names, cex=.5,col=cols,pos=3)
@@ -4788,20 +4757,18 @@ LinesStack.2.1 <- function(dat,m.names=NULL,lmain="",levs=NULL, plot.new=TRUE,bc
 #
 LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, region.group=T,levs=NULL, plot.new=TRUE,bcex=.7, sf=1.1, subset.n=NULL, img=NULL,bp.param=NULL, bp=F, bp.pts=F){
     #graphics.off()
-    #
     if(is.null(img)){img<-dat$img1}
-    
-    # If a list of cells is not input, then look at all cells
     if(is.null(m.names)){
         dropped.cells<-cellzand(dat$bin, "drop",1)
         m.names<-setdiff(dat$c.dat$id, dropped.cells)
     }else{
         dropped.cells<-cellzand(dat$bin, "drop",1)
         m.names<-setdiff(m.names, dropped.cells)
-    }
+        }
         
     if(is.null(subset.n)){subset.n<-as.numeric(select.list(as.character(c(5,10,15,20,25,30))))}
     if(plot.new){
+    
         if(subset.n>=10){
             dev.new(width=14,height=10)
             }
@@ -4828,29 +4795,20 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
         ylim<-c(-.1,hbc)
         #ylim <- c(-.1,2.5)
         
-        plot(xseq,
-            t.dat[,m.names[1]],
-            ylim=ylim,
-            xlab="",
-            ylab='',
-            main=lmain,
-            type="n",
-            xlim=c(min(xseq)-1.5,max(xseq)+10),
-            bty='n'
-        )#-sf
-        #axis(1, at=seq(floor(min(t.dat[,1])),ceiling(max(t.dat[,1])), 1))
+        plot(xseq,t.dat[,m.names[1]],ylim=ylim,xlab="Time (min)",main=lmain,type="n", xaxt="n",xlim=c(min(xseq)-1.5,max(xseq)+10))#-sf
+        axis(1, at=seq(floor(min(t.dat[,1])),ceiling(max(t.dat[,1])), 1))
         
         ## Tool for adding window region labeling
         if(length(wr) > 0){
             #levs <- setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
             x1s <- tapply(xseq,as.factor(wr),min)[levs]
             x2s <- tapply(xseq,as.factor(wr),max)[levs]
-            y1s <- par('usr')[3]
-            y2s <- par('usr')[4]
+            y1s <- rep(min(ylim)-.2,length(x1s))
+            y2s <- rep(max(ylim)+.2,length(x1s))
             rect(x1s,y1s,x2s,y2s,col="grey90",border="black")
             levs.loc<-tapply(dat$w.dat[,"Time"],as.factor(wr),mean)[levs]
-            par(xpd=T)
-            text(levs.loc, par("usr")[3] - yinch(.5),levs,cex=bcex, srt=90)	
+            text(levs.loc,par("usr")[3],levs,pos=3,offset=-4.2,cex=bcex, srt=90)	
+            #text(t.dat[match(levs,wr),"Time"],rep(c(-.05, abs(min(ylim)),abs(min(ylim))+.1),length=length(levs)),levs,cex=bcex,offset=0, pos=4)#,offset=-offs}
         }
         ## Tool for adding line and point plot for all lines
             #matlines(xseq, blc[,m.names], col=rgb(0,0,0,3, maxColorValue=100), lwd=.01)
@@ -4862,7 +4820,7 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
         ## To select data within the experiment to group around
         if(region.group){
             dev.new(width=15, height=10)
-            LinesEvery.5(dat, sample(dat$c.dat$id)[1:5], plot.new=F, lmain="Click to Select region to Groups Cells", t.type="t.dat", img="img1")
+            LinesEvery.5(dat, sample(row.names(dat$c.dat)[1:5]), plot.new=F, lmain="Click to Select region to Groups Cells", t.type="t.dat", img="img1")
             #LinesEvery.4(dat, sample(row.names(dat$c.dat)[1:5]), plot.new=F, lmain="Click to Select region to Groups Cells", img=dat$img1)
             b.xseq<-locator(n=2, type="o", pch=15, col="red")$x
             dev.off()
@@ -4934,15 +4892,8 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
                 }
         }
         if(region.group){
-            text(mean(b.xseq),
-                par('usr')[4]+yinch(3),
-                "Cluster Region",
-                col='blue',
-                font=2,
-                cex=2
-            )            
-            par(xpd=F)
-            abline(v=b.xseq, col="blue", lwd=2)
+            points(b.xseq,rep(min(ylim),2),pch=15, col="blue", cex=.5)
+            abline(v=b.xseq, col="blue")
         }else{}
 
         par(xpd=F)
@@ -5491,7 +5442,7 @@ bpfunc.2<-function(dat,n.names, bp.pts=T){
     
     
     dev.off()
-    tmp.png <- png::readPNG("tmp.png")
+    tmp.png <- readPNG("tmp.png")
     dim(tmp.png)
     unlink("tmp.png")
     return(tmp.png)			
@@ -5560,7 +5511,7 @@ bpfunc.3<-function(dat,n.names=NULL, dat.select=NULL, parameters=NULL,bp.pts=F, 
     }
     if(print.out){
         dev.off()
-        tmp.png <- png::readPNG("tmp.png")
+        tmp.png <- readPNG("tmp.png")
         dim(tmp.png)
         unlink("tmp.png")
         return(tmp.png)		
@@ -6642,12 +6593,12 @@ PeakFunc7 <- function(dat,n.names,t.type="t.dat",Plotit.trace=T,Plotit.both=F, i
     }
     
     #text(dat.t[match(levs,wr),"Time"],c(ymin, ymin+(yrange*.2)),levs,pos=4,offset=0,cex=bcex)	
-    #text(dat.t[match(levs,wr),"Time"],par("usr")[3],levs,pos=3,offset=-4.2,cex=bcex, srt=90)    
-    levs_cex <- nchar(levs)
-	levs_cex[ levs_cex <= 12*1.3  ] <- 1
-	levs_cex[ levs_cex > 12*1.3  ] <- 12/levs_cex[ levs_cex>12*1.3  ]*1.3
+    #text(dat.t[match(levs,wr),"Time"],par("usr")[3],levs,pos=3,offset=-4.2,cex=bcex, srt=90)
+	levs_cex <- nchar(levs)
+	levs_cex[ levs_cex<=12 ] <- 1
+	levs_cex[ levs_cex > 12 ] <- 12/levs_cex[ levs_cex>12 ]*1.3
 
-    text(levs.loc,par("usr")[3],levs,pos=3,offset=-4.3,cex=levs_cex, srt=90)	
+    text(levs.loc,par("usr")[3],levs,pos=3,offset=-4.2,cex=levs_cex, srt=90)	
 
     if(Plotit.both){
         if(!is.null(dat$der)){lines(dat$der[,n.names]~dat.t[-1,1], lwd=.01, col="paleturquoise4")}
@@ -7403,7 +7354,7 @@ onKeybd <- function(key){
 #f: New trace fitting for pottassium pulses
 #F: New smoothing factor for imputer
 #z: zoom factor to apply to the view of the cell on the right side of the trace, and to the view window
-tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type="t.dat", plot.new=F, info=T, pts=T, lns=T, bcex=1, levs=NULL, klevs=NULL, sft=NULL, underline=T, zf=20, lw=2, sf=1, dat.name=NULL, view_func_description=F, save_question = T){
+tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type="t.dat", plot.new=F, info=T, pts=T, lns=T, bcex=1, levs=NULL, klevs=NULL, sft=NULL, underline=T, zf=20, lw=2, sf=1, dat.name=NULL, view_func_description=F){
     graphics.off()
     print(environment())
     if(is.null(dat.name)){
@@ -7636,12 +7587,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(lines.flag==2){
             sample.to.display<-as.numeric(select.list(as.character(c(5,10,20,50,70,100))),title='Sample Number?')
             tryCatch(dev.off(which=lines.window.2), error=function(e) print("this windows hasn't been opened yet"))
-            
-            if(sample.to.display > 20){
-                windows(width=10,height=12,xpos=0, ypos=250)     
-            }else{
-                windows(width=10,height=7,xpos=0, ypos=250)
-            }
+            windows(width=10,height=12,xpos=0, ypos=250) 
             lines.window.2<-dev.cur()
             dev.set(which=lines.window.2)
             
@@ -7696,34 +7642,6 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(keyPressed=="Down")
         {cell.i <- cell.i - 1;if(cell.i<1){cell.i<-length(cnames)};lines.flag<-0}
         
-    #a: Assign this will place the cell of interest into the correct cell class
-        if(keyPressed=='a'){
-            #need to see if the dat has a cell_types
-            cellToReassign <- cnames[cell.i]
-            cat('\nReassigning cell', cellToReassign,'\n')
-            #cellTypeId <- grep('^cell',names(dat), value=T)
-            if(length(cellTypeId) > 0){
-                #get only cell types that we want to reassign
-                cellTypeNames <- names(dat[[cellTypeId]])
-                cellTypesToNotClean <- c('neurons')
-                cellTypesToClean <- setdiff(cellTypeNames, cellTypesToNotClean)
-                
-                #remove it from all groups
-                dat[[cellTypeId]][cellTypesToClean] <- lapply(dat[[cellTypeId]][cellTypesToClean], function(X) setdiff(X,cellToReassign))
-                
-                ###now that we have indicated that we would like to place this cell into a new group
-                #First lets find all groups we can assign to\
-                bringToTop(-1)
-                cat('\nWhich cell class does this actually belong to?\n')
-                correctCellClass <- cellTypesToClean[menu(cellTypesToClean)]
-                print(dat[[cellTypeId]][[correctCellClass]])
-                dat[[cellTypeId]][[correctCellClass]] <- union(dat[[cellTypeId]][[correctCellClass]], cellToReassign)
-                print(dat[[cellTypeId]][correctCellClass])
-                assign(dat.name, dat, envir=.GlobalEnv)
-            }else{
-                cat('\nSorry You haven\'t defined cell types yet. Please do this first!\n')
-            }
-        }
 
 
     #c: add cells to g.names
@@ -7746,31 +7664,10 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             if(sf==0){sf<-.001}
             lines.flag<-1
         }
-    # #f: New trace fitting for pottassium pulses
-    #     if(keyPressed=="f"){
-    #         lines.flag<-3
-    #     }
-    #f: Fixes the scoring
-    #This function will allow you to fix the region you click on
-        # if(keyPressed === 'f'){
-            # #first find the middle region of each levs to correct the scoring
-            # levsMiddle <- tapply(            levsMiddle <- tapply(dat$w.dat[,1], as.factor(dat$w.dat$wr1),mean)[levs]
-            # yLocation <- rep(par('usr')[4] + yinch(.5), length(levsMiddle))
-            # par(xpd=T)
-
-            # points(levsMiddle, yLocation, pch=7))
-            # identify(levsMiddle, yLocation, n=1)
-
-
-
-            # par(xpd=F)
-            # }
-
-
-        # }
-
-
-
+    #f: New trace fitting for pottassium pulses
+        if(keyPressed=="f"){
+            lines.flag<-3
+        }
     #F: New smoothing factor for fit trace
         if(keyPressed=="F"){
             print("Change the loess smoothing factor")
@@ -7804,25 +7701,6 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             if( (levs=="") || identical(levs,character(0)) ){levs<-NULL}#levs<-setdiff(unique(as.character(dat$w.dat$wr1)),"")}
             lines.flag<-1
         }
-    #m: Move groups to another group
-        if(keyPressed=="m"){
-            bringToTop(-1)
-            cat("
-            Select the Group you would like to move
-            
-            ")
-            
-            gt_to_move<-select.list(names(gt.names), multiple=F)
-            print(paste("You Selected Group ",gt_to_move))
-            cat("
-            Select the Target group to replace
-            
-            ")
-            gt_to_replace<-select.list(names(gt.names), multiple=F)
-            print(paste("Group ",gt_to_replace, "was replaced by ", gt_to_move))
-            gt.names[[gt_to_replace]]<-gt.names[[gt_to_move]]
-        }    
-
     #o: order all cells in a new way
         if(keyPressed=="o"){
         toMatch<-c("c.dat","bin","scp")
@@ -7841,6 +7719,24 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             lines.flag<-1
             window.flag<-1
         }	
+    #m: Move groups to another group
+        if(keyPressed=="m"){
+            bringToTop(-1)
+            cat("
+            Select the Group you would like to move
+            
+            ")
+            
+            gt_to_move<-select.list(names(gt.names), multiple=F)
+            print(paste("You Selected Group ",gt_to_move))
+            cat("
+            Select the Target group to replace
+            
+            ")
+            gt_to_replace<-select.list(names(gt.names), multiple=F)
+            print(paste("Group ",gt_to_replace, "was replaced by ", gt_to_move))
+            gt.names[[gt_to_replace]]<-gt.names[[gt_to_move]]
+        }    
     #p: Toggles points on graph
         if(keyPressed=="p"){
             if(pts){pts<-FALSE}else{pts<-TRUE}
@@ -7848,8 +7744,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #P: Pick a group/cells to click through
         if(keyPressed=="P"){
-            bringToTop(-1)
-            print("Pick a Group of cells or a single cell to observe \nIf you Click cancel, all cells will be returned")
+        bringToTop(-1)
+        print("Pick a Group of cells or a single cell to observe.\nIf you Click cancel, all cells will be returned")
             selection<-select.list(c("group","cells"))
             if(selection=="group"){
                 gt.to.click<-select.list(names(gt.names), multiple=F)
@@ -7957,31 +7853,6 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             lw<-scan(n=1)
             lines.flag<-1
         }
-    #x: Drop cell
-        if(keyPressed=="x")
-        {
-            print(cnames[cell.i])
-            dat$bin[cnames[cell.i], "drop"]<-1
-            print(dat$bin[cnames[cell.i], "drop"])
-            print(paste("You Dropped Cell",cnames[cell.i]))
-            # now that you have dropped a cell, this need to be removed from
-            # cell types
-            cellTypeId <- grep('^cell',names(dat), value=T)
-            if(length(cellTypeId) > 0){
-                drops <- row.names(dat$bin[dat$bin$drop==1,])
-				print(drops)
-                dat[[cellTypeId]] <- lapply(dat[[cellTypeId]], function(X) setdiff(X,drops))
-                assign(dat.name,dat, envir=.GlobalEnv)
-            }else{assign(dat.name,dat, envir=.GlobalEnv)}
-        }
-    #X: undrop cell
-        if(keyPressed=="X")
-        {
-            print(cnames[cell.i])
-            dat$bin[cnames[cell.i], "drop"]<-0
-            print(dat$bin[cnames[cell.i], "drop"])
-            print(paste("You Dropped Cell",cnames[cell.i]))
-        }
     #y: Zoom yaxis automatically
         if(keyPressed=="y"){
             if(yvar){yvar<-FALSE}else{yvar<-TRUE}
@@ -7995,6 +7866,23 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             lines.flag<-1
             window.flag<-1
         }
+
+        if(keyPressed=="x")
+        {
+            print(cnames[cell.i])
+            dat$bin[cnames[cell.i], "drop"]<-1
+            print(dat$bin[cnames[cell.i], "drop"])
+            print(paste("You Dropped Cell",cnames[cell.i]))
+        }
+
+        if(keyPressed=="X")
+        {
+            print(cnames[cell.i])
+            dat$bin[cnames[cell.i], "drop"]<-0
+            print(dat$bin[cnames[cell.i], "drop"])
+            print(paste("You Dropped Cell",cnames[cell.i]))
+        }
+
         
         #if(keyPressed=="k")
         #{
@@ -8144,7 +8032,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             TopView(dat, p.names, 12, 6, dat_name=dat.name, aux.var=aux_var)
         }
 
-        #F5: Censusus Viewer
+        #F4: Censusus Viewer
         if(keyPressed=="F5"){
 			cnames_orig <- cnames
 			cells_to_view <- census_viewer(dat)
@@ -8158,56 +8046,11 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 				cnames <- cells_to_view$cells
 				gt.names[[12]] <- cells_to_view$cells
 				names(gt.names)[12] <- cells_to_view$name
-                p.namez <- cells_to_view$name
 				p.names <- gt.names[[12]]
 				lines.flag<-1
 			}
 		}    
         
-        #F6: Censusus Viewer
-        if(keyPressed=="F6"){
-			cnames_orig <- cnames
-            cat("Please select the collumn you would like to view\n")
-			cells_to_view <- cellzand_tcd(dat$bin)
-			if( is.na(cells_to_view) ){
-				cnames <- cnames_orig
-				cat(
-				"There were no cells in that selection"
-				)
-			}else{ 
-				cell.i<-1
-				cnames <- cells_to_view$cells
-				gt.names[[12]] <- cells_to_view$cells
-				names(gt.names)[12] <- cells_to_view$name
-				if(length(cells_to_view$cells[1]) > 20 ){
-                    p.namez <- cells_to_view$name
-				    p.names <- gt.names[[12]]
-                    lines.flag<-1
-                }
-			}
-		}  
-
-        #F7: Load cell Types into the groups to pick with 'P'
-        if(keyPressed=='F7')  {
-           cellTypeId <- grep('^cell',names(dat), value=T)
-            if(length(cellTypeId)>0){
-				if(length(cellTypeId)>1){
-					bringToTop(-1)
-					cat('\n Select the cell type to load in \n')
-					cellTypeId <- select.list(cellTypeId, title="Select Cell Type")
-				}
-                bringToTop(-1)             
-                cat("\nI have filled in your cell_types to choose by pressing \'P\' ENJOY!\n")
-                gt.names <- list()
-                for(i in 1:length(dat[[cellTypeId]])){
-                    #Fill in the gt.names with each cell type
-                    gt.names[[ names(dat[[cellTypeId]][i]) ]]<-dat[[cellTypeId]][[i]]
-                }
-            }else{
-                cat('\nSorry you haven\'t defined cell types yet, so i can\'t fill it it for you.\n')
-            }
-        }
-
         if(keyPressed=="1")
         {gt.names[[1]]<-union(gt.names[[1]],cnames[cell.i]);print(gt.names[1])}
         if(keyPressed=="!")
@@ -8289,21 +8132,16 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     
     assign(dat.name,dat, envir=.GlobalEnv)
     bringToTop(-1)
-    if(save_question){
-        print('Would y ou like to save you cell groups?')
-        selection<-select.list(c('no','yes'),title='Save Groups?')
-        if(selection=='yes'){
-            print("Write in your name")
-            save.names <- scan(n=1, what='character')
-            save_label <- save.names
-            assign(save.names, gt.names, envir = .GlobalEnv)  
-            assign(save.names , gt.names)
-            save(list = save.names ,file=paste(save_label,'.Rdata',sep=''))
-            gt.names<<-gt.names
-        }else{
-            gt.names<<-gt.names
-            return(gt.names)
-        }
+    print('Would y ou like to save you cell groups?')
+    selection<-select.list(c('no','yes'),title='Save Groups?')
+    if(selection=='yes'){
+        print("Write in your name")
+        save.names <- scan(n=1, what='character')
+		save_label <- save.names
+        assign(save.names, gt.names, envir = .GlobalEnv)  
+		assign(save.names , gt.names)
+        save(list = save.names ,file=paste(save_label,'.Rdata',sep=''))
+        gt.names<<-gt.names
     }else{
         gt.names<<-gt.names
         return(gt.names)
@@ -9543,60 +9381,11 @@ ImageFiller<-function(dat){
         
         if(image.to.add==""){dat[[paste('img',i,sep='')]]<-NULL
         }else{
-            dat[[paste('img',i,sep='')]]<-png::readPNG(image.to.add)
+            dat[[paste('img',i,sep='')]]<-readPNG(image.to.add)
         }
     }
     return(dat)
 }
-
-ImageFillerv2 <- function(dat, img_name_vec){
-
-    if( is.null(img_name_vec) ){
-        img_name_vec<-c(
-            "bf.gfp.tritc.start.png",
-            "gfp.tritc.start.ci.ltl.rs.png",
-            "tritc.start.ci.ltl.rs.png",
-            "gfp.start.ci.ltl.rs.png",
-            "bf.start.lab.png",
-            "fura2.png",
-            "fura2.divide.start.png",
-            "roi.img.png")
-        image_question <- T
-    }else{
-        image_question <- F
-    }
-    # Add images
-    img_list<-list()
-    for( j in 1:length(img_name_vec) ){
-        dat[[ paste0("img",j) ]] <- tryCatch(png::readPNG(img_name_vec[j]), error=function(e)NULL)
-    }
-    if(image_question == T){
-        cat('\nThese are the images I have attempted to load for you\nIf any are NULL, and want to add different images say yes to the \nnext question. You will be asked to select a png image for each loaction.\n\n')
-        cat(img_name_vec, sep='\n')
-        cat(str(img_list))
-
-        cat('\nDO YOU WANT DIFFERENT IMAGES[y,n]?\n')
-        img_reselect <- scan(n=1,what='character')
-        if( img_reselect=='y' ){
-            cat("\nAlright buddy I am going to give you options if you don't\nwant any image there just go ahead and press 0\n\n")
-            png_imgs <- list.files(pattern='png')
-            for( j in 1:8 ){
-                cat("\nWhat do you want for image ", j, '\n')
-                selection <- menu(png_imgs)
-                if(selection==0){
-                    dat[[paste0("img",j)]] <- NULL
-                }else{
-                    dat[[paste0("img",j)]] <- png::readPNG(png_imgs[selection])
-                }
-                cat('\nI have added ', png_imgs[selection],' to position ',j,'\n')
-            }
-            }
-    }
-    return(dat)    
-}
-
-
-
 
 # Fucntion locates single cell or groups of cells on plot.  
 # Needs more optional assignments
@@ -10176,7 +9965,7 @@ multi.pic.zoom.2<-function(dat, m.names, img, labs=F, zf=NULL, cols=NULL){
         }
     }	
         dev.off()
-        tmp.png <- png::readPNG("tmp.png")
+        tmp.png <- readPNG("tmp.png")
         unlink("tmp.png")
         return(tmp.png)			
 }
@@ -10632,53 +10421,7 @@ cellzand<-function(dat,collumn=NULL, parameter=1,cells=NULL){
     bob<-intersect(bob,cells)
     return(bob)
 }
-
-### Function to select rows based on collumn parameters
-# dat can be either a raw RD object or an RD dataframe
-# ex dat -or- dat$bin
-
-cellzand_tcd<-function(dat,collumn=NULL, parameter=1,cells=NULL){
     
-    cells_to_view <- list()
-    bob<-list()
-    if(is.null(cells)){cells<-dat$c.dat$id}else{cells<-cells}
-    if(class(dat)=="list"){
-        dat.select<-select.list(names(dat), title="Select DataFrame")
-        dat<-dat[[dat.select]]
-        if(is.null(cells)){
-            cells<-row.names(dat)}else{cells<-cells
-        }
-    }else{
-        dat<-dat
-        if(is.null(cells)){cells<-row.names(dat)}else{cells<-cells}
-    }
-    
-    if(is.null(collumn)){
-        collumn<-select.list(names(dat), multiple=T, title="Select Collumn")
-        cells_to_view$name <- collumn
-    }else{collumn<-collumn}
-    
-    if(is.null(parameter)){
-        parameter<-1
-    }else{parameter<-parameter}
-    
-    for(i in collumn){
-        bob[[i]]<-row.names(dat)[dat[,i]>=parameter]
-    }
-    
-    bob<-Reduce(union, bob)
-    
-    bob<-intersect(bob,cells)
-
-    cells_to_view$cells <- bob
-    if( length(bob) == 0){
-        return(NA)
-    }else{
-        return(cells_to_view)
-    }
-}
-
-
 cellzor<-function(dat,collumn=NULL, parameter=1,cells=NULL){
     
     bob<-list()
@@ -10840,17 +10583,16 @@ census.brewer<-function(dat){
     stacked.traces<-dev.cur()
     LinesEvery.5.1(dat, sample(row.names(dat$c.dat)[1:5]), plot.new=F, lmain="WAZZZUPPPP", t.type="t.dat", img=dat$img1)
 
-    cat("HOWDY PARTNER How Many groups to census?\n")
-    bringToTop(-1)
+    print("How Many groups to census?")
     group.number<-scan(n=1, what='numeric')
 
-    cat("\nEnter the names of your census groups seperated by '.'\n")
+    print("enter the names of your census groups seperated by '.' (6)")
     census.names<-scan(n=as.numeric(group.number), what='character')
     dev.off(stacked.traces)
 
 
     selected.cell.groups<-select.list(names(cell.types), title="Select groups to census", multiple=T)
-    cat("\nThese are the cells you have chosen\n")
+    print("These are the cells you have chosen")
     print(selected.cell.groups)
     census<-list()
 
@@ -10859,7 +10601,7 @@ census.brewer<-function(dat){
         print(selected.cell.groups[i])
         
         if(length(cell.types[[selected.cell.groups[i]]])>1){
-            census[[i]]<-tcd(dat, Reduce(union,cell.types[[selected.cell.groups[i]]]), save_question=F)
+            census[[i]]<-tcd(dat, Reduce(union,cell.types[[selected.cell.groups[i]]]))
             names(census[[i]])<-census.names
         }else{
             census[[i]]<-NA
@@ -10871,8 +10613,6 @@ census.brewer<-function(dat){
     names(census)<-selected.cell.groups
 
     dat$census<-census
-
-    dat <- census_to_table(dat)        
     return(dat)
 }
 
@@ -10892,22 +10632,20 @@ census.brewer.2<-function(dat){
         census.names<-scan(n=as.numeric(group.number), what='character')
         dev.off(stacked.traces)
     }else{
-        census.names<-names(dat$census[[1]])[!is.na(names(dat$census[[1]]))]
+    census.names<-names(dat$census[[1]])[!is.na(names(dat$census[[1]]))]
     }
+
 
     selected.cell.groups<-select.list(names(cell.types), title="Select groups to census", multiple=T)
-    print("These are the cells you have chosen")
-    print(selected.cell.groups)
 
-    if(is.null(dat$census)){
-        dat$census<-list()
-    }
+    if(is.null(dat$census)){dat$census<-list()}
 
     for(i in selected.cell.groups)
     {
         print(i)
+        
         if(length(cell.types[[i]])>1){
-            dat$census[[i]]<-tcd(dat, Reduce(union,cell.types[[i]]))
+            dat$census[[i]]<-Trace.Click.dev(dat, Reduce(union,cell.types[[i]]))
             names(dat$census[[i]])<-census.names
         }else{
             dat$census[[i]]<-NULL
@@ -11015,26 +10753,20 @@ PulseImputer<-function(tmp,cell,pulse.names=NULL,plot.new=F,sf=8){
 }
 
 #function to build a table with defined cell types, and selected collumns
-TableBrewer<-function(dat, ct.names=NULL, save=T, xlsx=T){
+TableBrewer<-function(dat, ct.names=NULL){
+    require(xlsx)
     dat.name<-deparse(substitute(dat))
     pulse<-select.list(names(dat$bin), multiple=T, title="select variables for table")
     ct.sum<-data.frame()
-
+    
+    
+    
     if(is.null(ct.names)){
-        #F7: Load cell Types into the groups to pick with 'P'
-        cellTypeId <- grep('^cell', names(dat), value=T)
-        if(length(cellTypeId)>0){
-			if(length(cellTypeId)>1){
-				bringToTop(-1)
-				cat('\n Select the cell type to load in \n')
-				cellTypeId <- select.list(cellTypeId, title="Select Cell Type")
-            }
-        }
-        cell.type.names <- names(dat[[cellTypeId]])
-        cell.types <- dat[[cellTypeId]]
+        cell.type.names<-names(dat$cell.types)
+        cell.types<-dat$cell.types
     }else{
-        cell.type.names <- names(ct.names)
-        cell.types <- ct.names
+        cell.type.names<-names(ct.names)
+        cell.types<-ct.names
     }
     
     for(z in 1:length(pulse)){
@@ -11045,21 +10777,10 @@ TableBrewer<-function(dat, ct.names=NULL, save=T, xlsx=T){
                 ct.sum[pulse[z],cell.type.names[x]]<-sum(dat$bin[cell.types[[ cell.type.names[x] ]],pulse[z]])
             }
     }
-
-    if(save){
-        print('Enter you file name without spaces')
-        save.names <- scan(n=1, what='character')
-        print(paste(save.names,'xlsx',sep=''))
-        if(xlsx){
-            require(xlsx)
-            tryCatch(
-                write.xlsx(ct.sum, file=paste(save.names,'.xlsx',sep='')), 
-                error=function(e) print("You Forgot to input cells.")
-            )
-        }else{
-            write.csv(ct.sum, file=paste(save.names,'.csv',sep=''))
-        }
-    }
+    print('Endter you file name without sapces')
+    save.names<-scan(n=1, what='character')
+    print(paste(save.names,'xlsx',sep=''))
+    write.xlsx(ct.sum, file=paste(save.names,'.xlsx',sep=''))
     return(ct.sum)
 }
 
@@ -11352,9 +11073,7 @@ Cell_Typer<-function(tmp.rd, edit_ct=T, UL_classify=T, thermos_classify=T){
 #181016 If the large diameter cells have been classified, then do not score again.
 Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NULL){
     
-    if(is.null(cell_types)){
-        large_cell_types_names <- NULL
-    }else{
+    if(!is.null(cell_types)){
         #If your cell_types is not null do large celltyping
         UL_classify <- T
         #perform a test on your cell_types to see if there are large ones
@@ -11369,8 +11088,7 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NULL)
             UL_ct<-cell_types[large_cell_types_names]
 			UL_classes_logic <- T
         }
-	}
-
+    }
 
     dropped<-cellzand(tmp_rd$bin,"drop",1)
     #selected bin and dropped
@@ -11455,7 +11173,6 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NULL)
         #not classified by th previous green groups
         #This groups contains miscored Menthol responses and the large cell groups
         G_0<-setdiff(green_cells, c(G7,G8,G9,G10))
-		print(G_0)
     }	
     ########################################
     #RED ONLY GROUP
@@ -11511,21 +11228,17 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NULL)
     
     #find trpm8 and trpa1 containing neurons
     menth_and_aitc_cells<-intersect(menth_cells, aitc_cells)
-    if(length(menth_and_aitc_cells) > 0 ){
-		menth_and_aitc_neurons<-intersect(neurons, menth_and_aitc_cells)
-		trpm8_trpa1<-c()
-		for(i in 1:length(menth_and_aitc_neurons)){
-			if(tmp_rd$scp[menth_and_aitc_neurons[i],menth_stat] >= 
-				((tmp_rd$scp[menth_and_aitc_neurons[i],aitc_stat])*1.1)
-			){
-				trpm8_trpa1<-c(trpm8_trpa1,menth_and_aitc_neurons[i])
-			}
-		}
-		
-		N15_a<-trpm8_trpa1
-	}else{
-		N15_a <- NULL
-	}
+    menth_and_aitc_neurons<-intersect(neurons, menth_and_aitc_cells)
+    trpm8_trpa1<-c()
+    for(i in 1:length(menth_and_aitc_neurons)){
+        if(tmp_rd$scp[menth_and_aitc_neurons[i],menth_stat] >= 
+            ((tmp_rd$scp[menth_and_aitc_neurons[i],aitc_stat])*1.1)
+        ){
+            trpm8_trpa1<-c(trpm8_trpa1,menth_and_aitc_neurons[i])
+        }
+    }
+    
+    N15_a<-trpm8_trpa1
     ################################
     #Unlabeled
     ################################
@@ -11566,8 +11279,7 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NULL)
     
     #N14 is a miscellaneous class that stores addiional unclassified cells
     N14<-union(N14, R_0)
-    UC<- union(R_0, US_0)
-    #N14<-union(N14, US_0)
+    N14<-union(N14, US_0)
 
     #######################################
     #UL
@@ -11582,20 +11294,13 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NULL)
             PRESS ANY KEY TO CONTINUE
         ")
         scan(n=1)
-
-        if(length(UL) > 0){
-            UL_groups <- tcd(tmp_rd, c(UL), save_question=F)
-            L1<-UL_groups[[1]] #proprioceptor	
-            L2<-UL_groups[[2]] #jagged
-            L3<-UL_groups[[3]] #IDE only
-            L4<-UL_groups[[4]] #no effect
-            if(edit_ct){discard<-union(discard, UL_groups[[5]])}
-         }else{
-            L1 <- NULL
-            L2 <- NULL
-            L3 <- NULL
-            L4 <- NULL
-         }
+        UL_groups<-tcd(tmp_rd, c(UL))
+        L1<-UL_groups[[1]] #proprioceptor	
+        L2<-UL_groups[[2]] #jagged
+        L3<-UL_groups[[3]] #IDE only
+        L4<-UL_groups[[4]] #no effect
+        
+        if(edit_ct){discard<-union(discard, UL_groups[[5]])}
 
         if(GFP){
             cat(" Sort the Unlabled Large into
@@ -11606,15 +11311,11 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NULL)
             PRESS ANY KEY TO CONTINUE
             ")
             scan(n=1)
-            if(length(G_0)>0){
-                G_0_sort<-tcd(tmp_rd, c(G_0), save_question=F)
-                L5<-G_0_sort[[1]]
-                L6<-G_0_sort[[2]]
-                if(edit_ct){discard<-union(discard,G_0_sort[[3]])}
-            }else{
-                L5 <- NULL
-                L6 <- NULL
-            }
+            
+            G_0_sort<-tcd(tmp_rd, c(G_0))
+            L5<-G_0_sort[[1]]
+            L6<-G_0_sort[[2]]
+            if(edit_ct){discard<-union(discard,G_0_sort[[3]])}
         }
     }else{
         UL<-large_cells_330
@@ -11749,15 +11450,14 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NULL)
                 L5,
                 L6
             )
-			cell_types<-append(cell_types,UL_gfp_ct)
+        cell_types<-append(cell_types,UL_gfp_ct)
         }else{
+            if(length(large_cell_types_names)>1){
+                cell_types<-append(cell_types,UL_ct)
+            }
         }
     }else{
-        if(UL_classes_logic){
-            cell_types<-append(cell_types,UL_ct)
-        }else{
-            cell_types<-append(cell_types,named.list(UL))
-        }
+        cell_types<-append(cell_types,named.list(UL))
     }
     if(GFP){
         gfp_ct<-named.list(
@@ -11778,8 +11478,7 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NULL)
         N15,
         N15_c,
         N15_a,
-        N16,
-        UC
+        N16
     )
     
     cell_types<-append(cell_types,red_ul_ct)
@@ -11844,44 +11543,6 @@ gif_maker<-function(dense=200, fps=2, file.name=NULL, type='png'){
 
     animation<-image_animate(gif,fps=fps)
     image_write(animation,paste0(file.name,'.gif'))
-}
-# I have a series of pdf files
-gif_png_maker<-function(dense=200,fps=2,file.name=NULL){
-    require(magick)
-    if(is.null(file.name)){
-        cat("Write the name fo the file you would like the ned image to be \n")
-        file.name<-scan(n=1,what="character")
-        file.name <- paste0(file.name,'.gif')
-    }
-    
-    cat("Lets create a gif with this data, below are all pngs in your experiment \n")
-    cat(list.files(pattern="[pP][nN][gG]"),sep="\n")
-    imgs<-list.files(pattern="[pP][nN][gG]")
-
-    cat("How many images would you like in your gif? \n")
-    imgs_to_add <-scan(n=1)
-    
-    imgs_for_gif<-c()
-    for(i in 1:imgs_to_add){
-        img_selection <- menu(list.files(pattern="[pP][nN][gG]"),title=paste("Select image ",i))
-        imgs_for_gif[i] <- imgs[as.numeric(img_selection)]
-        cat("These are the selected images \n")
-        cat(imgs_for_gif,sep="\n")
-    }
-
-    #dense<-200
-    gif<-image_read(imgs_for_gif[1], density=dense)
-    gif<-image_border(gif, "red", "10x10")
-    for(i in 2:length(imgs_for_gif)){
-        gifz<-image_read(imgs_for_gif[i], density=dense)
-        gifz<-image_border(gifz,"black","10x10")
-        gif<-c(gif,gifz)
-    }   
-
-    #fps=2
-    animation<-image_animate(gif,fps=fps)
-
-    image_write(animation,file.name)
 }
 
 Trace_select_grid<-function(dat, x.names, levs=select.list(names(dat$bin)), t.type="blc", preselect=T, l.col="red", window.w=10, window.h=10, title1="hi"){
@@ -11949,7 +11610,7 @@ Trace_select_grid<-function(dat, x.names, levs=select.list(names(dat$bin)), t.ty
     require(png)
     start.time<-Sys.time()
     for(i in 1:xn){
-        tmp_img<-png::readPNG(png.name[i])
+        tmp_img<-readPNG(png.name[i])
         dim(tmp_img)
         
         xl <- all.x[i]-sl*.9
@@ -12548,202 +12209,3 @@ cat(
 	}
 }	
 	
-#Funciton to save the work along with create a unique savehistory
-
-saveRD <- function(dat){
-    cat("\nDO NOT CLOSE UNTIL I SAY YOU CAN!\nWait for the sound...")
-    flush.console()
-    bringToTop(-1)
-    Sys.sleep(1)
-
-    #History Saver
-    experimentorsName <- strsplit(getwd(),'/')[[1]][2]
-    historyName <- paste(experimentorsName, Sys.time(), 'History.r')
-    historyName <- gsub(":", '_',historyName)
-    savehistory(historyName)
-
-    #Exp Saver
-    expName <- deparse(substitute(dat))
-    #expToSave <- get(expName, envir = .GlobalEnv)
-    assign(expName, dat)
-    save(list=expName, file=paste0(expName,".Rdata") )
-    alarm()
-    cat('\nYou can now close. Please consider cleaning up the file,\n',historyName,'\n')
-}
-
-
-cellTypeFixer<- function(dat){
-	dropped <- row.names(dat$bin[dat$bin$drop==1,])
-	dat$cell_types <- lapply(dat$cell_types, function(x) setdiff(x, dropped))
-	return(dat)
-}
-
-
-# MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS,
-# ALSO HAVE SEPERATE WR1's that match  exactly what happened
-# 1 Now tht we know the videos are ok we will simply do the cell profiler pipeline
-# 2 we copy everything from the cell profiler pipeline into the 2 folders that contain the videos
-# 3 Now do the pharming harvest and select both folders that contain the seperate videos
-
-# dat1 is the flocation of the frist RD fil ex. "./1 video that yeeted itself/RD.1.Rdata"
-# dat2 is the second rd file taht needs to stich to "./2 R3J, TTAA, agonist vid/RD.2.Rdata"
-# timeBuffer is the time separation in minutes between the frist trace and the second trace
-# newName is the name of the experiment to save 
-# Example of how to use
-#traceSticher(
-#    './1 video that yeeted itself/RD.1.Rdata',
-#   './2 R3J, TTAA, agonist vid/RD.2.Rdata',
-#   3,
-#    'RD.bob')
-
-traceSticher <- function(dat1Loc, dat2Loc, timeBuffer = 3, newName = NULL){
-    cat("
-    # MAKE SURE BOTH VIDEOS ARE IN SEPERATE FOLDERS, 
-    # ALSO HAVE SEPERATE WR1's that match  exactly what happened
-    # 1 Now tht we know the videos are ok we will simply do the cell profiler pipeline
-    # 2 we copy everything from the cell profiler pipeline into the 2 folders that contain the videos
-    # 3 Now do the pharming harvest and select both folders that contain the seperate videos
-    
-    traceSticher(
-        './1 video that yeeted itself/RD.1.Rdata', 
-        './2 R3J, TTAA, agonist vid/RD.2.Rdata', 
-        3, 
-        'RD.bob')
-    ")
-    dat1 <- get(load(dat1Loc))
-    dat2 <- get(load(dat2Loc))
-
-    fName <- paste0(newName, ".Rdata")
-    assign(newName, dat1)
-    assign(newName, dat1, envir = .GlobalEnv)  
-    save(list = newName ,file=fName )
-
-    #How long were your experiments seperated?
-    #I think at least 7 min is mandatory
-    #time_buffer <- 3
-    #look at the max time value in the t.dat on the first experiemnt
-    #add it to the time_buffer
-    #look at the max time value in the t.dat on the first experiemnt
-    #add it to the time_buffer
-    time_to_change<-max(dat1$t.dat[1])+timeBuffer
-    #now increase every time value in the second experiment by the 
-    #value above
-    changed_time <- dat2$t.dat[,1] + time_to_change
-
-    #Now we need make unique names of rhte windew regions
-    names_to_change<-setdiff(unique(dat2$w.dat[,"wr1"]),"")
-    new_names<-paste(names_to_change,"_2", sep="")
-    #dat2$w.dat["ignore"]<-0
-    for(i in 1:length(names_to_change)){
-        dat2$w.dat[ dat2$w.dat["wr1"]==names_to_change[i] ,2]<-new_names[i]
-    }
-
-    #Select the t.dat, blc and, w.dat
-    t_to_view<-c('t.dat', 't.340', 't.380', 'w.dat')
-    ##now merg ethe datasets
-    for(i in 1:length(t_to_view)){
-        #we need to get rid of the epad
-        notEpadLogic <- dat1$w.dat$wr1 != "epad"
-        dat1[[ t_to_view[i] ]] <- dat1[[ t_to_view[i] ]][notEpadLogic, ]
-        #change the row names first
-        
-        notEpadLogic <- dat2$w.dat$wr1 != "epad"
-        dat2[[ t_to_view[i] ]] <- dat2[[ t_to_view[i] ]][notEpadLogic, ]
-        row.names( dat2[[ t_to_view[i] ]] ) <- as.character(changed_time)
-        #change the first collumn value
-        dat2[[ t_to_view[i] ]][1]<-changed_time
-        #combine the experiments trace dataframes together
-        dat1[[ t_to_view[i] ]]<-rbind(dat1[[ t_to_view[i] ]], dat2[[ t_to_view[i] ]])
-    }
-
-    #And reprocess the data
-    levs<-setdiff(unique(as.character(dat1$w.dat[,2])),"")
-        snr.lim=5;hab.lim=.05;sm=2;ws=3;blc="SNIP"
-    pcp <- ProcConstPharm(dat1,sm,ws,blc)
-    scp <- ScoreConstPharm(dat1,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
-    bin <- bScore(pcp$blc,pcp$snr,snr.lim,hab.lim,levs,dat1$w.dat[,"wr1"])
-
-    dat1$scp<-scp
-    dat1$snr<-pcp$snr
-    dat1$blc<-pcp$blc
-    dat1$bin<-bin
-    
-    #dat1 <- TraceBrewer(dat1)
-
-    fName <- paste0(newName, '.Rdata')
-    assign(newName, dat1)
-    assign(newName, dat1, envir = .GlobalEnv)  
-    save(list = newName ,file=fName )
-}
-
-# now create table 
-barPlotter <- function(dat = NULL, cols = 'YlOrRd'){
-    cat("\nREAD ME\nWelcome to barPlotter to use me,\nbarPlotter(dat=RD.experiment, col = \'YlOrRd\')\nCustomize your colors, go to this webpage to get other names \nhttps://www.datanovia.com/en/wp-content/uploads/dn-tutorials/ggplot2/figures/0101-rcolorbrewer-palette-rcolorbrewer-palettes-1.png")
-
-    cat('\nSelect what you Want to be on your barPlot\n')
-    table <- TableBrewer(dat, ,F,F)
-    # for each row except the first (this is the number of cells in each cell type)
-    tableList <- list()
-    for(i in 2:dim(table)[1]){
-        tableList[[ row.names(table)[i] ]] <- table[c(1,i),,drop=F]
-    }
-    #tableList[['ATP']] <- read.csv('./atp.csv', row.names=1)
-    #tableList[['Ca-free ATP']] <- read.csv('./caFree.csv', row.names=1)
-    #tableList[['MRS-2365']] <- read.csv('./mrs2365.csv', row.names=1)
-
-
-    tablePercs <- Reduce(rbind,lapply(tableList, function(x) round(x[2,]/x[1,]*100, digits=2)))
-    tablePercsMut <- as.matrix(rev(tablePercs[nrow(tablePercs):1,]))
-
-    # BARPLOT
-    require(RColorBrewer)
-    cols <- rev(brewer.pal(5, cols))[length(tableList):1]
-    graphics.off()
-    dev.new(width=5, height=12)
-    par(mar=c(5,4,4,7))
-    bpDims <- barplot(
-        tablePercsMut, 
-        beside=T, 
-        horiz=T,
-        col=cols,
-        yaxt='n',
-        xlab='% Cell Class Reponding',
-        xlim=c(0,100),
-        border=NA)
-
-    # LEGEND
-    par(xpd=T)
-    responses <- names(tableList)
-    legend(
-        par('usr')[2]+xinch(.2),
-        par('usr')[4]+yinch(.2), 
-        responses, 
-        fill=rev(cols), 
-        border=NA,
-        bty='n',
-        horiz=F,
-        cex=.7)
-
-    # YLAB
-    yLocs <- apply(bpDims, 2, mean)
-    xLocs <- rep(par('usr')[1]-xinch(.5), length(yLocs))
-    tableLabs <- rev(names(tableList[[1]]))
-    par(xpd=T)
-    text(xLocs, yLocs, tableLabs)
-
-
-    # BARLABS
-    tablePercsMut <- tablePercsMut[nrow(tablePercsMut):1,,drop=F]
-    bpDims <- bpDims[nrow(bpDims):1,, drop=F]
-
-    for(i in 1:nrow(bpDims)){
-        xLocs <- tablePercsMut[i,] + xinch(.3)
-        yLocs <- bpDims[i,] +yinch(.02)
-        textToPlace <- paste(rev(tableList[[i]][2,]), '/', rev(tableList[[i]][1,]))
-        text(xLocs, yLocs, textToPlace, cex=.6)
-    }
-
-}
-
-
-

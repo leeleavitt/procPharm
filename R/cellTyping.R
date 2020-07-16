@@ -52,7 +52,7 @@ census.brewer<-function(dat){
         print(selected.cell.groups[i])
         
         if(length(cell.types[[selected.cell.groups[i]]])>1){
-            census[[i]]<-tcd(dat, Reduce(union,cell.types[[selected.cell.groups[i]]]), save_question=F)
+            census[[i]]<-tcd(dat, Reduce(union,cell.types[[selected.cell.groups[i]]]), save_question=F, track = F)
             names(census[[i]])<-census.names
         }else{
             census[[i]]<-NA
@@ -294,6 +294,7 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
     
     #N15_c Menthol capsaicin
     N15_c <- intersect(N15, cap_cells)
+    R11 <- setdiff(R11, N15_c)
     
     #Now create an unlabeled large group of cells
     UL<- intersect(large_cells_330, unlabeled)
@@ -339,7 +340,7 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
         scan(n=1)
 
         if(length(UL) > 0){
-            UL_groups <- tcd(tmp_rd, c(UL), save_question=F)
+            UL_groups <- tcd(tmp_rd, c(UL), save_question=F, track = F)
             L1<-UL_groups[[1]] #proprioceptor	
             L2<-UL_groups[[2]] #jagged
             L3<-UL_groups[[3]] #IDE only
@@ -362,7 +363,7 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
             ")
             scan(n=1)
             if(length(G_0)>0){
-                G_0_sort<-tcd(tmp_rd, c(G_0), save_question=F)
+                G_0_sort<-tcd(tmp_rd, c(G_0), save_question=F, track = F)
                 L5<-G_0_sort[[1]]
                 L6<-G_0_sort[[2]]
                 if(edit_ct){discard<-union(discard,G_0_sort[[3]])}

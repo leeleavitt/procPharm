@@ -2,7 +2,8 @@
 % Please edit documentation in R/tcd.R
 \name{tcd}
 \alias{tcd}
-\title{TraceClick.dev(tcd)}
+\title{TraceClick.d
+ev(tcd)}
 \usage{
 tcd(
   dat,
@@ -25,7 +26,8 @@ tcd(
   sf = 1,
   dat.name = NULL,
   view_func_description = F,
-  save_question = T
+  save_question = T,
+  track = T
 )
 }
 \arguments{
@@ -48,6 +50,8 @@ tcd(
 \item{f}{New trace fitting for pottassium pulses}
 
 \item{F}{New smoothing factor for fit trace}
+
+\item{ctrl-F}{function to correct the scoring}
 
 \item{i}{Select image to display on Stacked Traces}
 

@@ -8,7 +8,7 @@ cell type densities.}
 density_ct_plotter(
   dat,
   cells,
-  cell_types,
+  cell_types = NULL,
   stat = dat$c.dat["area"],
   xlim_top = NULL,
   xlim_bottom = NULL,

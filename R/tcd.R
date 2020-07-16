@@ -1,10 +1,13 @@
 
 readkeygraph <- function(prompt){
-    getGraphicsEvent(prompt = prompt, 
-                 onMouseDown = NULL, onMouseMove = NULL,
-                 onMouseUp = NULL, onKeybd = onKeybd,
-                 consolePrompt = "uh")
-    Sys.sleep(0.01)
+    responses <- c("hey", "hi", "hello", "ouch", "tumbs-up")
+    keyPressed <- getGraphicsEvent(prompt = prompt, 
+                 onMouseDown = mouseDownFixer, 
+                 onMouseMove = NULL,
+                 onMouseUp = NULL, 
+                 onKeybd = onKeybd,
+                 consolePrompt = responses[sample(length(responses))[1]])
+    #Sys.sleep(0.01)
     return(keyPressed)
 }
 
@@ -12,8 +15,33 @@ onKeybd <- function(key){
     keyPressed <<- key
 }
 
+# Fucntion to sample it but maintain current order
+mySample <- function(values,N){
+        size <- length(values)
 
-#' TraceClick.dev(tcd)
+        values[sapply(1:size, function(i){
+                    select <- as.logical(rbinom(1,1,N/(size+1-i)))
+                    if(select) N <<- N - 1
+                    select
+        })]
+}
+
+# Functions to read the mouse and keyboard during fixes!
+mouseDownFixer <- function(buttons, x, y){
+    mouseReturn <- list(
+        buttons =  buttons,
+        x = x,
+        y=y
+     )
+    return(mouseReturn)
+}
+
+keybdFixer <- function(key){
+    return(key)
+}
+
+#' TraceClick.d
+#' ev(tcd)
 #' 
 #' This function is an interactive dashboard for viewing your exeriments.
 #'
@@ -40,6 +68,7 @@ onKeybd <- function(key){
 #' @param D LinesEvery seperation	
 #' @param f New trace fitting for pottassium pulses
 #' @param F New smoothing factor for fit trace
+#' @param ctrl-F function to correct the scoring
 #' @param i Select image to display on Stacked Traces
 #' @param I image for Multiview
 #' @param l choose window region to display on stack trace plot
@@ -64,12 +93,17 @@ onKeybd <- function(key){
 #' @param F3 Density plot visualization
 #' @param F5 does something
 #' @export
-tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type="t.dat", plot.new=F, info=T, pts=T, lns=T, bcex=1, levs=NULL, klevs=NULL, sft=NULL, underline=T, zf=20, lw=2, sf=1, dat.name=NULL, view_func_description=F, save_question = T){
+tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type="t.dat", plot.new=F, info=T, pts=T, lns=T, bcex=1, levs=NULL, klevs=NULL, sft=NULL, underline=T, zf=20, lw=2, sf=1, dat.name=NULL, view_func_description=F, save_question = T, track = T){
+    time1 <- proc.time()
+	additionalInfo <- c()
+
     graphics.off()
     print(environment())
     if(is.null(dat.name)){
         dat.name<-deparse(substitute(dat))
-    }else{dat.name<-dat.name}
+    }else{
+        dat.name<-dat.name
+    }
     if(view_func_description){
     cat(
     "
@@ -167,20 +201,20 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     tryCatch(windows(width=14,height=4,xpos=0, ypos=50), error=function(e) windows(width=14,height=4))
     click.window<-dev.cur()
     
-    tryCatch(windows(width=10,height=6,xpos=0, ypos=450), error=function(e) windows(width=14,height=4))
-    lines.window<-dev.cur()
+    # tryCatch(windows(width=10,height=6,xpos=0, ypos=450), error=function(e) windows(width=14,height=4))
+    # lines.window<-dev.cur()
     
-    dimx<-dim(img)[2]
-    dimy<-dim(img)[1]
-    haight<-10*dimy/dimx
-    tryCatch(windows(width=haight*dimx/dimy, height=haight,xpos=1130, ypos=200), error=function(e) windows(width=haight*dimx/dimy, height=haight))
-    view.window<-dev.cur()
+    # dimx<-dim(img)[2]
+    # dimy<-dim(img)[1]
+    # haight<-10*dimy/dimx
+    # tryCatch(windows(width=haight*dimx/dimy, height=haight,xpos=1130, ypos=200), error=function(e) windows(width=haight*dimx/dimy, height=haight))
+    # view.window<-dev.cur()
     
-    tryCatch(windows(width=8, height=8,xpos=1130, ypos=0), error=function(e) windows(width=8, height=8))
-    multipic.window<-dev.cur()
+    # tryCatch(windows(width=8, height=8,xpos=1130, ypos=0), error=function(e) windows(width=8, height=8))
+    # multipic.window<-dev.cur()
     
-    tryCatch(windows(width=12, height=2,xpos=0, ypos=550), error=function(e) windows(width=12, height=2))
-    traceimpute.window<-dev.cur()
+    # tryCatch(windows(width=12, height=2,xpos=0, ypos=550), error=function(e) windows(width=12, height=2))
+    # traceimpute.window<-dev.cur()
     
     window.flag<-0
     lines.flag <- 0
@@ -260,89 +294,138 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         cnames<-cells
     }
     
-    
+    # Look for a setting portion of the RD.experiment.
+    # what we need to track are
+    # levs
+    # underline
+    # zoom factor
+    # selected trace
+    # selected images
+    if( ! "SETTINGS" %in% names(dat)){
+        SETTINGS <- list()
+        SETTINGS$levs <- levs
+        SETTINGS$l.img <- l.img
+        SETTINGS$img <- img
+        SETTINGS$underline <- underline
+        SETTINGS$t.type <- t.type
+        dat$SETTINGS <- SETTINGS
+    }else{
+        SETTINGS <- dat$SETTINGS
+    }
+
+
     keyPressed <- "z"
-    #group.names<-NULL
-    if(is.null(levs)){levs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
-    }else{levs<-levs}
+
+    if(is.null(SETTINGS$levs)){
+        SETTINGS$levs <- setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
+    }
     
-    if(is.null(klevs)){klevs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
-    }else{klevs<-levs}
+    klevs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
     
     while(keyPressed!="q"){
         cell.pick <- cnames[cell.i]
         
         dev.set(which=click.window)
-        p1 <- PeakFunc7(dat,cell.pick, t.type=t.type, yvar=yvar, info=info, bcex=bcex, pts=pts, lns=lns, levs=levs, underline=underline, dat.n=dat.name, zf=zf)
+        p1 <- PeakFunc7(dat,cell.pick, t.type=t.type, yvar=yvar, info=info, bcex=bcex, pts=pts, lns=lns, levs=SETTINGS$levs, underline=SETTINGS$underline, dat.n=dat.name, zf=zf)
         p1.par<-par()
         
         ##LinesEvery
-        if(lines.flag==1){
-            #if(length(p.names)<100){
+        if(lines.flag == 1){
+            if(length(p.names) < 500){
                 if(length(p.names)>11){
-                    dev.off(which=lines.window)
+                    tryCatch(dev.off(which=lines.window), error=function(e)NULL)
                     tryCatch(windows(width=10,height=12,xpos=0, ypos=100), error=function(e)windows(width=10,height=12))
                     lines.window<-dev.cur()
                 }else{
-                    dev.off(which=lines.window)
+                    tryCatch(dev.off(which=lines.window), error=function(e)NULL)
                     tryCatch(windows(width=10,height=7,xpos=0, ypos=250) , error=function(e)windows(width=10,height=7))
                     lines.window<-dev.cur()
                 }
                 dev.set(which=lines.window)
-                tryCatch(LinesEvery.5(dat,p.names,plot.new=F, img=l.img,lmain=paste(gsub("[$]","",p.namez), 'n=',length(p.names)), t.type=t.type, lw=lw, col=lines.color, lns=lns, levs=levs, bcex=1, underline=underline, dat.n=dat.name, zf=zf, sf=sf, values=values),error=function(e) print("You haven't stacked traces yet, yo."))
+                tryCatch(LinesEvery.5(dat,p.names,plot.new=F, img=SETTINGS$l.img,lmain=paste(gsub("[$]","",p.namez), 'n=',length(p.names)), t.type=SETTINGS$t.type, lw=lw, col=lines.color, lns=lns, levs=SETTINGS$levs, bcex=1, underline=SETTINGS$underline, dat.n=dat.name, zf=zf, sf=sf, values=values),error=function(e) print("You haven't stacked traces yet, yo."))
                 lines.flag <- 0
-            #}
-        }
-        
-        if(lines.flag==2){
-            sample.to.display<-as.numeric(select.list(as.character(c(5,10,20,50,70,100))),title='Sample Number?')
-            tryCatch(dev.off(which=lines.window.2), error=function(e) print("this windows hasn't been opened yet"))
-            
-            if(sample.to.display > 20){
-                tryCatch(windows(width=10,height=12,xpos=0, ypos=250), error=function(e)windows(width=10,height=12))
-            }else{
-                tryCatch(windows(width=10,height=7,xpos=0, ypos=250), error=function(e)windows(width=10,height=7))
             }
-            lines.window.2<-dev.cur()
-            dev.set(which=lines.window.2)
-            
-            tryCatch(
-                LinesEvery.5(
-                    dat,
-                    sample(p.names)[1:sample.to.display],
-                    plot.new=F,
-                    lmain=paste("Sample",sample.to.display,"out of",length(p.names)), 
-                    img=l.img, lw=lw, t.type=t.type, col="black", lns=lns, levs=levs, bcex=1, underline=underline, dat.n=dat.name, zf=zf,sf=sf, values=values)
-            ,error=function(e) print("You haven't stacked traces yet, yo."))
-            lines.flag <- 0
-        }
-
-        ##Pulse Imputer
-        if(lines.flag==3){
-
-            #dev.off(which=traceimpute.window)
-            #windows(width=2*length(klevs),height=2,xpos=0, ypos=550) 
-            #traceimpute.window<-dev.cur()
-            
-            dev.set(which=traceimpute.window)
-            tryCatch(PulseImputer(dat,cell.pick,levs,sf=sf),error=function(e) print("You haven't stacked traces yet, yo."))
-            lines.flag <- 0
         }
         
-        ##Pic zoom
-        if(window.flag==1){
-            dev.set(which=view.window)
-            tryCatch(cell.view(dat,cell=p.names, img=img,cols="Yellow",plot.new=F,cell.name=T, lmain=paste(gsub("[$]","",p.namez)), zoom=FALSE),error=function(e) print("You haven't collected cells to view"))
+        if(lines.flag == 2){
+            sample.to.display <- as.numeric(select.list(as.character(c(5,10,20,50,70,100))),title='Sample Number?')
             
-            dev.set(which=multipic.window)
-            tryCatch(multi.pic.zoom(dat,p.names,img, plot.new=F, zf=zf, labs=F) ,error=function(e) print("You haven't collected cells to view"))
+            print(p.names)
+            print(sample.to.display)
+            if(sample.to.display < length(p.names)){
+                if(sample.to.display > 20){
+                    tryCatch(dev.off(which=lines.window.2), error=function(e)NULL)
+                    tryCatch(windows(width=10,height=12,xpos=0, ypos=100), error=function(e)windows(width=10,height=12))
+                    lines.window.2<-dev.cur()
+                }else{
+                    tryCatch(dev.off(which=lines.window.2), error=function(e)NULL)
+                    tryCatch(windows(width=10,height=7,xpos=0, ypos=100), error=function(e)windows(width=10,height=12))
+                    lines.window.2<-dev.cur()
+                }
+
+                tryCatch(
+                    LinesEvery.5(
+                        dat,
+                        mySample(p.names, sample.to.display),
+                        plot.new=F,
+                        lmain=paste("Sample",sample.to.display,"out of",length(p.names)), 
+                        img=SETTINGS$l.img, lw=lw, t.type=SETTINGS$t.type, col="black", lns=lns, levs=SETTINGS$levs, bcex=1, underline=SETTINGS$underline, dat.n=dat.name, zf=zf,sf=sf, values=values)
+                ,error=function(e) print("You haven't stacked traces yet, yo."))
+                lines.flag <- 0
+            }else{
+                lines.flag <- 1
+            }
+        }
+
+        ##Pic zoom
+        if(window.flag == 1){
+            tryCatch(dev.off(which=view.window), error=function(e)NULL)
+            tryCatch({
+                dimx<-dim(SETTINGS$img)[2]
+                dimy<-dim(SETTINGS$img)[1]
+                haight<-10*dimy/dimx
+                tryCatch(windows(width=haight*dimx/dimy, height=haight,xpos=1130, ypos=200), error=function(e) windows(width=haight*dimx/dimy, height=haight))
+            }, error = function(e)NULL)
+            view.window <- dev.cur()
+
+            tryCatch(dev.off(which=mulitpic.window), error=function(e)NULL)
+            tryCatch(windows(width=8, height=8,xpos=1130, ypos=0), error=function(e) windows(width=8, height=8))
+            multipic.window<-dev.cur()
+            
+            if(length(p.names) < 500 ){
+                dev.set(which=view.window)
+                tryCatch(
+                    cell.view(dat,
+                        cell=p.names, 
+                        img=SETTINGS$img,
+                        cols="Yellow",
+                        plot.new=F,
+                        cell.name=T, 
+                        lmain=paste(gsub("[$]","",p.namez)), 
+                        zoom=FALSE)
+                    ,error=function(e) print("You haven't collected cells to view")
+                )
+                
+                dev.set(which=multipic.window)
+                tryCatch(
+                    multi.pic.zoom(
+                        dat,
+                        p.names,
+                        SETTINGS$img, 
+                        plot.new=F, 
+                        zf=zf, 
+                        labs=F)
+                    ,error=function(e) print("You haven't collected cells to view")
+                )
+            }else{
+                cat("\nThere are too many cells to view try again with less than 500 \n")
+            }
             window.flag <- 0
         }
         
-        if(lines.flag==0){
-            #dev.set(dev.list()[1]) 
+        #if(lines.flag==0){
             dev.set(which=click.window)
-        }		
+        #}		
         
         #title(sub=paste("Group ",group.i," n=",g.num," Cell ",cell.i,sep=""))
         ## How many cells are you looking at
@@ -350,6 +433,22 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         #click.i <- identify(x=xs,y=ys,n=1,plot=F)
         
         keyPressed <- readkeygraph("[press any key to continue]")
+        if(class(keyPressed) == 'list'){
+            keyPressed <- keyPressed$buttons
+            if(keyPressed == 0){
+                keyPressed <- "Up"
+            }else if(keyPressed == 2){
+                keyPressed <- "Down"
+            }else if(keyPressed == 1){
+                keyPressed <- "Up"
+            }
+        }
+
+        cat('\n###############################################\nKey pressed : ')
+        cat(keyPressed)
+        cat('\n\n')
+
+        additionalInfo <- c(additionalInfo, keyPressed)
         
         if(keyPressed=="Up")
         {cell.i <- cell.i + 1;if(cell.i>length(cnames)){cell.i<-1};lines.flag<-0}
@@ -406,30 +505,48 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             if(sf==0){sf<-.001}
             lines.flag<-1
         }
-    # #f: New trace fitting for pottassium pulses
-    #     if(keyPressed=="f"){
-    #         lines.flag<-3
-    #     }
-    #f: Fixes the scoring
-    #This function will allow you to fix the region you click on
-        # if(keyPressed === 'f'){
-            # #first find the middle region of each levs to correct the scoring
-            # levsMiddle <- tapply(            levsMiddle <- tapply(dat$w.dat[,1], as.factor(dat$w.dat$wr1),mean)[levs]
-            # yLocation <- rep(par('usr')[4] + yinch(.5), length(levsMiddle))
-            # par(xpd=T)
+    # ctrl-F: Fixes the scoring
+    # This function will allow you to fix the region you click on
+        if(keyPressed == 'ctrl-F'){
 
-            # points(levsMiddle, yLocation, pch=7))
-            # identify(levsMiddle, yLocation, n=1)
+            #First input a nonsense press to get the party started
+            press = 'hibob'
+            options(warn = -1)
+            # Remain within the scoring function until ctrl-F is pressed
+            while(press != 'ctrl-F'){
+                # Update the plot to include all windows and the info
+                dev.set(which=click.window)
+                p1 <- PeakFunc7(dat, cell.pick, t.type=SETTINGS$t.type, yvar=yvar, info=T, bcex=bcex, pts=pts, lns=lns, levs=klevs, underline=SETTINGS$underline, dat.n=dat.name, zf=zf)
 
+                # Add the Buttons to Click
+                xLoc <- tapply(dat$w.dat[,1], as.factor(dat$w.dat$wr1),mean)[klevs]
+                yLoc <- rep(par('usr')[3] + yinch(.1), length(xLoc))
+                points(xLoc, yLoc, pch=19, cex = 1.5)
+                points(xLoc, yLoc, pch=19, cex = 1, col='white')
+                points(xLoc, yLoc, pch=19, cex = .5, col='black')
 
-
-            # par(xpd=F)
-            # }
-
-
-        # }
-
-
+                # Identify the buttons/
+                # Now pay attention to the user input.
+                press <- getGraphicsEvent('Select Windows to correct scoring. Press ctrl-F to exit this mode', 
+                    onMouseDown = mouseDownFixer, 
+                    onKeybd = keybdFixer)
+                
+                if(class(press) == "list"){
+                    # Convert the click into something more useful
+                    buttonLoc <- grconvertX(press$x, 'ndc', 'user')
+                    pressedButton <- which.min(sqrt((buttonLoc - xLoc)^2))
+                    levSel <- klevs[pressedButton]
+                    # Change the score
+                    score <- dat$bin[cell.pick, levSel]
+                    if(score == 0){
+                        dat$bin[cell.pick, levSel] <- 1
+                    }else if(score == 1){
+                        dat$bin[cell.pick, levSel] <- 0
+                    }
+                }
+            }
+        options(warn = 0)
+        }
 
     #F: New smoothing factor for fit trace
         if(keyPressed=="F"){
@@ -448,20 +565,23 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     #i: Select image to display on Stacked Traces
         if(keyPressed=="i"){
-            l.img<-image.selector(dat)
+            SETTINGS$l.img<-image.selector(dat)
             lines.flag<-1
         }
     #I: image for Multiview
         if(keyPressed=="I"){
-            img<-dat[[image.selector(dat, multi=F)]]
+            SETTINGS$img<-dat[[image.selector(dat, multi=F)]]
             #lines.flag<-1
             window.flag<-1
         }
     #l: choose window region to display on stack trace plot
         if(keyPressed=="l"){
             #if(lns){lns<-FALSE}else{lns<-TRUE}
-            levs<-select.list(setdiff(unique(as.character(dat$w.dat[,"wr1"])),""), multiple=T)
-            if( (levs=="") || identical(levs,character(0)) ){levs<-NULL}#levs<-setdiff(unique(as.character(dat$w.dat$wr1)),"")}
+            SETTINGS$levs <- select.list(
+                setdiff(unique(as.character(dat$w.dat[,"wr1"])),""), 
+                multiple=T,
+                preselect = SETTINGS$levs)
+            if( (SETTINGS$levs=="") || identical(SETTINGS$levs,character(0)) ){SETTINGS$levs<-NULL}
             lines.flag<-1
         }
     #m: Move groups to another group
@@ -497,9 +617,12 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }	
     #O: order cells in Stacked Traces and multiview
         if(keyPressed=="O"){
-            tryCatch(p.names<-c.sort.2(dat,p.names),error=function(e) print("You have not stacked traces yet."))
-            lines.flag<-1
-            window.flag<-1
+            tryCatch({
+                    p.names <- c.sort.2(dat, p.names)
+                    lines.flag <- 1
+                    window.flag <- 1
+                },error=function(e) print("You have not stacked traces yet.")
+            )
         }	
     #p: Toggles points on graph
         if(keyPressed=="p"){
@@ -509,28 +632,32 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     #P: Pick a group/cells to click through
         if(keyPressed=="P"){
             tryCatch(bringToTop(-1), error=function(e)NULL)
-            print("Pick a Group of cells or a single cell to observe \nIf you Click cancel, all cells will be returned")
+            cat("\nPick a Group of cells or a single cell to observe \nIf you Click cancel, all cells will be returned\n")
             selection<-select.list(c("group","cells"))
             if(selection=="group"){
                 gt.to.click<-select.list(names(gt.names), multiple=F)
                 if( is.null(gt.names[[gt.to.click]]) | is.logical( gt.names[[gt.to.click]]) ){
                     tryCatch(bringToTop(-1), error=function(e)NULL)
-                    print("Nothing is in this Group")
+                    cat("\nNothing is in this Group\n")
                 }else{
                     cell.i<-1
                     print(gt.to.click)
-                    cnames<-gt.names[[gt.to.click]]
-                    tryCatch(
-                        cnames<-c.sort.2(dat[[datfram]],cnames,collumn=collumn),
+                    cnames <- gt.names[[gt.to.click]]
+                    tryCatch({
+                        cnames <- c.sort.2(dat[[datfram]],cnames,collumn=collumn)
+                    },
                     error=function(e) print("Something went wrong try again") )
+                    p.names <- cnames
                     print(cnames)
                 }
             }
             if(selection=="cells"){
                 cell.i<-1
                 cnames<-select.list(as.character(dat$c.dat$id), multiple=T)
-                tryCatch(cnames<-c.sort.2(dat[[datfram]],cnames,collumn=collumn),error=function(e) print("Something went wrong try again"))
-
+                tryCatch({
+                    cnames <- c.sort.2(dat[[datfram]],cnames,collumn=collumn)
+                },error=function(e) print("Something went wrong try again"))
+                p.names <- cnames
             }
             if(selection==""){
                 cell.i<-1
@@ -564,34 +691,32 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     #s: stack selected groups
         if(keyPressed=="s"){
             p.namez<-paste(select.list(names(gt.names)),sep="")
-            print(p.namez)
             p.names<-gt.names[[p.namez]]
             #p.names<-get(ls(pattern=p.namez))
-            print(p.names)
             lines.flag<-1
         }
         
     #S: Sample selected groups
         if(keyPressed=="S"){
-            p.namez<-paste(select.list(names(gt.names)),sep="")
-            print(p.namez)
-            p.names<-gt.names[[p.namez]]
-            #p.names<-get(ls(pattern=p.namez))
-            print(p.names)
-            lines.flag<-2
+            # p.namez<-paste(select.list(names(gt.names)),sep="")
+            # print(p.namez)
+            # p.names<-gt.names[[p.namez]]
+            # #p.names<-get(ls(pattern=p.namez))
+            # print(p.names)
+            lines.flag <- 2
         }
     #t: brings up list of RD file. Select Trace (anything starting with t or mp)
         if(keyPressed=="t"){
             toMatch<-c("t[.]","blc","snr","mp")
             trace_dat<-grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
-            t.type1<-t.type
-            t.type<-select.list(trace_dat)
-            if(t.type==""){t.type<-t.type1}
+            t.type1<-SETTINGS$t.type
+            SETTINGS$t.type<-select.list(trace_dat)
+            if(SETTINGS$t.type==""){SETTINGS$t.type<-t.type1}
             lines.flag<-1
         }
     #u: Underlines the Trace
         if(keyPressed=="u"){
-            if(underline){underline=F}else{underline=T}
+            if(SETTINGS$underline){SETTINGS$underline=F}else{SETTINGS$underline=T}
             lines.flag<-1
         }
     #v: Show where cells are located and give zoomed in view
@@ -665,100 +790,159 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         #F1: Simple bp.selector. Create the statistic labeled on the plot. The localize question
         #allows you to click the boxplot to select a subset of cells to observe
         if(keyPressed=="F1"){
-            #first open a new window
-            #after undergoing a logical test to see if it exists
-            if(length(ls(pattern='bp.selector.window'))==0){
-                dev.new(width=14, height=8)
-                #give this window a name
-                bp.selector.window<-dev.cur()
-            }else{}
-            #give the focus to the new window
-            dev.set(bp.selector.window)
-            #empty gt.names[[12]]
-            gt.names[[12]]<-NA
-            #remove the NA, which will be repalced with a logical(0)
-            gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
-            #do the function bp.selector to gather data
-            tryCatch(bringToTop(-1), error=function(e)NULL)
-            cat("This function allows you to create statistics based on the statistic you select. 
-            \n This Function finds a represention of peak amplification and or block 
-            \n This function will take in what ever you are currently scrolling through
-            \n You have the option to localize your boxplot. This means, select cells
-            \n specifically based on where you click on the boxplot. Two clicks means you need
-            \n to specigy the lower range followed by the upper range.
-            \n One click will take everything greater than your click
-            \n The Other option that will arise is, would you like the save the stat.
-            \n If you do, the console will prompt you to enter a name. Ensure no spaces in the name
-            \n The next option will be whether you would like to make another statistic.")
-            cat(" \n Would you like to localize your boxplot? \n")
-            print("T=yes, F=no")
-            localize_log<-scan(n=1,what="character")
-            print(localize_log != "T")
-            if(localize_log != "T"){localize_log<-"F"}
-            print(cnames[cell.i])
-            dev.set(bp.selector.window)
-            gt.names[[12]]<-bp.selector(dat,cnames[cell.i],cnames,plot.new=F,dat.name=NULL,env=environment(),localize=localize_log)
-            #Now fill TCD with the cells just selected.
-            cnames<-gt.names[[12]]	
-            cell.i<-1
-            lines.flag<-1
-            windows.flag<-1
+            tryCatch({
+                #first open a new window
+                #after undergoing a logical test to see if it exists
+                if(length(ls(pattern='bp.selector.window'))==0){
+                    dev.new(width=14, height=8)
+                    #give this window a name
+                    bp.selector.window<-dev.cur()
+                }
+                #give the focus to the new window
+                dev.set(bp.selector.window)
+                #empty gt.names[[12]]
+                gt.names[[12]]<-NA
+                #remove the NA, which will be repalced with a logical(0)
+                gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
+                #do the function bp.selector to gather data
+                tryCatch(bringToTop(-1), error=function(e)NULL)
+                cat("##############################################################################\nStat Maker: CUSTOM\n##############################################################################\n\nThis function allows you to create statistics based on the statistic you select.\nThis Function finds a represention of peak amplification and or block \nThis function will take in what ever you are currently scrolling through\n\nYou have the option to localize your boxplot. This means, select cells\nspecifically based on where you click on the boxplot.\n\nTwo clicks means you need\nto specify the lower range followed by the upper range.\nOne click will take everything greater than your click\n\nThe Other option that will arise is, would you like the save the stat.\nIf you do, the console will prompt you to enter a name. Ensure no spaces in the name\nThe next option will be whether you would like to make another statistic.\n")
+                dev.set(bp.selector.window)
+                gt.names[[12]]<-bp.selector(dat,
+                    cnames[cell.i],
+                    cnames, 
+                    groups = gt.names, 
+                    plot.new=F,
+                    dat.name=NULL,
+                    env=environment(),
+                    statType = 'custom')
+                #Now fill TCD with the cells just selected.
+                cnames<-gt.names[[12]]	
+                cell.i<-1
+                lines.flag<-1
+                windows.flag<-1
+            }, error = function(e) cat("\nDid not work. Review documentation\n")
+            )
         }
         
         #F2: Advanced Statistic maker This function uses the function (After-Before)/(After+Before)
         #this function allows you to save the stat.  This will be added to the scp dataframe at the bottom.
         #if you have created statistics, be sure to save your RD file before you close
         if(keyPressed=="F2"){
-        
-            #first open a new window
-            #after undergoing a logical test to see if it exists
-            if(length(ls(pattern='bp.selector.window'))==0){
-                dev.new(width=14, height=8)
-                #give this window a name
-                bp.selector.window<-dev.cur()
-            }else{}
-            #give the focus to the new window
-            dev.set(bp.selector.window)
-            #empty gt.names[[12]]
-            gt.names[[12]]<-NA
-            #remove the NA, which will be repalced with a logical(0)
-            gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
-            #do the function bp.selector to gather data
-            tryCatch(bringToTop(-1), error=function(e)NULL)
-            cat("This function allows you to create statistics based on the statistic you select. 
-            \n This Function finds a represention of peak amplification and or block 
-            \n This function will take in what ever you are currently scrolling through
-            \n You have the option to localize your boxplot. This means, select cells
-            \n specifically based on where you click on the boxplot. Two clicks means you need
-            \n to specigy the lower range followed by the upper range.
-            \n One click will take everything greater than your click
-            \n The Other option that will arise is, would you like the save the stat.
-            \n If you do, the console will prompt you to enter a name. Ensure no spaces in the name
-            \n The next option will be whether you would like to make another statistic.")
-            cat(" \n Would you like to localize your boxplot? \n")
-            print("T=yes, F=no")
-            localize_log<-scan(n=1,what="character")
-            print(localize_log != "T")
-            if( length(localize_log) == 0 ){
-                localize_log<-"F"
-            }else{ 
-                if(localize_log != "T"){
-                    localize_log<-"F"
+            tryCatch({
+                #first open a new window
+                #after undergoing a logical test to see if it exists
+                if(length(ls(pattern='bp.selector.window'))==0){
+                    dev.new(width=14, height=8)
+                    #give this window a name
+                    bp.selector.window<-dev.cur()
                 }
-            }
-            print(cnames[cell.i])
-            dev.set(bp.selector.window)
-            gt.names[[12]]<-bp.selector.advanced(dat,cnames[cell.i],cnames,plot.new=F,dat.name=NULL,env=environment(),localize=localize_log)
-            #Now fill TCD with the cells just selected.
-            cnames<-gt.names[[12]]	
-            cell.i<-1
-            lines.flag<-1
-            windows.flag<-1
+                #give the focus to the new window
+                dev.set(bp.selector.window)
+                #empty gt.names[[12]]
+                gt.names[[12]]<-NA
+                #remove the NA, which will be repalced with a logical(0)
+                gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
+                #do the function bp.selector to gather data
+                tryCatch(bringToTop(-1), error=function(e)NULL)
+                cat("##############################################################################\nStat Maker: MinMaxnorm\n##############################################################################\n\nThis function allows you to create statistics based on the statistic you select.\nThis Function finds a represention of peak amplification and or block\nThis function will take in what ever you are currently scrolling through\n\nYou have the option to localize your boxplot. This means, select cells\nspecifically based on where you click on the boxplot.\nTwo clicks means you need to specigy the lower range followed by the upper range.\nOne click will take everything greater than your click\nThe Other option that will arise is, 'would you like the save the stat?'\nIf you do, the console will prompt you to enter a name. Ensure no spaces in the name\nThe next option will be whether you would like to make another statistic."
+                )
+                dev.set(bp.selector.window)
+                gt.names[[12]]<-bp.selector(dat,
+                    cnames[cell.i],
+                    cnames, 
+                    groups = gt.names, 
+                    plot.new = F,
+                    dat.name=NULL,
+                    env=environment(),
+                    statType = 'minMax')
+                #Now fill TCD with the cells just selected.
+                cnames<-gt.names[[12]]	
+                cell.i<-1
+                lines.flag<-1
+                windows.flag<-1
+            }, error = function(e) cat("\nDid not work. Review documentation\n")
+            )
         }
         
 
         #F3: Plotting the Density plots.  There are many options for this plot
         if(keyPressed=="F3"){
+            if(length(ls(pattern="density_win"))==0){
+                dev.new(width=10,height=10)
+                density_win <- dev.cur()
+            }else{
+                dev.off(density_win)
+                dev.new(width=10,height=10)
+                density_win <- dev.cur()
+            }
+            tryCatch(bringToTop(-1), error=function(e)NULL)
+            cat("What dataframe wil contain your stat? \n")
+            dense_df_q <- select.list(names(dat))
+            cat("What attribute would you like to see the distribution? \n")
+            dense_df_att <- menu(names(dat[[dense_df_q]]))
+            statz <- dat[[dense_df_q]][, dense_df_att, drop = F]
+
+            #define the top xlim value
+            cat("Define Top xlim value \n")
+            cat("Enter n to allow default Max value \n")
+            xlim_top<-scan(n=1, what = 'raw')
+            if(xlim_top == 'n' ){
+                xlim_top<-max(dat[[dense_df_q]][dense_df_att])
+            }else{
+                xlim_top <- as.numeric(xlim_top)
+            }
+            
+            cat("Define bottom xlim value \n")
+            cat("Enter n to allow default Max value \n")
+            xlim_bottom<-scan(n=1, what = 'raw')
+            if(xlim_bottom == 'n'){
+                xlim_bottom<-min(dat[[dense_df_q]][dense_df_att])
+            }else{
+                xlim_bottom <- as.numeric(xlim_bottom)
+            }
+            
+            cat("\nSeperate the density plots?")
+            sel <- c('yes', 'no')
+            sel <- sel[menu(sel)]
+
+            if(sel == 'yes'){
+                formals(density_ct_plotter)$dense_sep <- T
+            }else if(sel == 'no'){
+                formals(density_ct_plotter)$dense_sep <- F
+            }
+
+            dev.set(density_win)
+            density_ct_plotter(
+                dat,
+                g.names,
+                cell_types=gt.names, 
+                stat=statz,
+                overlay=T, 
+                plot_new=F,
+                xlim_top=xlim_top,
+                xlim_bottom=xlim_bottom,
+                dat.name=dat.name)
+
+            lines.flag<-1
+        }
+        
+        # #F4: Utilizing Topview
+        # if(keyPressed=="F4"){
+        #     p.namez<-paste(select.list(names(gt.names)),sep="")
+        #     p.names<-gt.names[[p.namez]]
+
+        #     aux_var<-c('area')
+
+        #     #What i need to do is selectively import gfp and tritc variables into the 
+        #     #topview function
+        #     #this means search in the bin data frame for ib4 and gfp
+        #     add_vars <- grep('mcherry|cy5|gfp|drop', names(dat$bin),value=T)
+        #     aux_var<-c(aux_var, add_vars)
+        #     TopView(dat, p.names, 12, 6, dat_name=dat.name, aux.var=aux_var)
+        # }
+        
+        if(keyPressed=="F4"){
             if(length(ls(pattern="density_win"))==0){
                 dev.new(width=10,height=10)
                 density_win<-dev.cur()
@@ -772,43 +956,43 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 
             #define the top xlim value
             cat("Define Top xlim value \n")
-            cat("Enter 0 to allow default Max value \n")
-            xlim_top<-scan(n=1)
-            if(xlim_top==0){
+            cat("Enter n to allow default Max value \n")
+            xlim_top<-scan(n=1, what = 'raw')
+            if(xlim_top == 'n' ){
                 xlim_top<-max(dat[[dense_df_q]][dense_df_att])
+            }else{
+                xlim_top <- as.numeric(xlim_top)
             }
             
             cat("Define bottom xlim value \n")
-            xlim_bottom<-scan(n=1)
-            if(xlim_bottom==0){
+            cat("Enter n to allow default Max value \n")
+            xlim_bottom<-scan(n=1, what = 'raw')
+            if(xlim_bottom == 'n'){
                 xlim_bottom<-min(dat[[dense_df_q]][dense_df_att])
+            }else{
+                xlim_bottom <- as.numeric(xlim_bottom)
             }
             
             dev.set(density_win)
-            density_ct_plotter(dat,g.names,cell_types=NULL, stat=statz,overlay=T, dense_sep=TRUE,plot_new=F,xlim_top=xlim_top,xlim_bottom=xlim_bottom,dat.name=dat.name)
+            density_ct_plotter(dat, 
+                cnames, 
+                cell_types = gt.names, 
+                stat=statz,
+                overlay=T, 
+                dense_sep=F,
+                plot_new=F,
+                xlim_top=xlim_top,
+                xlim_bottom=xlim_bottom,
+                dat.name=dat.name)
+
             lines.flag<-1
-        }
-        
-        #F4: Utilizing Topview
-        if(keyPressed=="F4"){
-            p.namez<-paste(select.list(names(gt.names)),sep="")
-            p.names<-gt.names[[p.namez]]
-
-            aux_var<-c('area')
-
-            #What i need to do is selectively import gfp and tritc variables into the 
-            #topview function
-            #this means search in the bin data frame for ib4 and gfp
-            add_vars <- grep('mcherry|cy5|gfp|drop', names(dat$bin),value=T)
-            aux_var<-c(aux_var, add_vars)
-            TopView(dat, p.names, 12, 6, dat_name=dat.name, aux.var=aux_var)
         }
 
         #F5: Censusus Viewer
         if(keyPressed=="F5"){
+            cat("\nSelect a binary column to add to the 12th group\n")
 			cnames_orig <- cnames
-			tryCatch(
-            {
+			tryCatch({
                 cells_to_view <- census_viewer(dat)
                 
                 if( is.na(cells_to_view) ){
@@ -819,10 +1003,13 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 }else{ 
                     cell.i<-1
                     cnames <- cells_to_view$cells
+
+                    oldName <- names(gt.names)[12]
                     gt.names[[12]] <- cells_to_view$cells
                     names(gt.names)[12] <- cells_to_view$name
                     p.namez <- cells_to_view$name
                     p.names <- gt.names[[12]]
+                    cat("/nThe group ", oldName, ' has been replaced by ', names(gt.names)[12], "\n")
                     lines.flag<-1
                 }
             },
@@ -834,6 +1021,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         
         #F6: Censusus Viewer
         if(keyPressed=="F6"){
+            cat("\n This is a temporary function to view the responses per cell class.\n")
+
 			cnames_orig <- cnames
             cat("Please select the collumn you would like to view\n")
 			cells_to_view <- cellzand_tcd(dat$bin)
@@ -866,6 +1055,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 				}
                 tryCatch(bringToTop(-1), error=function(e)NULL)             
                 cat("\nI have filled in your cell_types to choose by pressing \'P\' ENJOY!\n")
+                flush.console()
+                Sys.sleep(0.5)
                 gt.names <- list()
                 for(i in 1:length(dat[[cellTypeId]])){
                     #Fill in the gt.names with each cell type
@@ -940,12 +1131,14 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(keyPressed=="q")
         {
             #graphics.off()
-            dev.off(which=click.window)
-            dev.off(which=lines.window)
-            tryCatch(dev.off(which=lines.window.2), error=function(e) print("this windows hasn't been opened yet"))			
-            dev.off(which=view.window)
-            dev.off(which=multipic.window)
-            dev.off(which=traceimpute.window)
+            tryCatch({
+                dev.off(which=click.window)
+                dev.off(which=lines.window)
+                dev.off(which=lines.window.2)			
+                dev.off(which=view.window)
+                dev.off(which=multipic.window)
+                dev.off(which=traceimpute.window)
+            }, error=function(e) print("this windows hasn't been opened yet"))
 
         }
     }
@@ -954,8 +1147,9 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     #assign(rd.name, dat, envir=.GlobalEnv)
     #gt.names<-list(g.names1=g.names1, g.names2=g.names2, g.names3=g.names3, g.names4=g.names4, g.names5=g.names5, g.names6=g.names6, g.names7=g.names7, g.names8=g.names8,g.names9=g.names9, g.names10=g.names10, g.names11=g.names11, g.names12=g.names12, g.names=g.names)
     BACKUP<<-gt.names 
-    
-    assign(dat.name,dat, envir=.GlobalEnv)
+    dat$SETTINGS <- SETTINGS
+
+    assign(dat.name, dat, envir=.GlobalEnv)
     tryCatch(bringToTop(-1), error=function(e)NULL)
     if(save_question){
         print('Would y ou like to save you cell groups?')
@@ -970,10 +1164,27 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             gt.names<<-gt.names
         }else{
             gt.names<<-gt.names
+            
+            if(track){
+                tryCatch({
+                    functionName <- as.character(match.call())[1]
+                    timeInFunction <- (proc.time() - time1)[3]
+                    logger(functionName, timeInFunction, additionalInfo)
+                }, error = function(e) print("Could not Spy on you :/"))
+            }
+
             return(gt.names)
         }
     }else{
         gt.names<<-gt.names
+        if(track){
+            tryCatch({
+                functionName <- as.character(match.call())[1]
+                timeInFunction <- (proc.time() - time1)[3]
+                logger(functionName, timeInFunction, additionalInfo)
+            }, error = function(e) print("Could not Spy on you :/"))
+        }
+
         return(gt.names)
     }
     #print(rd.name)

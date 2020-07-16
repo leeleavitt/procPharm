@@ -231,33 +231,34 @@ WindowRefine <- function(tmp,levs=NULL,maxws=1,wr="wr1",zthresh=2,cthresh=NULL,p
 }
 
 
-TypeReview <- function(a.tot){
-	rs.levs <- names(a.tot)[c(1:4,15)]	
-	for(my.type in c("CIMpAm","CIMpAp","CSMmAm","HTMpAm","HTMpAp","LTMpAm","MTMpAp"))	
-	{
-	for(i in rd.list)
-	{
-			tmp <- get(i)
-			tmp$w.dat["wr2"] <- tmp$w.dat[,"wr1"]
-			tmp.wr <- WindowRefine(tmp,rs.levs,.8,"wr2",zthresh=2)		
-			tmp$w.dat["wr1"] <- tmp.wr
-			x.names <- a.tot[a.tot[,"rd.name"]==i & a.tot[,"ctype3"]==my.type,"trace.id"]
-			if(length(x.names) > 0)
-			{
-			rtag <- round(a.tot[a.tot[,"rd.name"]==i & a.tot[,"ctype3"]==my.type,"ROI.Area"],0)
-
-		z.names <- TraceSelectLarge(tmp$t.dat,,x.names,tmp$w.dat[,"wr1"],unique(tmp$w.dat[,"wr1"])[-1],lmain=paste("select to remove from",my.type,i),rtag=rtag)
-		if(length(z.names) > 0)
+TypeReview <- function(a.tot)
+{
+rs.levs <- names(a.tot)[c(1:4,15)]	
+for(my.type in c("CIMpAm","CIMpAp","CSMmAm","HTMpAm","HTMpAp","LTMpAm","MTMpAp"))	
+{
+for(i in rd.list)
+{
+		tmp <- get(i)
+		tmp$w.dat["wr2"] <- tmp$w.dat[,"wr1"]
+		tmp.wr <- WindowRefine(tmp,rs.levs,.8,"wr2",zthresh=2)		
+		tmp$w.dat["wr1"] <- tmp.wr
+		x.names <- a.tot[a.tot[,"rd.name"]==i & a.tot[,"ctype3"]==my.type,"trace.id"]
+		if(length(x.names) > 0)
 		{
-			a.tot[a.tot[,"rd.name"]==i & is.element(a.tot[,"trace.id"],z.names),"ctype3"] <- "unk"	
-			x.names <- setdiff(x.names,z.names)
-		}
-		
-		}
+		rtag <- round(a.tot[a.tot[,"rd.name"]==i & a.tot[,"ctype3"]==my.type,"ROI.Area"],0)
+
+	z.names <- TraceSelectLarge(tmp$t.dat,,x.names,tmp$w.dat[,"wr1"],unique(tmp$w.dat[,"wr1"])[-1],lmain=paste("select to remove from",my.type,i),rtag=rtag)
+	if(length(z.names) > 0)
+	{
+		a.tot[a.tot[,"rd.name"]==i & is.element(a.tot[,"trace.id"],z.names),"ctype3"] <- "unk"	
+		x.names <- setdiff(x.names,z.names)
 	}
-	}	
-		return(a.tot)
-		
+	
+	}
+}
+}	
+	return(a.tot)
+	
 }
 
 
@@ -473,6 +474,8 @@ ShiftCor <- function(x,y)
 	return(cor.tab)
 		
 }
+
+
 
 #must have a criteria for predicting 
 #Should use raw trace data in specifically defined windows.
@@ -1047,7 +1050,7 @@ BackgroundRaster <- function(wt,ht,wd,col50,xlim,ylim)
 	plot(wt[,1],wt[,2],xaxt="n",yaxt="n",ylim=ylim,xlim=xlim,type="n")
 	for(i in 2:ncol(wt)){lines(wt[,1],wt[,i],lwd=1,col=col50[i-1])}
 	dev.off()
-	tmp.png <- png::readPNG("tmp.png")
+	tmp.png <- readPNG("tmp.png")
 	return(tmp.png)			
 }
 
@@ -1153,9 +1156,9 @@ ScoreLev <- function(wt,bin=NULL,ignore=NULL,col1=NULL,main.lab=NULL,bin.cat=3,r
 				ret.seq <- seq(0,ret.spread,length.out=ncol(ret.group))
 				ret.group <- sweep(ret.group,2,ret.seq[ret.ord],'+')
 				
-			#cmg <- CalcMeanGroup(wts[,sub.names,drop=F],cut1[sub.names],max.cnt=10)
-			#ret.group <- cmg[["retval"]]
-			#cut1 <- cmg[["grp"]]
+#				cmg <- CalcMeanGroup(wts[,sub.names,drop=F],cut1[sub.names],max.cnt=10)
+#				ret.group <- cmg[["retval"]]
+#				cut1 <- cmg[["grp"]]
 				
 				grp.tab <- data.frame(tot=apply(ret.group,2,sum))
 				grp.tab["sd"] <- apply(ret.group,2,sum)
@@ -1467,8 +1470,6 @@ SetShades <- function(tmp,trans=.1)
 	
 }
 
-<<<<<<< HEAD:extras/170103.doodles.lee.R
-=======
 #tmp is an RD object
 #wr.i is the window region definition.
 #rd.name is the name of the RD object (used for png.out)
@@ -1476,7 +1477,7 @@ SetShades <- function(tmp,trans=.1)
 #rscale is a boolean for rescaling the data
 #wh is the window height
 #hh is the window width (why the hell did I name it hh?)
-RDView <- function(tmp,c.i=NULL,wr.i="wr1",rd.name=NULL,rscale=F,wh=11,hh=6)
+RDView <- function(tmp,wr.i="wr1",rd.name=NULL,c.i=NULL,rscale=F,wh=14,hh=8)
 {
 	if(!is.element("bin",names(tmp))){stop("No bin ")}
 	if(!is.element("drop",names(tmp$bin))){tmp$bin[,"drop"] <- 0}
@@ -1511,7 +1512,6 @@ RDView <- function(tmp,c.i=NULL,wr.i="wr1",rd.name=NULL,rscale=F,wh=11,hh=6)
 	}		
 	return(tmp)
 }
->>>>>>> 02c76eaf0507e5b2abfc9b5cea8d86cca953c6ef:170103.doodles.lee.R
 
 #off loaded from above this should calculate the relevant features of a response
 #presumably wts is spike trimed data wtd is the delta data. ignore is a vector of points to use
@@ -1586,6 +1586,34 @@ DescribeAll <- function(tmp,t.levs=NULL,wr="wr1",mpyes=FALSE)
 		{wt <- tmp$t.dat[tmp$w.dat[,wr]==t,]}
 		ignore <- tmp$w.dat[tmp$w.dat[,wr]==t,"ignore"]
 		
+		wts <- wt
+		wtd <- wts[-1,]-wts[-nrow(wts),]
+		wtd <- sweep(wtd[,-1],1,wtd[,1],'/')
+		wts <- wts[,-1]
+		xsec <- round(wt[,1]*60,0)		
+		if(sum(ignore) > 5)
+		{
+			resp.dets <- DescribeResponse(wts,wtd,ignore,xsec)
+			names(resp.dets) <- paste(t,names(resp.dets),sep=".")
+			for(rp.i in names(resp.dets)){tmp$scp[,rp.i] <- resp.dets[row.names(tmp$scp),rp.i]}		
+		}
+	}
+	return(tmp)
+}
+
+#
+DescribeAll_lee <- function(tmp,t.levs=NULL,wr="wr1",blc_yes=FALSE)
+{
+	if(!is.element("blc",names(tmp))){blc_yes <- FALSE}
+	if(is.null(t.levs)){t.levs <- setdiff(unique(tmp$w.dat[,wr]),c(""))}
+	for(t in t.levs)
+	{
+		if(blc_yes)
+		{wt <- tmp$blc[tmp$w.dat[,wr]==t,]}
+		else
+		{wt <- tmp$t.dat[tmp$w.dat[,wr]==t,]}
+		
+		ignore <- tmp$w.dat[tmp$w.dat[,wr]==t,"ignore"]
 		wts <- wt
 		wtd <- wts[-1,]-wts[-nrow(wts),]
 		wtd <- sweep(wtd[,-1],1,wtd[,1],'/')
