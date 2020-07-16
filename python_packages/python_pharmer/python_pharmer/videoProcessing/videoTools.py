@@ -25,10 +25,14 @@ def roi_checker():
     roi1024unique = np.unique(roi1024)
     roi2048unique = np.unique(roi2048)
     
-    if len(np.setdiff1d(roi2048unique, roi1024unique)) == 1 :
+    if len(np.setdiff1d(roi2048unique, roi1024unique)) > 0 :
         roiToRemove = np.setdiff1d(roi2048unique, roi1024unique)
         #Now that we have found the roi giving us a head ache, lets return its value
-        return np.where(roi2048unique==roiToRemove)[0]
+        roiByeLoc = []
+        for i in range(len(roiToRemove)):
+            roiByeLoc.append(np.where(roi2048unique == roiToRemove[i])[0][0])
+
+    return roiByeLoc
 
 #######################################
 #Find Video

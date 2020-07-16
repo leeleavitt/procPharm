@@ -591,8 +591,9 @@ docx.wr1.importer<-function(file.name='wr1.docx'){
     wr1<-read_docx(file.name)
     #Extract each table
     wr1<-docx_extract_all_tbls(wr1, guess_header=F)
+
     #out table is the third one
-    wr1<-Reduce(c,wr1[[3]])
+    wr1<-Reduce(c,wr1[[length(wr1)]])
     #split up each vaue based on a single space
     wr1<-strsplit(wr1, ' ')
     
@@ -637,7 +638,7 @@ docx.wr1.importer<-function(file.name='wr1.docx'){
         #Extract each table
         wr1<-docx_extract_all_tbls(wr1, guess_header=F)
         #out table is the third one
-        wr1<-Reduce(c,wr1[[3]])
+        wr1<-Reduce(c,wr1[[length(wr1)]])
         #split up each vaue based on a single space
         wr1<-strsplit(wr1, ' ')
     }else{}
