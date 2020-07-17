@@ -489,14 +489,32 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
     #####################################################
     # Window Region Definition
     #####################################################
-    ############ wr1 import
-    wrdef<-"wr1.docx"
-    require(docxtractr)
-    if(!is.null(wrdef)){
-            wr<-docx.wr1.importer(wrdef)
-            w.dat<-MakeWr.docx(t.dat,wr)
-    }
+    wrdef <- list.files(pattern = '^wr1')
+    wrdef_logic <- grep(".docx", wrdef, ignore.case=T, value=T)
+    # If it is a wr1.docx, continue
+    if( length(wrdef_logic) == 1 ){
+        require(docxtractr)
+        wr <- docx.wr1.importer(wrdef)
+        w.dat <- MakeWr.docx(t.dat, wr)		
 
+        ## Check for duplicated rows	
+        if(length(which(duplicated(row.names(t.dat))))>=1){
+            dup<-which(duplicated(row.names(t.dat)))
+            paste(dup)
+            t.dat<-t.dat[-dup,]
+            w.dat<-w.dat[-dup,]
+        }
+
+    }else{
+        tryCatch(
+            wr <- ReadResponseWindowFile(wrdef)
+            , error=function(e) print("YOU NEED A wr1.docx or wr1.csv")
+        )
+        #Wr<-length(wr[,1])#complete and revise this section
+        wr['at'] <- wr['at'] - (10/60)
+
+        w.dat <- MakeWr(t.dat,wr)
+    }
 
     #if(!is.null(wrdef))
     #	{
@@ -511,41 +529,73 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
     #		wr <- ReadResponseWindowFile("wr1.csv")
     #		w.dat <- MakeWr(t.dat,wr)
     #	}
-        tmp.rd <- list(t.dat=t.dat,w.dat=w.dat,c.dat=c.dat)
-        #####################################################
-        #Create Despiked data
-        #####################################################
-        wts <- tmp.rd$t.dat
-        for(i in 1:5) #run the despike 5 times.
-        {
-            wt.mn3 <- Mean3(wts)
-            wts <- SpikeTrim2(wts,1,-1)
-            print(sum(is.na(wts))) #this prints out the number of points removed should be close to 0 after 5 loops.
-            wts[is.na(wts)] <- wt.mn3[is.na(wts)]
-        }
-        tmp.rd$mp <- wts
+    # Initial and simple Data processing
+    tmp.rd <- list(t.dat=t.dat,w.dat=w.dat,c.dat=c.dat)
+    levs<-setdiff(unique(as.character(w.dat[,2])),"")
+    snr.lim=5; hab.lim=.05; sm=2; ws=3; blc="SNIP"
+    pcp <- ProcConstPharm(tmp.rd,sm,ws,blc)
+    scp <- ScoreConstPharm(tmp.rd,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
+    bin <- bScore(pcp$blc, pcp$snr, snr.lim, hab.lim, levs, tmp.rd$w.dat[,"wr1"])
+    bin <- bin[,levs]
+    bin["drop"] <- 0 #maybe try to generate some drop criteria from the scp 
 
-        # Initial Data processing
-        levs<-setdiff(unique(as.character(w.dat[,2])),"")
-        snr.lim=4;hab.lim=.05;sm=2;ws=20;blc="SNIP"
+    tmp.rd <- list(
+        t.dat=t.dat,
+        w.dat=w.dat,
+        c.dat=c.dat, 
+        bin=bin, 
+        scp=scp, 
+        #snr=pcp$snr, 
+        blc=pcp$blc)
+        #der=pcp$der) 
+    
+    tmp.rd <- TraceBrewer(tmp.rd) 
+    tmp.rd <- list(
+        t.dat=t.dat,
+        w.dat=w.dat,
+        c.dat=c.dat, 
+        bin=bin, 
+        scp=tmp.rd$scp, 
+        #snr=pcp$snr, 
+        blc=tmp.rd$blc)
+        #der=pcp$der) 
+
+
+        # tmp.rd <- list(t.dat=t.dat,w.dat=w.dat,c.dat=c.dat)
+        # # #####################################################
+        # # #Create Despiked data
+        # # #####################################################
+        # wts <- tmp.rd$t.dat
+        # for(i in 1:5) #run the despike 5 times.
+        # {
+        #     wt.mn3 <- Mean3(wts)
+        #     wts <- SpikeTrim2(wts,1,-1)
+        #     print(sum(is.na(wts))) #this prints out the number of points removed should be close to 0 after 5 loops.
+        #     wts[is.na(wts)] <- wt.mn3[is.na(wts)]
+        # }
+        # tmp.rd$mp <- wts
+
+        # # Initial Data processing
+        # levs<-setdiff(unique(as.character(w.dat[,2])),"")
+        # snr.lim=4;hab.lim=.05;sm=2;ws=20;blc="SNIP"
         
-        pcp <- ProcConstPharm(tmp.rd$mp,sm,ws,blc)
-        scp <- ScoreConstPharm(tmp.rd,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
-        bin <- bScore(pcp$blc,pcp$snr,snr.lim,hab.lim,levs,tmp.rd$w.dat[,"wr1"])
-        bin <- bin[,levs]
-        bin["drop"] <- 0 #maybe try to generate some drop criteria from the scp file.
-        bin<-pf.function(bin,levs)
+        # pcp <- ProcConstPharm(tmp.rd$mp,sm,ws,blc)
+        # scp <- ScoreConstPharm(tmp.rd,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
+        # bin <- bScore(pcp$blc,pcp$snr,snr.lim,hab.lim,levs,tmp.rd$w.dat[,"wr1"])
+        # bin <- bin[,levs]
+        # bin["drop"] <- 0 #maybe try to generate some drop criteria from the scp file.
+        # bin<-pf.function(bin,levs)
+
+        # tmp.rd <- TraceBrewer(tmp.rd)
+
         
-        tmp.rd$t.dat<-t.dat
-        tmp.rd$w.dat<-w.dat
-        tmp.rd$c.dat<-c.dat
-        tmp.rd$bin<-bin
-        tmp.rd$scp<-scp
-        tmp.rd$snr<-pcp$snr
-        tmp.rd$blc<-pcp$blc
-        tmp.rd$der<-pcp$der
+        # tmp.rd$t.dat<-t.dat
+        # tmp.rd$w.dat<-w.dat
+        # tmp.rd$c.dat<-c.dat
+        # tmp.rd$bin<-bin
+        # tmp.rd$scp<-tmp.rd$scp
+        # tmp.rd$blc<-tmp.rd$blc
         
-        tmp.rd<-TraceBrewer(tmp.rd)
 
         # Add images
         if(!is.null(img1)){tmp.rd$img1<-png::readPNG(img1)}
@@ -951,4 +1001,57 @@ WindowRenamer<-function(dat){
 ReadResponseWindowFile <- function(fname){
     dat <- read.csv(fname)
     return(dat)
+}
+
+##############################################################################################
+# Fucntions usied for data Input
+##############################################################################################
+#Function used in ReadDataDump.
+#Converts time to minutes
+ConvertTime <- function(x){
+    vals <- strsplit(x,":")[[1]]
+    retval <- NA
+    if(length(vals)==3)
+    {
+        retval <- as.integer(vals[1])*60+as.integer(vals[2])+as.single(vals[3])/60
+    }
+    if(length(vals)==2)
+    {
+        retval <- as.integer(vals[1])+as.single(vals[2])/60
+    }
+    
+    return(retval)
+    
+}
+
+#each point is replaced with the mean of the two neighboring points
+Mean3 <- function(wt){
+	wt.mn <- (wt[-c(1,2),]+wt[-c(nrow(wt),(nrow(wt)-1)),])/2
+	wt[2:(nrow(wt)-1),] <- wt.mn
+	return(wt)
+}
+
+SpikeTrim2 <- function(wt,ulim=NULL,dlim= NULL){
+	wtd <- wt[-1,]-wt[-nrow(wt),]
+	wtd <- sweep(wtd[,-1],1,wtd[,1],'/')
+	if(is.null(ulim) | is.null(dlim))
+	{
+		qvals <- quantile(as.vector(as.matrix(wtd)),probs=c(0,.01,.5,.99,1))
+	}
+	if(is.null(dlim)){dlim <- qvals[2]}
+	if(is.null(ulim)){ulim <- qvals[4]}	
+	wt.up <- wtd > ulim
+	wt.dn <- wtd < dlim
+	wt.ud <- wt.up[-nrow(wt.up),] + wt.dn[-1,]
+	wt.du <- wt.up[-1,] + wt.dn[-nrow(wt.dn),]
+	wt.na <- wt[2:(nrow(wt)-1),-1]
+	wt.na[wt.ud==2] <- NA
+	wt.na[wt.du==2] <- NA	
+	sum(is.na(wt.na))
+	wt[2:(nrow(wt)-1),-1] <- wt.na
+
+	#impute missing using mean of flanking.
+	#consider replicating first and last columns and doing this all as a vector
+	
+	return(wt)
 }

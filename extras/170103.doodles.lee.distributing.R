@@ -165,8 +165,7 @@ SpikeTrim2 <- function(wt,ulim=NULL,dlim= NULL)
 }
 
 #each point is replaced with the mean of the two neighboring points
-Mean3 <- function(wt)
-{
+Mean3 <- function(wt){
 	wt.mn <- (wt[-c(1,2),]+wt[-c(nrow(wt),(nrow(wt)-1)),])/2
 	wt[2:(nrow(wt)-1),] <- wt.mn
 	return(wt)
