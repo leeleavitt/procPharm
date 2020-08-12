@@ -1,5 +1,5 @@
 
-readkeygraph <- function(prompt){
+readkeygraph <- function(prompt = "DO SOMEHTING"){
     responses <- c("hey", "hi", "hello", "ouch", "tumbs-up")
     keyPressed <- getGraphicsEvent(prompt = prompt, 
                  onMouseDown = mouseDownFixer, 
@@ -507,7 +507,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     # ctrl-F: Fixes the scoring
     # This function will allow you to fix the region you click on
-        if(keyPressed == 'ctrl-F'){
+        if(keyPressed == 'ctrl-F' | keyPressed == ' '){
 
             #First input a nonsense press to get the party started
             press = 'hibob'
@@ -605,10 +605,9 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 
     #o: order all cells in a new way
         if(keyPressed=="o"){
-        toMatch<-c("c.dat","bin","scp")
+        toMatch<-c("c.dat", "bin", "scp", 'uncMat')
         order_dat<-grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
 
-        
         datfram<-select.list(order_dat,title="Where is the data?")
         collumn<-select.list(names(dat[[datfram]]),title="Collumn to sort")
         
@@ -618,10 +617,20 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     #O: order cells in Stacked Traces and multiview
         if(keyPressed=="O"){
             tryCatch({
-                    p.names <- c.sort.2(dat, p.names)
+                toMatch<-c("c.dat", "bin", "scp", 'uncMat')
+                order_dat<-grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
+
+                datfram<-select.list(order_dat,title="Where is the data?")
+                collumn<-select.list(names(dat[[datfram]]),title="Collumn to sort")
+        
+                tryCatch(
+                    p.names<-c.sort.2(dat[[datfram]],p.names,collumn=collumn)
+                    ,error=function(e) print("Something went wrong try again")
+                )
                     lines.flag <- 1
                     window.flag <- 1
-                },error=function(e) print("You have not stacked traces yet.")
+                }
+                ,error=function(e) print("You have not stacked traces yet.")
             )
         }	
     #p: Toggles points on graph

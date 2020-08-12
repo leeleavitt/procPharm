@@ -2,16 +2,24 @@
 #' 170515: added pts and lns: (logical)
 #' added dat.n for insertation of the name for the rd file
 #' @export
-PeakFunc7 <- function(dat,n.names,t.type="t.dat",Plotit.trace=T,Plotit.both=F, info=T,lmain=NULL, bcex=.7, yvar=T, ylim.max=NULL, zf=40, pts=T, lns=T, levs=NULL, underline=T, dat.n=""){
+PeakFunc7 <- function(dat,cell,t.type="t.dat",Plotit.trace=T, info=T,lmain=NULL, bcex=.7, yvar=T, ylim.max=NULL, zf=40, pts=T, lns=T, levs=NULL, underline=T, dat.n=""){
+    # Plot ontop always unless you dont need it
+    par(xpd = T)
+
     dat.name<-deparse(substitute(dat))
-    if(dat.name=="dat"){dat.name<-dat.n
-    }else{dat.name<-dat.name}	
+    if(dat.name=="dat"){
+        dat.name<-dat.n
+    }else{
+        dat.name<-dat.name
+    }	
     
     if(is.null(lmain)){
-        lmain=n.names
-    }else{lmain=lmain}
-    if(class(t.type)=="character")
-    {
+        lmain=cell
+    }else{
+        lmain=lmain
+    }
+    
+    if(class(t.type)=="character"){
         dat.select<-t.type
         dat.t<-dat[[dat.select]]
     }else{
@@ -19,272 +27,320 @@ PeakFunc7 <- function(dat,n.names,t.type="t.dat",Plotit.trace=T,Plotit.both=F, i
         dat.t<-dat[[dat.select]]
     }
 
+    # Set the y limits for the plotting
     if(yvar){
-        ymax<-max(dat.t[,n.names])*1.05
-        ymin<-min(dat.t[,n.names])*.95
-        yrange<-ymax-ymin
+        ymax<-max(dat.t[,cell])*1.05
+        ymin<-min(dat.t[,cell])*.95
     }else{		
-        if(is.null(ylim.max)){ylim.max<-1.4}else{ylim.max<-ylim.max}
-        if(Plotit.trace){ylim <- c(-.1,ylim.max)}
-        if(Plotit.both){ylim <- c(-.5,ylim.max)}
-        ymin<-min(ylim)
-        ymax<-max(ylim)
-        yrange<-ymax-ymin
+        if(is.null(ylim.max)){
+            ylim.max <- 1.4
+        }
+        ylim <- c(-0.1, ylim.max)
+        ymin <- min(ylim)
+        ymax <- max(ylim)
     }
-
-    if(Plotit.trace){ylim <- c(ymin,ymax)}
-    if(Plotit.both){ymin<- -.5;ylim <- c(ymin,ymax)}
-    par(xpd=FALSE)
+    
+    ylim <- c(ymin,ymax)
     xlim <- range(dat.t[,1]) # use same xlim on all plots for better comparison
     
-    #   ylim <- range(intensity(s1))
-    if(is.null(levs)){levs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
-    }else{levs<-levs}
-    par(mar=c(9,6.2,3.5,13), bty="n")
-    plot(dat.t[,n.names]~dat.t[,1], main=lmain,xlim=xlim,ylim=ylim,xlab="", ylab="",pch="", cex=.5)
+    if(is.null(levs)){
+        levs <- setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
+    }
 
-    #axis(3,tick=TRUE, outer=F )
+    # Plot it up
+    par(mar=c(9,6.2,3.5,13), bty="n")
+    plot(
+        1, 
+        type='n',
+        main=lmain,
+        xlim=xlim,
+        ylim=ylim,
+        xlab="", 
+        ylab="",
+        xaxt = 'n'
+    )
+
     axis(1, at= seq(0, max(dat.t[,1]),10), tick=TRUE)
     
     # Tool for labeling window regions
-    wr<-dat$w.dat[,"wr1"]
+    wr <- dat$w.dat[,"wr1"]
     #levs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
     x1s <- tapply(dat$w.dat[,"Time"],as.factor(wr),min)[levs]
     x2s <- tapply(dat$w.dat[,"Time"],as.factor(wr),max)[levs]
     y1s <- rep(par("usr")[4],length(x1s))
     y2s <- rep(par("usr")[3],length(x1s))
-    rect(x1s,y1s,x2s,y2s,col="grey95")
-    
-    
-    # Tool for labeling cellular aspects, gfp.1, gfp.2, tritc, area 
-    legend(x=par("usr")[1]-xinch(1.45), y=par("usr")[3]-yinch(.25), xpd=TRUE, inset=c(0,-.14),bty="n", cex=.7, legend=c(
-        if(!is.null(dat$c.dat[n.names, "CGRP"])){paste("CGRP","",round(dat$c.dat[n.names,"CGRP"],digits=4))},
-        if(!is.null(dat$c.dat[n.names, "mean.gfp"])){paste("GFP","",round(dat$c.dat[n.names,"mean.gfp"],digits=4))},
-        if(!is.null(dat$c.dat[n.names, "mean.gfp.1"])){paste("GFP.1","",round(dat$c.dat[n.names,"mean.gfp.1"],digits=4))},
-        if(!is.null(dat$c.dat[n.names, "mean.gfp.2"])){paste("GFP.2","",round(dat$c.dat[n.names,"mean.gfp.2"],digits=4))},
-        if(!is.null(dat$c.dat[n.names, "mean.gfp.start"])){paste("mean.gfp.start","",round(dat$c.dat[n.names,"mean.gfp.start"],digits=4))},
-        if(!is.null(dat$c.dat[n.names, "mean.gfp.end"])){paste("mean.gfp.end","",round(dat$c.dat[n.names,"mean.gfp.end"],digits=4))},
-        if(!is.null(dat$c.dat[n.names, "mean.gfp.immuno"])){paste("CGRP immunostain","",round(dat$c.dat[n.names,"mean.gfp.immuno"],digits=4))},
-        if(!is.null(dat$c.dat[n.names, "mean.dapi"])){paste("DAPI","",round(dat$c.dat[n.names,"mean.dapi"],digits=4))},
-        if(!is.null(dat$c.dat[n.names, "IB4"])){paste("IB4","",round(dat$c.dat[n.names,"IB4"],digits=4))},
-        if(!is.null(dat$c.dat[n.names, "mean.tritc"])){paste("IB4","",round(dat$c.dat[n.names, "mean.tritc"], digits=4))}, 
-        if(!is.null(dat$c.dat[n.names, "mean.tritc.start"])){paste("IB4.start","",round(dat$c.dat[n.names, "mean.tritc.start"], digits=4))}, 
-        if(!is.null(dat$c.dat[n.names, "mean.tritc.end"])){paste("IB4.end","",round(dat$c.dat[n.names, "mean.tritc.end"], digits=4))}, 
-        if(!is.null(dat$c.dat[n.names, "mean.tritc.immuno"])){paste("NF200 immunostain","",round(dat$c.dat[n.names, "mean.tritc.immuno"], digits=4))}, 
-        if(!is.null(dat$c.dat[n.names, "mean.cy5.start"])){paste("IB4.start","",round(dat$c.dat[n.names, "mean.cy5.start"], digits=4))}, 
-        if(!is.null(dat$c.dat[n.names, "mean.cy5.end"])){paste("IB4.end","",round(dat$c.dat[n.names, "mean.cy5.end"], digits=4))}, 
-        if(!is.null(dat$c.dat[n.names, "area"])){paste("area","", round(dat$c.dat[n.names, "area"], digits=4))},
-        if(!is.null(dat$c.dat[n.names, "ROI.Area"])){paste("area","", round(dat$c.dat[n.names, "ROI.Area"], digits=4))},
-        #if(!is.null(dat$c.dat[n.names, "perimeter"])){paste("perimeter","", round(dat$c.dat[n.names, "perimeter"], digits=0))},
-        if(!is.null(dat$c.dat[n.names, "circularity"])){paste("circularity","", round(dat$c.dat[n.names, "circularity"], digits=4))}
-        )
+
+    # Colors the windows regions based on if the window is scored as a 1 or a 0
+    if(info){
+        cols <- ifelse(dat$bin[cell,levs] == 1, "grey80", "grey95")
+    }else{
+        cols <- "grey95"
+    }
+    rect(
+        x1s,
+        y1s,
+        x2s,
+        y2s,
+        col=cols
     )
     
-    legend(x=par("usr")[2]+xinch(.8), y=par("usr")[3]-yinch(.9), xpd=TRUE, inset=c(0,-.14), bty="n", cex=.7, legend=dat.name)
+    # Tool for labeling cellular aspects, gfp.1, gfp.2, tritc, area 
+    cellLabs <- c(
+        "CGRP",                 "CGRP",
+        "mean.gfp",             "GFP",
+        "mean.gfp.1",           "GFP.1",
+        "mean.gfp.2",           "GFP.2",
+        "mean.gfp.start",       "mean.gfp.start",
+        "mean.gfp.end",         "mean.gfp.end",
+        "mean.gfp.immuno",      "CGRP immunostain",
+        "mean.dapi",            "DAPI",
+        "IB4",                  "IB4",
+        "mean.tritc",           "IB4",
+        "mean.tritc.start",     "IB4.start",
+        "mean.tritc.end",       "IB4.end",
+        "mean.tritc.immuno",    "NF200 immunostain",
+        "mean.cy5.start",       "IB4.start",
+        "mean.cy5.end",         "IB4.end",
+        "area",                 "area",
+        "ROI.Area",             "area",
+        "perimeter",            "perimeter",
+        "circularity",          "circularity")
 
+    dim(cellLabs) <- c(2,length(cellLabs)/2)
+    cellLabs <- t(cellLabs)
     
+    legendAdds <- c()
+    for(i in 1:dim(cellLabs)[1]){
+        if( !is.null(dat$c.dat[cell, cellLabs[i,1] ]) ){
+            toAdd <- paste0(cellLabs[i,2],": ",round(dat$c.dat[ cell, cellLabs[i,1] ],digits=4))
+            legendAdds <- c(legendAdds, toAdd)
+        }
+    }
+
+    legend(
+        x=par("usr")[1]-xinch(1.45), 
+        y=par("usr")[3]-yinch(.25), 
+        xpd=TRUE, 
+        inset=c(0,-.14),
+        bty="n", 
+        cex=.7, 
+        legend=legendAdds
+    )
+    
+    # Adds the rd name
+    legend(
+        x=par("usr")[2]+xinch(.8), 
+        y=par("usr")[3]-yinch(.9), 
+        xpd=TRUE, 
+        inset=c(0,-.14), 
+        bty="n", 
+        cex=.7, 
+        legend=dat.name
+    )
+
     #Adding binary scoring for labeling to plot
     par(xpd=TRUE)
-    if(!is.null(dat$bin[n.names, "gfp.bin"])){text(y=par("usr")[4]+yinch(.5), x=par("usr")[2]+xinch(1.8), paste("GFP:",dat$bin[n.names,"gfp.bin"]), cex=.7)}
-    if(!is.null(dat$bin[n.names, "tritc.bin"])){text(y=par("usr")[4]+yinch(.25), x=par("usr")[2]+xinch(1.8), paste("IB4 :",dat$bin[n.names,"tritc.bin"]), cex=.7)}
-    if(!is.null(dat$bin[n.names, "cy5.bin"])){text(y=par("usr")[4]+yinch(.25), x=par("usr")[2]+xinch(1.8), paste("IB4 :",dat$bin[n.names,"cy5.bin"]), cex=.7)}
-    if(!is.null(dat$bin[n.names, "drop"])){text(y=par("usr")[4]+yinch(0), x=par("usr")[2]+xinch(1.8), paste("Drop :",dat$bin[n.names,"drop"]), cex=.7)}
+    binLabs <- c(
+        "gfp.bin",      "GFP",
+        "tritc.bin",    "IB4",
+        "cy5.bin",      "IB4",
+        "drop",         "Drop"
+    )
+    dim(binLabs) <- c(2, length(binLabs)/2)
+    binLabs <- t(binLabs)
 
+    binLabsToAdd <- c()
+    for(i in 1:dim(binLabs)[1]){
+        if( !is.null(dat$bin[cell, binLabs[i,1] ]) ){
+            toAdd <- paste0(binLabs[i,2],": ", dat$bin[cell, binLabs[i,1] ])
+            binLabsToAdd <- c(binLabsToAdd, toAdd)
+        }
+    }
+
+    legend(
+        x=par("usr")[2]+xinch(1.8), 
+        y=par("usr")[4]+yinch(.5), 
+        xpd=TRUE, 
+        inset=c(0,-.14), 
+        bty="n", 
+        cex=.7, 
+        legend=binLabsToAdd
+    )
 
     # Tool for lableing window region information
-    levs.loc<-tapply(dat$w.dat[,"Time"],as.factor(wr),mean)[levs]
+    levs.loc <- tapply(dat$w.dat[,"Time"], as.factor(wr), mean)[levs]
     if(info){
-        x.name<-n.names
-        #levs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])), "")
-        mtext(c("max","snr"), side=3, at=-max(dat.t[,1])*.05, line=c(0, .7), cex=.6)
-        for(i in 1:length(levs)){
-            max.name<-paste(levs[i],".max", sep="")
-            max.val<-round(dat$scp[x.name, max.name], digits=3)
-            mtext(max.val, side=3, at=levs.loc[ levs[i] ], line=0, cex=.6)
-            
-            tot.name<-paste(levs[i],".snr", sep="")
-            tot.val<-round(dat$scp[x.name, tot.name], digits=3)
-            mtext(tot.val, side=3, at=levs.loc[ levs[i] ], line=.7, cex=.6)
-        }
-        
-    # Tool for labeling the binary score
-        #levs<-setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
-        z<-t(dat$bin[n.names,levs])
-        zz<-z==1
-        zi<-attributes(zz)
-        zzz<-which(zz, arr.ind=T)
-        #levs<-zi$dimnames[[2]][zzz[,2]]
-        levs1<-unique(as.character(row.names(zzz)))
-        x1s <- tapply(dat$w.dat[,"Time"],as.factor(wr),min)[levs1]
-        x2s <- tapply(dat$w.dat[,"Time"],as.factor(wr),max)[levs1]
-        y1s <- rep(par("usr")[4],length(x1s))
-        y2s <- rep(par("usr")[3],length(x1s))
-        rect(x1s,y1s,x2s,y2s,col="grey80")
-        #levs <- setdiff(unique(wr),"")
+        xLoc <- par('usr')[1] - xinch(.01)
+        yLoc <- par('usr')[4]
+        toAdd <- c('max', 'tot', 'snr')
+        bcex <- 0.55
+        for(j in 1:length(toAdd)){
+            yLocJ <- yLoc + (yinch(.09) * j)
+            text(
+                xLoc, 
+                yLocJ,
+                toAdd[j],
+                cex = bcex
+            )
+
+            valNames <- paste(levs, toAdd[j], sep=".")
+            val <- apply(dat$scp[cell, valNames], 1, round, digits=2)
+
+            text(
+                x = levs.loc[ levs ],
+                y = rep(yLocJ, length(val)),
+                val,
+                cex = bcex
+            )
+        }    
     }
     
-    #text(dat.t[match(levs,wr),"Time"],c(ymin, ymin+(yrange*.2)),levs,pos=4,offset=0,cex=bcex)	
-    #text(dat.t[match(levs,wr),"Time"],par("usr")[3],levs,pos=3,offset=-4.2,cex=bcex, srt=90)    
+    # Adding the window labels
+    shrinkFactor <- 1
+    maxLength <- 12
     levs_cex <- nchar(levs)
-	levs_cex[ levs_cex <= 12*1.3  ] <- 1
-	levs_cex[ levs_cex > 12*1.3  ] <- 12/levs_cex[ levs_cex>12*1.3  ]*1.3
+	levs_cex[ levs_cex <= maxLength * shrinkFactor ] <- 1
+	levs_cex[ levs_cex > maxLength * shrinkFactor  ] <- maxLength/levs_cex[ levs_cex> maxLength * shrinkFactor  ] * shrinkFactor
+    
+    text(
+        levs.loc,
+        par("usr")[3] - yinch(.38),
+        levs,
+        adj = 1,
+        cex=levs_cex, 
+        srt=90
+    )
 
-    text(levs.loc,par("usr")[3],levs,pos=3,offset=-4.3,cex=levs_cex, srt=90)	
+    # Adding the uncertainty  to the windows
+    tryCatch({
+        val <- apply(dat$uncMat[cell, levs], 1, round, digits=2)
+        
+        text(
+            x = levs.loc[ levs ],
+            y = rep(yLoc, length(val)),
+            val,
+            cex = bcex
+        )
 
-    if(Plotit.both){
-        if(!is.null(dat$der)){lines(dat$der[,n.names]~dat.t[-1,1], lwd=.01, col="paleturquoise4")}
-        par(xpd=T)
-        abline(h=0)
-        if(lns){lines(dat.t[,n.names]~dat.t[,1])
-        }else{}
-        if(pts){points(dat.t[,n.names]~dat.t[,1], pch=16, cex=.3)
-        }else{}
-        par(xpd=F)
+        yLoc <- par('usr')[3] + (yinch(.09))
+        text(
+            xLoc, 
+            yLoc,
+            'unc',
+            cex = bcex
+        )
+    },error=function(e) NULL)
+
+    # Add lines or points
+    if(lns){
+        lines(dat.t[,cell]~dat.t[,1])
     }
     
-    if(Plotit.trace){
-        par(xpd=T)
-        if(lns){lines(dat.t[,n.names]~dat.t[,1])
-        }else{}
-        
-        if(pts){points(dat.t[,n.names]~dat.t[,1], pch=16, cex=.3)
-        }else{}
-        
-        par(xpd=F)
+    if(pts){
+        points(dat.t[,cell]~dat.t[,1], pch=16, cex=.3)
     }
-    
+
     ##Tool for adding underline to plot
     if(underline){
         par(xpd=F)
-        abline(h=min(dat.t[,n.names]), col="black")
+        abline(h=min(dat.t[,cell]), col="black")
         par(xpd=T)
-    }else{}
+    }
 
-    
     ## Tool for adding rasterImages to plot
-    
-    ###Finding the picture loaction of the cells
-    if(!is.null(dat$img1)){
-        if(is.null(zf)){zf<-20
-        }else{zf<-zf}
+    for(i in 1:9){
+        if( !is.null(dat[[paste0('img',i)]]) ){
+            break
+        }
+    }
+    # If the loops never breaks, there are no images to raster
+    if(i != 9){
+        # This gathers the cells location
+        imgToUse <- paste0('img', i)
+        if(!is.null(dat[[imgToUse]])){
+            img.dim <- dim(dat$img1)[1]
+            x<-dat$c.dat[cell,"center.x"]
+            y <- dat$c.dat[cell, "center.y"]
+            if(is.null(zf)){
+                zf<-20
+            }else{
+                zf<-zf
+            }
 
-        img.dim<-dim(dat$img1)[1]
-        x<-dat$c.dat[n.names,"center.x"]
-        left<-x-zf
-        if(left<=0){left=0; right=2*zf}
-        right<-x+zf
-        if(right>=img.dim){left=img.dim-(2*zf);right=img.dim}
+            left <- x-zf
+            right <- x+zf
+            top <- y-zf
+            bottom<-y+zf
+
+            if(left <= 0){
+                left = 0
+                right = 2*zf
+            }
+            
+            if(right >= img.dim){
+                left = img.dim-(2*zf)
+                right=img.dim
+            }
+            
+            if(top<=0){
+                top=0
+                bottom=2*zf
+            }
+
+            if(bottom >= img.dim){
+                top=img.dim-(2*zf)
+                bottom=img.dim
+            }       
+        }
         
-        y<-dat$c.dat[n.names,"center.y"]
-        top<-y-zf
-        if(top<=0){top=0; bottom=2*zf}
-        bottom<-y+zf
-        if(bottom>=img.dim){top=img.dim-(2*zf);bottom=img.dim}
+        desDims <- c(
+            1,1,
+            1,2,
+            2,1,
+            2,2,
+            3,1,
+            3,2,
+            4,1,
+            4,2
+        )
+    
+        dim(desDims) <- c(2, length(desDims)/2)
+        desDims <- t(desDims)
+        desDims <- desDims - 1
         
-        par(xpd=TRUE)
-    }
-    ### Where to plot pictures
-    #ymax<-max(dat.t[,n.names])*1.05
-    #ymin<-min(dat.t[,n.names])*.95
-    #yrange<-ymax-ymin
-    
+        yMax <- par("usr")[4]
+        xMax <- par("usr")[2]
+        
+        for(i in 1:8){
+            tryCatch({
+                imgName <- paste0('img', i)
+                xLeft <- xmax + (xinch(0.8) * desDims[i,2])
+                xRight <- xLeft + xinch(0.8)
+                
+                yBottom <- yMax + (yinch(0.8) * -desDims[i,1])
+                yTop <- yBottom + yinch(0.8)
 
-    
-    ymax<-par("usr")[4]
-    xmax<-par("usr")[2]
-    if(!is.null(dat$img1)){
-        img1<-dat$img1
-        xleft<-xmax
-        xright<-xmax+xinch(.8)
-        ytop<-ymax+yinch(.8)
-        ybottom<-ymax
-        tryCatch(
-            rasterImage(img1[top:bottom,left:right,],xleft,ybottom,xright,ytop),
-            error=function(e) rasterImage(img1[top:bottom,left:right],xleft,ybottom,xright,ytop))
+                tryCatch(
+                    rasterImage(
+                        dat[[imgName]][top:bottom,left:right,],
+                        xLeft,
+                        yBottom,
+                        xRight,
+                        yTop
+                    )
+                    ,error=function(e){
+                        rasterImage(
+                            dat[[imgName]][top:bottom,left:right],
+                            xLeft,
+                            yBottom,
+                            xRight,
+                            yTop
+                        )
+                    }
+                )
+            },error = function(e) 'uh')
+        }
     }
-    
-    if(!is.null(dat$img2)){
-        img2<-dat$img2
-        xleft<-xmax+xinch(.8)
-        xright<-xmax+xinch(1.6)
-        ytop<-ymax+yinch(.8)
-        ybottom<-ymax
-        tryCatch(
-            rasterImage(img2[top:bottom,left:right,],xleft,ybottom,xright,ytop),
-            error=function(e) rasterImage(img2[top:bottom,left:right],xleft,ybottom,xright,ytop))
-
-    }
-
-    if(!is.null(dat$img3)){
-        img3<-dat$img3
-        xleft<-xmax
-        xright<-xmax+xinch(.8)
-        ytop<-ymax
-        ybottom<-ymax-yinch(.8)
-        tryCatch(
-            rasterImage(img3[top:bottom,left:right,],xleft,ybottom,xright,ytop),
-            error=function(e) rasterImage(img3[top:bottom,left:right],xleft,ybottom,xright,ytop))
-    }
-    
-    if(!is.null(dat$img4)){
-        img4<-dat$img4
-        xleft<-xmax+xinch(.8)
-        xright<-xmax+xinch(1.6)
-        ytop<-ymax
-        ybottom<-ymax-yinch(.8)
-        tryCatch(
-            rasterImage(img4[top:bottom,left:right,],xleft,ybottom,xright,ytop),
-            error=function(e) rasterImage(img4[top:bottom,left:right],xleft,ybottom,xright,ytop))
-    }
-
-    if(!is.null(dat$img5)){
-        img5<-dat$img5
-        xleft<-xmax
-        xright<-xmax+xinch(.8)
-        ytop<-ymax-yinch(.8)
-        ybottom<-ymax-yinch(1.6)
-        tryCatch(
-            rasterImage(img5[top:bottom,left:right,],xleft,ybottom,xright,ytop),
-            error=function(e) rasterImage(img5[top:bottom,left:right],xleft,ybottom,xright,ytop))
-    }
-    
-    if(!is.null(dat$img6)){
-        img6<-dat$img6
-        xleft<-xmax+xinch(.8)
-        xright<-xmax+xinch(1.6)
-        ytop<-ymax-yinch(.8)
-        ybottom<-ymax-yinch(1.6)
-        tryCatch(
-            rasterImage(img6[top:bottom,left:right,],xleft,ybottom,xright,ytop),
-            error=function(e) rasterImage(img6[top:bottom,left:right],xleft,ybottom,xright,ytop))
-    }
-    
-    if(!is.null(dat$img7)){
-        img7<-dat$img7
-        xleft<-xmax
-        xright<-xmax+xinch(.8)
-        ytop<-ymax-yinch(1.6)
-        ybottom<-ymax-yinch(2.4)
-        tryCatch(
-            rasterImage(img7[top:bottom,left:right,],xleft,ybottom,xright,ytop),
-            error=function(e) rasterImage(img7[top:bottom,left:right],xleft,ybottom,xright,ytop))
-    }
-    
-    if(!is.null(dat$img8)){
-        img8<-dat$img8
-        xleft<-xmax+xinch(.8)
-        xright<-xmax+xinch(1.6)
-        ytop<-ymax-yinch(1.6)
-        ybottom<-ymax-yinch(2.4)
-        tryCatch(
-            rasterImage(img8[top:bottom,left:right,],xleft,ybottom,xright,ytop),
-            error=function(e) rasterImage(img8[top:bottom,left:right],xleft,ybottom,xright,ytop))
-
-    }
-    
-
-    
-    
 }	
 
 #' LinesEvery same as .4 but has image at begining of trace and moves to pic plot at >10 

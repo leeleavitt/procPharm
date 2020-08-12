@@ -87,9 +87,9 @@ def featureMaker2(traces, numWindows = 12):
     #This need to be a 3 dimensional numpy array
     traces = np.asarray(traces)
     samples = traces.shape[0]
+    dataPoints = traces.shape[1]
 
-    timeSteps = np.ceil(np.linspace(start = 0, stop = 48, num=12)).astype('int')
-
+    timeSteps = np.ceil(np.linspace(start = int(0), stop = int(dataPoints), num=int(numWindows))).astype('int')
     # Start my breaking up the traces into segments based on the
     # number of points in the trace.
     features = 4
