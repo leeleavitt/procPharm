@@ -340,6 +340,7 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
 
     }        
 
+    # Visualize the data!
     density_ct_plotter(
         dat, 
         cells,  
@@ -393,7 +394,8 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
             subsetMat <- max_amp_mean[cells, 1, drop=F][keepLogic,,drop=F]
             x.names <- row.names(subsetMat[order(subsetMat[,1], decreasing=T),,drop=F])
         }else{
-            x.names <- row.names(max_amp_mean[order(max_amp_mean[,1],decreasing=T),])
+            print('hihihi')
+            x.names <- row.names(max_amp_mean[cells,][order(max_amp_mean[cells,1],decreasing=T),])
         }
         }, error=function(e) {x.names <<- row.names(max_amp_mean[order(max_amp_mean[,1],decreasing=T),])} 
     )
@@ -404,7 +406,7 @@ bp.selector<-function(dat, cell=NULL, cells=NULL, groups = NULL, dat.name=NULL,p
     }else{continue<-"No"}
     
     if(continue=="Yes"){
-        real.cells<-tcd(dat, x.names,dat.name=dat.name, track = F)
+        real.cells <- tcd(dat, x.names,dat.name=dat.name, track = F)
         return(real.cells)
     }else{
         return(x.names)
