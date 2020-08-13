@@ -2,7 +2,7 @@
 #' 170515: added pts and lns: (logical)
 #' added dat.n for insertation of the name for the rd file
 #' @export
-PeakFunc7 <- function(dat,cell,t.type="t.dat",Plotit.trace=T, info=T,lmain=NULL, bcex=.7, yvar=T, ylim.max=NULL, zf=40, pts=T, lns=T, levs=NULL, underline=T, dat.n=""){
+PeakFunc7 <- function(dat,cell,t.type="t.dat", info=T,lmain=NULL, bcex=.7, yvar=T, ylim.max=NULL, zf=40, pts=T, lns=T, levs=NULL, underline=T, dat.n=""){
     # Plot ontop always unless you dont need it
     par(xpd = T)
 
@@ -44,7 +44,9 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat",Plotit.trace=T, info=T,lmain=NULL,
     xlim <- range(dat.t[,1]) # use same xlim on all plots for better comparison
     
     if(is.null(levs)){
-        levs <- setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
+        levs <- setdiff(unique(as.character(dat$w.dat[,"wr1"])),c("",'epad'))
+    }else{
+        levs <- setdiff(levs, 'epad')
     }
 
     # Plot it up
@@ -214,7 +216,8 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat",Plotit.trace=T, info=T,lmain=NULL,
     # Adding the uncertainty  to the windows
     tryCatch({
         val <- apply(dat$uncMat[cell, levs], 1, round, digits=2)
-        
+        yLoc <- par('usr')[3] + (yinch(.09))
+
         text(
             x = levs.loc[ levs ],
             y = rep(yLoc, length(val)),
@@ -222,7 +225,6 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat",Plotit.trace=T, info=T,lmain=NULL,
             cex = bcex
         )
 
-        yLoc <- par('usr')[3] + (yinch(.09))
         text(
             xLoc, 
             yLoc,
@@ -237,7 +239,7 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat",Plotit.trace=T, info=T,lmain=NULL,
     }
     
     if(pts){
-        points(dat.t[,cell]~dat.t[,1], pch=16, cex=.3)
+        points(dat.t[,cell]~dat.t[,1], pch=16, cex=.2)
     }
 
     ##Tool for adding underline to plot
@@ -259,7 +261,7 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat",Plotit.trace=T, info=T,lmain=NULL,
         imgToUse <- paste0('img', i)
         if(!is.null(dat[[imgToUse]])){
             img.dim <- dim(dat$img1)[1]
-            x<-dat$c.dat[cell,"center.x"]
+            x <- dat$c.dat[cell,"center.x"]
             y <- dat$c.dat[cell, "center.y"]
             if(is.null(zf)){
                 zf<-20
@@ -314,7 +316,7 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat",Plotit.trace=T, info=T,lmain=NULL,
         for(i in 1:8){
             tryCatch({
                 imgName <- paste0('img', i)
-                xLeft <- xmax + (xinch(0.8) * desDims[i,2])
+                xLeft <- xMax + (xinch(0.8) * desDims[i,2])
                 xRight <- xLeft + xinch(0.8)
                 
                 yBottom <- yMax + (yinch(0.8) * -desDims[i,1])

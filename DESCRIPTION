@@ -21,8 +21,7 @@ Imports:
     RColorBrewer,
     MALDIquant,
     data.table,
-    docxtractr,
-    gmailr
+    docxtractr
 Suggests:    
     xlsx,
     cairoDevice

@@ -513,7 +513,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             press = 'hibob'
             options(warn = -1)
             # Remain within the scoring function until ctrl-F is pressed
-            while(press != 'ctrl-F'){
+            while(press != 'ctrl-F' | press != ' '){
                 # Update the plot to include all windows and the info
                 dev.set(which=click.window)
                 p1 <- PeakFunc7(dat, cell.pick, t.type=SETTINGS$t.type, yvar=yvar, info=T, bcex=bcex, pts=pts, lns=lns, levs=klevs, underline=SETTINGS$underline, dat.n=dat.name, zf=zf)
@@ -527,7 +527,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 
                 # Identify the buttons/
                 # Now pay attention to the user input.
-                press <- getGraphicsEvent('Select Windows to correct scoring. Press ctrl-F to exit this mode', 
+                press <- getGraphicsEvent('Select Windows to correct scoring. Press ctrl-F or SPACE to exit this mode', 
                     onMouseDown = mouseDownFixer, 
                     onKeybd = keybdFixer)
                 

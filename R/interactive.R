@@ -469,8 +469,8 @@ XYtrace <- function(dat, cell=NULL, img=NULL, cols=NULL, labs=F, y.var=T){
     {	#selected name of cell
         s.names <- row.names(dat$c.dat[cell,])[i]
         dev.set(dev.list()[1])
-        if(y.var){PeakFunc6(dat,s.names, Plotit.both=F)}
-        else{PeakFunc5(dat,s.names, Plotit.both=T)}
+        if(y.var){PeakFunc7(dat,s.names)}
+        else{PeakFunc7(dat,s.names, yvar=F)}
 
         dev.set(dev.list()[2])
         # If a cell is selected, that has already been selected, 
