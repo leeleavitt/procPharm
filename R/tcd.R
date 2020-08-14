@@ -513,7 +513,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             press = 'hibob'
             options(warn = -1)
             # Remain within the scoring function until ctrl-F is pressed
-            while(press != 'ctrl-F' | press != ' '){
+            unPress <- c('ctrl-F', ' ')
+            while(!press %in% unPress){
                 # Update the plot to include all windows and the info
                 dev.set(which=click.window)
                 p1 <- PeakFunc7(dat, cell.pick, t.type=SETTINGS$t.type, yvar=yvar, info=T, bcex=bcex, pts=pts, lns=lns, levs=klevs, underline=SETTINGS$underline, dat.n=dat.name, zf=zf)
@@ -531,6 +532,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                     onMouseDown = mouseDownFixer, 
                     onKeybd = keybdFixer)
                 
+                print(press)
+
                 if(class(press) == "list"){
                     # Convert the click into something more useful
                     buttonLoc <- grconvertX(press$x, 'ndc', 'user')
@@ -605,14 +608,14 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 
     #o: order all cells in a new way
         if(keyPressed=="o"){
-        toMatch<-c("c.dat", "bin", "scp", 'uncMat')
-        order_dat<-grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
+            toMatch<-c("c.dat", "bin", "scp", 'uncMat')
+            order_dat<-grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
 
-        datfram<-select.list(order_dat,title="Where is the data?")
-        collumn<-select.list(names(dat[[datfram]]),title="Collumn to sort")
-        
-        tryCatch(cnames<-c.sort.2(dat[[datfram]],cnames,collumn=collumn),error=function(e) print("Something went wrong try again"))
-        cell.i<-1
+            datfram<-select.list(order_dat,title="Where is the data?")
+            collumn<-select.list(names(dat[[datfram]]),title="Collumn to sort")
+            
+            tryCatch(cnames<-c.sort.2(dat[[datfram]],cnames,collumn=collumn),error=function(e) print("Something went wrong try again"))
+            cell.i<-1
         }	
     #O: order cells in Stacked Traces and multiview
         if(keyPressed=="O"){
@@ -1076,6 +1079,49 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             }
         }
 
+        if(keyPressed=="F8"){
+            tryCatch({
+                #first open a new window
+                #after undergoing a logical test to see if it exists
+                if(length(ls(pattern='bp.selector.window'))==0){
+                    dev.new(width=10, height=4)
+                    #give this window a name
+                    bp.selector.window<-dev.cur()
+                }
+                #give the focus to the new window
+                dev.set(bp.selector.window)
+                #empty gt.names[[12]]
+                gt.names[[12]]<-NA
+                #remove the NA, which will be repalced with a logical(0)
+                gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
+                #do the function bp.selector to gather data
+
+                toMatch<-c("c.dat", "bin", "scp", 'uncMat')
+                order_dat <- grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
+
+                datFram <- select.list(order_dat,title="Where is the data?")
+                collumn <- select.list(names(dat[[datFram]]),title="Collumn to sort")
+        
+                tryCatch(bringToTop(-1), error=function(e) NULL)
+                cat("##############################################################################\nStat Maker: CUSTOM\n##############################################################################\n\nThis function allows you to create statistics based on the statistic you select.\nThis Function finds a represention of peak amplification and or block \nThis function will take in what ever you are currently scrolling through\n\nYou have the option to localize your boxplot. This means, select cells\nspecifically based on where you click on the boxplot.\n\nTwo clicks means you need\nto specify the lower range followed by the upper range.\nOne click will take everything greater than your click\n\nThe Other option that will arise is, would you like the save the stat.\nIf you do, the console will prompt you to enter a name. Ensure no spaces in the name\nThe next option will be whether you would like to make another statistic.\n")
+                dev.set(bp.selector.window)
+                gt.names[[12]] <- bp.selector(dat,
+                    cell = cnames[cell.i],
+                    cells = cnames,
+                    stat = dat[[datFram]][,collumn,drop=F], 
+                    groups = gt.names, 
+                    plot.new = F,
+                    dat.name=NULL,
+                    env=environment()
+                )
+                #Now fill TCD with the cells just selected.
+                cnames<-gt.names[[12]]	
+                cell.i<-1
+                lines.flag<-1
+                windows.flag<-1
+            }, error = function(e) cat("\nDid not work. Review documentation\n"))
+        }
+
         if(keyPressed=="1")
         {gt.names[[1]]<-union(gt.names[[1]],cnames[cell.i]);print(gt.names[1])}
         if(keyPressed=="!")
@@ -1194,13 +1240,11 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         }
     }else{
         gt.names<<-gt.names
-        if(track & length(additionalInfo)>40){
-            tryCatch({
-                functionName <- as.character(match.call())[1]
-                timeInFunction <- (proc.time() - time1)[3]
-                logger(functionName, timeInFunction, additionalInfo)
-            }, error = function(e) print("Could not Spy on you :/"))
-        }
+        tryCatch({
+            functionName <- as.character(match.call())[1]
+            timeInFunction <- (proc.time() - time1)[3]
+            logger(functionName, timeInFunction, additionalInfo)
+        }, error = function(e) print("Could not Spy on you :/"))
 
         return(gt.names)
     }

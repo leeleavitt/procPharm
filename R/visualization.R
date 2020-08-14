@@ -11,10 +11,10 @@
 #' @param plot_new Will create a new window for this plot
 #' @param abline_loc where to display the added line to help display data better
 #' @export
-density_ct_plotter<-function(dat, cells, cell_types = NULL, stat=dat$c.dat["area"],xlim_top=NULL, xlim_bottom=NULL,overlay=T,dense_sep=T,plot_new=T,env=NULL,dat.name=NULL, abline_loc=0){	
+density_ct_plotter<-function(dat, cells, cell_types = NA, stat=dat$c.dat["area"],xlim_top=NULL, xlim_bottom=NULL,overlay=T,dense_sep=T,plot_new=T,env=NULL,dat.name=NULL, abline_loc=0){	
     stat[is.na(stat)]<-0
     
-    par(xpd=F)
+    par(xpd=F, bty='n')
     if(is.null(dat.name)){
         dat.name<-deparse(substitute(dat))
     }else{dat.name<-dat.name}
@@ -49,7 +49,7 @@ density_ct_plotter<-function(dat, cells, cell_types = NULL, stat=dat$c.dat["area
     
     all.cells.density<-density(stat[,1])
     #Overlay plot used in bp.selector
-    if(is.null(cell_types)){
+    if(is.na(cell_types)){
         if(!is.null(dat$cell_types)){
             cell_types <- dat$cell_types
         }else{
@@ -81,7 +81,7 @@ density_ct_plotter<-function(dat, cells, cell_types = NULL, stat=dat$c.dat["area
     }
 
     density_window<-dev.cur()
-    xlim<-c(xlim_bottom, xlim_top)
+    xlim <- c(xlim_bottom, xlim_top)
     dev.set(density_window)
     plot(
         all.cells.density, 
@@ -89,9 +89,17 @@ density_ct_plotter<-function(dat, cells, cell_types = NULL, stat=dat$c.dat["area
         xlim=xlim, 
         ylim=c(0,max(all.cells.density$y)*1.5), 
         pch="",lwd=3, col="black",
-        main=names(stat)
+        main=names(stat),
+        xaxt = 'n'
         #main = ""
     )
+    
+    if(max(xlim) > 10){
+        axisSeq <- ceiling(seq(xlim[1], xlim[2], length.out = 15))
+    }else{
+        axisSeq <- round(seq(xlim[1], xlim[2], length.out = 17), digits = 2)
+    }
+    axis(1, axisSeq)
     polygon(all.cells.density,col=rgb(1, 0, 0 ,0.2),lwd=1)
 
     #Provide density plots with lines overla
@@ -306,17 +314,42 @@ barPlotter <- function(dat = NULL, cols = 'YlOrRd', selectCT = T, horiz=T){
 }
 
 #' @export
-boxPlotter <- function(mat, ylim = c(0,3), activewindows, controlwindows ){
+boxPlotter <- function(mat, xlim_top=NULL, xlim_bottom=NULL, activewindows, controlwindows ){
+    tryCatch({
+        mainName <- paste(paste(activewindows, collapse = " + "), "/\n", paste(controlwindows, collapse = "+"))
+        xLabel <- "Active.Max/Control.Max"
+    },error=function(e){
+        mainName <<- names(mat)[1]
+        xLabel <- NA
+    })
+
+    
+    xLabel <- "Active.Max/Control.Max"
+
+    if( is.null(xlim_top) ){
+        xlim_top<-max(stat[,1])
+    }else{
+        xlim_top<-xlim_top
+    }
+    
+    if( is.null(xlim_bottom) ){
+        xlim_bottom<-min(stat[,1])
+    }else{
+        xlim_bottom<-xlim_bottom
+    }
+
+    xlim <- c(xlim_bottom, xlim_top)
+
     bpStats <- boxplot(
         mat[,1], 
         outline=F, 
-        ylim=ylim,
+        ylim  = xlim, 
         boxfill=rgb(1,1,1,.6,maxColorValue = 1), 
-        width=10, 
+        width=5, 
         lty=1, 
         lwd=3, 
-        main=paste(paste(activewindows, collapse = " + "), "/\n", paste(controlwindows, collapse = "+")), 
-        xlab="Active.Max/Control.Max", 
+        main=mainName, 
+        xlab=xLabel, 
         horizontal=T,
         xaxt='n')
     par(xpd=T)
