@@ -10,7 +10,7 @@
 #' additionalInfo <- choices
 #' logger(functionName, timeInFunction, additionalInfo)
 #' @export
-logger <- function(functionName, timeInFunction, additionalInfo = NA){
+logger <- function(functionName, timeInFunction, additionalInfo = NA, rate = F){
     pathSplit <- strsplit(getwd(), "/")[[1]]
     driveLoc <- pathSplit[1]
 
@@ -28,10 +28,14 @@ logger <- function(functionName, timeInFunction, additionalInfo = NA){
     timeInFunction <- timeInFunction
 
     # 7
-    alarm()
-    flush.console()
-    cat("\nRate quality of your scoring 1 to 10\n")
-    quality <- scan(n=1, quiet=TRUE)
+    if(rate){
+        alarm()
+        flush.console()
+        cat("\nRate quality of your scoring 1 to 10\n")
+        quality <- scan(n=1, quiet=TRUE)
+    }else{
+        quality <- NA
+    }
 
     # 8 
     additionalInfo <- paste0(additionalInfo, collapse = '_')
