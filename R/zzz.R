@@ -13,4 +13,9 @@
         formals(RDView)$wh <<- 11
         formals(RDView)$hh <<- 6
     }
+
+    # hi <- tryCatch(
+    #     invisible(reticulate::import('keras'))
+    #     ,error=function(e) NULL)
+
 }

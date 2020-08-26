@@ -293,6 +293,7 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
             #der=pcp$der) 
         
         tmp.rd <- TraceBrewer(tmp.rd) 
+        
         tmp.rd <- list(
             t.dat=t.dat,
             t.340=t.340,
@@ -304,6 +305,7 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
             #snr=pcp$snr, 
             blc=tmp.rd$blc)
             #der=pcp$der) 
+        
 
         #tmp.rd <- fancyBin(tmp.rd)
         tmp.rd <- c(tmp.rd, img_list)
@@ -313,7 +315,7 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
             tmp.rd <- traceProbMaker(tmp.rd)
             tmp.rd <- imageProbMaker(tmp.rd)
             tmp.rd <- uncertaintyMaker(tmp.rd)
-        },error=function(e)print('Something wen wrong during your model making.'))
+        },error=function(e)print('Something went wrong during your model making.'))
 
         rd.name <- rd.names[i]
         f.name <- paste(rd.name,".Rdata",sep="")
