@@ -226,6 +226,10 @@ TraceBrewer<-function(dat){
     tmp.rd$blc<-pcp.tmp$blc
     tmp.rd$snr<-pcp.tmp$snr
     # Now perform trace statistics on the specified trace
+
+    # This is to get rid of the padding
+    tmp.rd$blc <- tmp.rd$blc[1:dim(tmp.rd$t.dat)[1],]
+
     tmp.rd$scp<-ScoreConstPharm.2(tmp.rd,'blc')
     print(paste("Completed Window Statistics at:",(proc.time()-start.time)[3]))
     return(tmp.rd)

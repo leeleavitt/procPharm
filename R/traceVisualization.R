@@ -568,7 +568,7 @@ LinesEvery.5 <- function(dat,m.names, img="img1",channel=NULL,pic.plot=TRUE,zf=N
 
 #' 170605:  Adding a drop function to this.  It will automatically update the RD.file.  I need something to drop cells much faster
 #' @export
-LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, region.group=T,levs=NULL, plot.new=TRUE,bcex=.7, sf=1.1, subset.n=NULL, img=NULL,bp.param=NULL, bp=F, bp.pts=F){
+LinesStack.2<- function(dat, m.names = NULL, t.type=NULL,lmain="", interact=T, region.group=T,levs=NULL, plot.new=TRUE,bcex=.7, sf=1.1, subset.n=NULL, img=NULL,bp.param=NULL, bp=F, bp.pts=F){
     #graphics.off()
     #
     if(is.null(img)){img<-dat$img1}
@@ -593,12 +593,18 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
     }
     if(length(m.names)>subset.n){
         
-        if(is.null(t.type)){t.dat<-dat$t.dat}
-        else{t.dat<-dat[[t.type]]}
+        if(is.null(t.type)){
+            t.dat<-dat$t.dat
+        }else{
+            t.dat<-dat[[t.type]]
+        }
         
-        wr<-dat$w.dat[,2]
-        if(is.null(levs)){levs <- setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")}
-        else{levs<-levs}
+        wr<-dat$w.dat$wr1
+        if(is.null(levs)){
+            levs <- setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")
+        }else{
+            levs<-levs
+        }
         m.names <- intersect(m.names,names(t.dat))
         hbc <-(max(t.dat[,m.names])+subset.n)*sf
         #hbc <- (subset.n*(.8*sf))+max(t.dat[,m.names])
@@ -608,7 +614,6 @@ LinesStack.2<- function(dat,m.names=NULL,t.type=NULL,lmain="", interact=T, regio
         par(mai=c(2,1,1,1))
         
         ylim<-c(-.1,hbc)
-        #ylim <- c(-.1,2.5)
         
         plot(xseq,
             t.dat[,m.names[1]],
