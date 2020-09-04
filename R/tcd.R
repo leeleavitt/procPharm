@@ -805,11 +805,10 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             tryCatch({
                 #first open a new window
                 #after undergoing a logical test to see if it exists
-                if(length(ls(pattern='bp.selector.window'))==0){
-                    dev.new(width=14, height=8)
-                    #give this window a name
-                    bp.selector.window<-dev.cur()
-                }
+                tryCatch(dev.off(bp.selector.window), error=function(e)NULL)
+                dev.new(width=14, height=8)
+                #give this window a name
+                bp.selector.window<-dev.cur()
                 #give the focus to the new window
                 dev.set(bp.selector.window)
                 #empty gt.names[[12]]
@@ -821,8 +820,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 cat("##############################################################################\nStat Maker: CUSTOM\n##############################################################################\n\nThis function allows you to create statistics based on the statistic you select.\nThis Function finds a represention of peak amplification and or block \nThis function will take in what ever you are currently scrolling through\n\nYou have the option to localize your boxplot. This means, select cells\nspecifically based on where you click on the boxplot.\n\nTwo clicks means you need\nto specify the lower range followed by the upper range.\nOne click will take everything greater than your click\n\nThe Other option that will arise is, would you like the save the stat.\nIf you do, the console will prompt you to enter a name. Ensure no spaces in the name\nThe next option will be whether you would like to make another statistic.\n")
                 dev.set(bp.selector.window)
                 gt.names[[12]]<-bp.selector(dat,
-                    cnames[cell.i],
-                    cnames, 
+                    cell = cnames[cell.i],
+                    cells = cnames, 
                     groups = gt.names, 
                     plot.new=F,
                     dat.name=NULL,
@@ -833,8 +832,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 cell.i<-1
                 lines.flag<-1
                 windows.flag<-1
-            }, error = function(e) cat("\nDid not work. Review documentation\n")
-            )
+            }, error = function(e) cat("\nDid not work. Review documentation\n"))
         }
         
     #F2: Advanced Statistic maker This function uses the function (After-Before)/(After+Before)
@@ -844,11 +842,10 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             tryCatch({
                 #first open a new window
                 #after undergoing a logical test to see if it exists
-                if(length(ls(pattern='bp.selector.window'))==0){
-                    dev.new(width=14, height=8)
-                    #give this window a name
-                    bp.selector.window<-dev.cur()
-                }
+                tryCatch(dev.off(bp.selector.window), error=function(e)NULL)
+                dev.new(width=14, height=8)
+                #give this window a name
+                bp.selector.window<-dev.cur()
                 #give the focus to the new window
                 dev.set(bp.selector.window)
                 #empty gt.names[[12]]
@@ -861,8 +858,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 )
                 dev.set(bp.selector.window)
                 gt.names[[12]] <- bp.selector(dat,
-                    cnames[cell.i],
-                    cnames, 
+                    cell = cnames[cell.i],
+                    cells = cnames, 
                     groups = gt.names, 
                     plot.new = F,
                     dat.name=NULL,
@@ -1083,11 +1080,10 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             tryCatch({
                 #first open a new window
                 #after undergoing a logical test to see if it exists
-                if(length(ls(pattern='bp.selector.window'))==0){
-                    dev.new(width=10, height=4)
-                    #give this window a name
-                    bp.selector.window<-dev.cur()
-                }
+                tryCatch(dev.off(bp.selector.window), error=function(e)NULL)
+                dev.new(width=10, height=4)
+                #give this window a name
+                bp.selector.window<-dev.cur()
                 #give the focus to the new window
                 dev.set(bp.selector.window)
                 #empty gt.names[[12]]
@@ -1115,6 +1111,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                     env=environment()
                 )
                 #Now fill TCD with the cells just selected.
+
+                print(gt.names[[12]])
                 cnames<-gt.names[[12]]	
                 cell.i<-1
                 lines.flag<-1
