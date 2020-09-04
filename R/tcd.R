@@ -609,12 +609,12 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     #o: order all cells in a new way
         if(keyPressed=="o"){
             toMatch<-c("c.dat", "bin", "scp", 'uncMat')
-            order_dat<-grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
+            order_dat <- grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
 
-            datfram<-select.list(order_dat,title="Where is the data?")
-            collumn<-select.list(names(dat[[datfram]]),title="Collumn to sort")
+            datfram <- select.list(order_dat,title="Where is the data?")
+            collumn <- select.list(names(dat[[datfram]]),title="Collumn to sort")
             
-            tryCatch(cnames<-c.sort.2(dat[[datfram]],cnames,collumn=collumn),error=function(e) print("Something went wrong try again"))
+            tryCatch(cnames <- c.sort.2(dat[[datfram]], cnames, collumn=collumn),error=function(e) print("Something went wrong try again"))
             cell.i<-1
         }	
     #O: order cells in Stacked Traces and multiview

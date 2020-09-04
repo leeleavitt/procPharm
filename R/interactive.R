@@ -156,7 +156,9 @@ bp.selector<-function(dat, stat = NA, cell=NULL, cells=NULL, groups = NULL, dat.
     #Make sure you have some type of cells
     if(is.null(cells)){
         cells<-dat$c.dat$id
-    }else{cells<-cells}
+    }else{
+        cells<-cells
+    }
     
     #Choose a cell to display for selecting stats
     if(is.null(cell)){
@@ -402,7 +404,7 @@ bp.selector<-function(dat, stat = NA, cell=NULL, cells=NULL, groups = NULL, dat.
             par(xpd=F)
             abline(v=loc$x,col="red")
             par(xpd=T)
-
+de
             if(length(loc$x)==1){
                 keepLogic <- stat[cells, 1] > loc$x[1]
             }

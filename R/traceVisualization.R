@@ -215,11 +215,13 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat", info=T,lmain=NULL, bcex=.7, yvar=
 
     # Adding the uncertainty  to the windows
     tryCatch({
-        val <- apply(dat$uncMat[cell, levs], 1, round, digits=2)
+        uncNames <- names(tmpRD$uncMat)
+        uncLevs <- intersect(uncNames, levs)
+        val <- apply(dat$uncMat[cell, uncLevs], 1, round, digits=2)
         yLoc <- par('usr')[3] + (yinch(.09))
 
         text(
-            x = levs.loc[ levs ],
+            x = levs.loc[ uncLevs ],
             y = rep(yLoc, length(val)),
             val,
             cex = bcex
@@ -231,7 +233,7 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat", info=T,lmain=NULL, bcex=.7, yvar=
             'unc',
             cex = bcex
         )
-    },error=function(e) NULL)
+    },error=function(e) print('cant UNC'))
 
     # Add lines or points
     if(lns){
@@ -331,13 +333,15 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat", info=T,lmain=NULL, bcex=.7, yvar=
                         yTop
                     )
                     ,error=function(e){
-                        rasterImage(
-                            dat[[imgName]][top:bottom,left:right],
-                            xLeft,
-                            yBottom,
-                            xRight,
-                            yTop
-                        )
+                        tryCatch(
+                            rasterImage(
+                                dat[[imgName]][top:bottom,left:right],
+                                xLeft,
+                                yBottom,
+                                xRight,
+                                yTop
+                            )
+                        , error=function(e)NULL)
                     }
                 )
             },error = function(e) 'uh')

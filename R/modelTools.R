@@ -43,7 +43,13 @@ traceProbMaker <- function(dat, minute = TRUE){
     pyPharm <- reticulate::import('python_pharmer')
     pulsesWithNN <- c("^AITC.*", "^[cC]aps.*", "^[mM]enth.*", "[kK][.]40.*")
     nnNames <- c('aitc','capsaicin', 'menthol', 'k40')
-
+    
+    if(is.null(dat$uncMat)){
+        uncertainMat <- data.frame(matrix(nrow = dim(dat$c.dat)[1], ncol = 0))
+        row.names(uncertainMat) <- row.names(dat$c.dat)
+    }else{
+        uncertainMat <- dat$uncMat
+    }
     for( i in 1:length(pulsesWithNN)){        
         # Make sure the pulse exists
         window <- grep(pulsesWithNN[i], unique(dat$w.dat$wr1), value=T)
@@ -72,12 +78,14 @@ traceProbMaker <- function(dat, minute = TRUE){
                 }else{
                     featureFrame <- pyPharm$featureMaker2(pulseToScore, 12)
                 }
-                probs <- model$predict(featureFrame)
-                colnames(probs) <- c(0,1)
                 # Transfer these scoring to the binary dataframe
                 pulseName <- grep(pulsesWithNN[i], names(dat$bin), value=T)[1]
-                dat[['probs']][[pulseName]] <- probs
                 dat$bin[,pulseName] <- model$predict_classes(featureFrame)
+
+                # add to the uncMat
+                probs <- model$predict(featureFrame)
+                uncertainty <- sqrt(probs[,1]^2 + probs[,2]^2)
+                uncertainMat[pulseName] <- uncertainty
                 }
                 , error=function(e) print(paste("Could not score", pulsesWithNN[i]))
             )
@@ -85,6 +93,9 @@ traceProbMaker <- function(dat, minute = TRUE){
             print(paste("Could not score", pulsesWithNN[i])) 
         }
     }
+
+    dat$uncMat <- uncertainMat
+
     return(dat)
 }
 
@@ -218,3 +229,129 @@ uncertaintyMaker <- function(dat){
         cat("\n Probabilities have not bee created. Plese do both, \n imageProbMaker(RD.exerpiment) \n and \n traceProbMaker(RD.experiment)\n")
     )
 }
+
+labelBinder <- function(dat, windowSizeMin = 3, tType = "t.dat", winMin = 1.2, winMax = 5, model = "./VRC.h5", winSel = T, featureWindows = 24, window = NA){
+    keras <- reticulate::import('keras')
+    
+    if(all(class(model) == 'character')){
+        model <- keras::load_model_hdf5(model)
+    }
+    pyPharm <- reticulate::import('python_pharmer')
+
+    # Lets create the window region
+    wr <- dat$w.dat$wr1
+    levs <- setdiff(unique(dat$w.dat$wr1), "")
+
+    # Lets find the window sizes to include,
+    x1s <- tapply(dat$w.dat[,"Time"],as.factor(wr),min)
+    x2s <- tapply(dat$w.dat[,"Time"],as.factor(wr),max)
+
+    # Perform a test to include windows of the right sizes
+    windowLen <- x2s - x1s
+    winCol <- names(windowLen[windowLen < winMax & windowLen > winMin])
+
+    # Provides the user with control over the windows includesd
+    if(winSel){
+        cat('\nSelect windows to add to the labeled data\n')
+        winCol <- select.list(levs, preselect = winCol,  multiple = T, title = "Select windows", graphics = T)
+    }else{
+        if(is.na(window)){
+            winCol <- grep(window, levs, T, value = T)
+        }else{
+            winCol <- levs
+        }
+    }
+    winStart <- sort(x1s[winCol])
+    winEnd <- winStart + windowSizeMin
+
+    # Test the window size since we are losing some data. due to differing window sizes
+    windowSize <- c()
+    for(i in 1:length(winStart)){
+        windowLogic <-  dat$w.dat$Time > winStart[i] & 
+                        dat$w.dat$Time < winEnd[i]
+
+        windowSize[i] <- dim(dat$t.dat[-1][windowLogic, ])[1]
+    }
+
+    windowSizeMax <- max(windowSize)
+    windowLogic <- (windowSizeMax - windowSize) < 10
+    if(length(winStart[!windowLogic])> 0 ){
+        cat("\nThese windows were not scored\n")
+        print(names(winStart[!windowLogic]))
+        cat("\nAnd these windows are defined to not be scored\n")
+        print(setdiff(levs, names(winStart[windowLogic])))
+    }
+
+    # This is the way we set the maximun windo size to the minimum window size
+    # for all window regions.
+    winStart <- winStart[windowLogic]
+    windowSizeMini <- min(windowSize)
+
+    startPoints <- Reduce(c,lapply(winStart, function(x) which(dat$t.dat$Time == x, arr.ind=T) ))
+    endPoints <- startPoints + windowSizeMini
+
+    # Create the uncertainty matrix and add the binary scoring to the data frame
+    uncertainMat <- data.frame(matrix(nrow = dim(dat$c.dat)[1], ncol = length(winStart)))
+    for(i in 1:length(winStart)){
+        pulseToScore <- as.data.frame(t(dat[[tType]][-1][startPoints[i]:endPoints[i],]))
+        featureFrame <- pyPharm$featureMaker2(pulseToScore, featureWindows)
+        
+        probs <- model$predict(featureFrame)
+        classes <- model$predict_classes(featureFrame)
+
+        uncertainty <- sqrt(probs[,1]^2 + probs[,2]^2)
+        uncertainMat[,i] <- uncertainty
+
+        dat$bin[,names(winStart)[i]] <- classes
+    }
+
+    names(uncertainMat) <- names(winStart)
+    row.names(uncertainMat) <- row.names(dat$c.dat)
+    dat$uncMat <- uncertainMat
+
+    # A plot to show the uncertainty per response type.
+    dev.new(width = 8, height = 4)
+    par(bty = 'l', mar = c(7,6,4,2))
+    bpDim <- boxplot(
+        uncertainMat,
+        xaxt = "n",
+        border = NA,
+        boxfill = 'gray90',
+        medcol = 'black',
+        medlty = 1,
+        medlwd =2,
+        whisklty = 1,
+        whisklwd = 2,
+        whiskcol = 'black',
+        staplelty = 1, 
+        staplelwd = 2,
+        staplecol = 'black',
+        main = 'Uncertainty per response',
+        ylab = 'Class probabilities\nsqrt(Sum of squares)'
+    )
+
+    # stripchart(
+    #     uncertainMat, 
+    #     vertical = T,
+    #     jitter = .2,
+    #     method = 'jitter',
+    #     pch = 18,
+    #     cex = .2,
+    #     col = rgb(0,0,0,.2),
+    #     add = T
+    #     )
+
+    par(xpd = T)
+    text(
+        seq(1,length(winStart), by=1),
+        par('usr')[3] - yinch(.1),
+        names(winStart),
+        adj = 1,
+        srt = 90,
+        cex = .7
+    )
+
+    return(dat)
+}
+
+
