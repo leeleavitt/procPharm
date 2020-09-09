@@ -24,3 +24,6 @@ plot(asw, type= "b", main = "pam() clustering assessment",
      xlab= "k  (# clusters)", ylab = "average silhouette width")
 axis(1, k.best, paste("best",k.best,sep="\n"), col = "red", col.axis = "red")
 
+
+tmpRD <- get(load("./extras/RD.200309.30.m.m3.p1.Rdata"))
+ dat <- tmpRD

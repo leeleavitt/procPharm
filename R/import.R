@@ -172,7 +172,6 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
 		wrdef_logic <- grep(".docx", wrdef, ignore.case=T, value=T)
 		# If it is a wr1.docx, continue
         if( length(wrdef_logic) == 1 ){
-			require(docxtractr)
 			wr <- docx.wr1.importer(wrdef)
 			w.dat <- MakeWr.docx(t.dat, wr)		
 
@@ -488,6 +487,7 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
         names(c.dat)[1:4] <- c("id","area","center.x","center.y") 
         row.names(c.dat) <- c.dat[,"id"]
     }
+    
     #####################################################
     # Window Region Definition
     #####################################################
@@ -640,11 +640,11 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
 
 #IMPORT DOCX tables
 docx.wr1.importer<-function(file.name='wr1.docx'){
-    if( !library(docxtractr, logical.return=T) ){install.packages('docxtractr')}else{}
+    #if( !library(docxtractr, logical.return=T) ){install.packages('docxtractr')}else{}
     #read in docx
-    wr1<-read_docx(file.name)
+    wr1<- docxtractr::read_docx(file.name)
     #Extract each table
-    wr1<-docx_extract_all_tbls(wr1, guess_header=F)
+    wr1 <- docxtractr::docx_extract_all_tbls(wr1, guess_header=F)
 
     #out table is the third one
     wr1<-Reduce(c,wr1[[length(wr1)]])
@@ -745,30 +745,47 @@ MakeWr <- function(t.dat,wr1,padL=0,padR=0){
 #' @export 
 WindowRepair_docx<-function(dat, complete=F, trace_brew=F){
     require(docxtractr)
-    tmp<-dat #first create a tmp to repair
-    tmp.rd<-dat # then create a tmp.rd to completely screwup for repairs
+    tmp <- dat #first create a tmp to repair
+    tmp.rd <- dat # then create a tmp.rd to completely screwup for repairs
 
     #Now do all of this to tmp.rd
-    wrdef<-"wr1.docx"
-    t.dat<-tmp.rd$t.dat
-    if(!is.null(wrdef)){
+    wrdef <- "wr1.docx"
+    wrdef <- list.files(pattern = '^wr1')
+    if(length(wrdef) > 1){
+        cat("\nWhich file contains the updated information?\n")
+        wrdef <- wrdef[menu(wrdef, title=)]
+    }
+
+    # Is the selection a docx?
+    wrdef_logic <- grep("[.]docx$", wrdef, ignore.case=T, value=T)
+    # If it is a wr1.docx, continue
+    if( length(wrdef_logic) == 1 ){
         wr <- docx.wr1.importer(wrdef)
-        Wr<-length(wr[,1])#complete and revise this section
-        if(length(colnames(wr))<2){
-            w.dat<-WrMultiplex(t.dat,wr,n=Wr)
-        }else{
-            w.dat <- MakeWr.docx(t.dat,wr)
+        w.dat <- MakeWr.docx(t.dat, wr)		
+
+        ## Check for duplicated rows	
+        if(length(which(duplicated(row.names(t.dat))))>=1){
+            dup<-which(duplicated(row.names(t.dat)))
+            t.dat <- t.dat[-dup,]
+            w.dat <- w.dat[-dup,]
         }
-        tmp.rd$w.dat<-w.dat
+    }else{
+        tryCatch(wr <- ReadResponseWindowFile(wrdef)
+            ,error=function(e) print("YOU NEED A wr1.docx or wr1.csv")
+        )
+        # Since this is the csv we need to move the window back ten seconds
+        wr['at'] <- wr['at'] - (10/60)
+
+        w.dat <- MakeWr(t.dat,wr)
     }
     levs<-setdiff(unique(as.character(tmp.rd$w.dat$wr1)),"")
 
-    #5 set the thresholds for scoring and run the automatic scoring
+    # Set the thresholds for scoring and run the automatic scoring
     sm <- 2 #smooth window size set
     ws <- 30 #window peak size
     snr.lim <- 4 #signal to noise threshold
     hab.lim <- .05 #height above baseline threshold
-    blc="SNIP"
+    blc = "SNIP"
     
     pcp <- ProcConstPharm(tmp.rd,sm,ws,blc)
     scp <- ScoreConstPharm(tmp.rd,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
@@ -788,7 +805,7 @@ WindowRepair_docx<-function(dat, complete=F, trace_brew=F){
     #starting with the window region
     tmp$w.dat$wr1<-tmp.rd$w.dat$wr1
     
-	if(length(summary(names(tmp.rd)=='t.norm')) == 2 | trace_brew ){
+	if('t.norm' %in% names(tmp.rd) | trace_brew ){
         tmp.rd <- TraceBrewer(tmp.rd)
     }
 

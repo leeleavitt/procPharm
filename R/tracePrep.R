@@ -132,23 +132,22 @@ NumBlanks <- function(x){
 #wr is the response window factor 
 #SNR.lim is the signal to noise ratio limit for peak detection
 #bl.meth is the method for baseline correction.
-PeakFunc2 <- function(dat,i,shws=2,phws=20,Plotit=F,wr=NULL,SNR.lim=2,bl.meth="TopHat",lmain=NULL){
-    library("MALDIquant")
-    s1 <- createMassSpectrum(dat[,"Time"],dat[,i])
-    if(shws > 1)
-        s3 <- smoothIntensity(s1, method="SavitzkyGolay", halfWindowSize=shws)
-    else
+PeakFunc2 <- function(dat, i, shws=2, phws=20, Plotit=F, wr=NULL, SNR.lim=2, bl.meth="TopHat", lmain=NULL){
+    s1 <- MALDIquant::createMassSpectrum(dat[,"Time"],dat[,i])
+    
+    if(shws > 1){
+        s3 <- MALDIquant::smoothIntensity(s1, method="SavitzkyGolay", halfWindowSize=shws)
+    }else{
         s3 <- s1
-    if(Plotit)
-    {
-        bSnip <- estimateBaseline(s3, method="SNIP")
-        bTopHat <- estimateBaseline(s3, method="TopHat")
     }
-    s4 <- removeBaseline(s3, method=bl.meth)
-    Baseline <- estimateBaseline(s3, method=bl.meth)
-    p <- detectPeaks(s4, method="MAD", halfWindowSize=phws, SNR=SNR.lim)
-    if(Plotit)
-    {
+
+    s4 <- MALDIquant::removeBaseline(s3, method=bl.meth)
+    Baseline <- MALDIquant::estimateBaseline(s3, method=bl.meth)
+    p <- MALDIquant::detectPeaks(s4, method="MAD", halfWindowSize=phws, SNR=SNR.lim)
+    if(Plotit){
+        bSnip <- MALDIquant::estimateBaseline(s3, method="SNIP")
+        bTopHat <- MALDIquant::estimateBaseline(s3, method="TopHat")
+
         xlim <- range(mass(s1)) # use same xlim on all plots for better comparison
         ylim <- c(-.1,1.4)
         #ylim <- range(intensity(s1))
@@ -181,20 +180,21 @@ PeakFunc2 <- function(dat,i,shws=2,phws=20,Plotit=F,wr=NULL,SNR.lim=2,bl.meth="T
         lines(bSnip, lwd=2, col="red")
         lines(bTopHat, lwd=2, col="blue")
         lines(s4,lwd=2)
+        
+        if((length(p) > 0)){
+            points(p)
+            ## label top 40 peaks
+            top40 <- intensity(p) %in% sort(intensity(p), decreasing=TRUE)[1:40]
+            labelPeaks(p, index=top40, underline=TRUE,labels=round(snr(p)[top40],2))
+        }
     }
-    if((length(p) > 0)&Plotit)
-    {
-        points(p)
-        ## label top 40 peaks
-        top40 <- intensity(p) %in% sort(intensity(p), decreasing=TRUE)[1:40]
-        labelPeaks(p, index=top40, underline=TRUE,labels=round(snr(p)[top40],2))
-    }
+
     return(list(peaks=p,baseline=Baseline,dat=s4))
 }
 
 #' This is our trace cleaning protocol
 #' @export 
-TraceBrewer<-function(dat){
+TraceBrewer<-function(dat, bscore = F){
     cat('
     #The current flow of our trace cleaning protocol is as follows, and this is
     #what the function automatically fills in for the RD list
