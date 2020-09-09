@@ -404,7 +404,6 @@ bp.selector<-function(dat, stat = NA, cell=NULL, cells=NULL, groups = NULL, dat.
             par(xpd=F)
             abline(v=loc$x,col="red")
             par(xpd=T)
-de
             if(length(loc$x)==1){
                 keepLogic <- stat[cells, 1] > loc$x[1]
             }
@@ -416,9 +415,9 @@ de
             x.names <- row.names(subsetMat[order(subsetMat[,1], decreasing=T),,drop=F])
         }else{
             print('hihihi')
-            x.names <- row.names(stat[cells,][order(stat[cells,1],decreasing=T),])
+            x.names <- row.names(stat[cells, 1, drop=F][order(stat[cells,1],decreasing=T),,drop=F])
         }
-        }, error=function(e) {x.names <<- row.names(stat[order(stat[,1],decreasing=T),])} 
+        }, error=function(e) {print("uh oh");x.names <<- row.names(stat[order(stat[,1],decreasing=T),])} 
     )
         
     return(x.names)
