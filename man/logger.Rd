@@ -5,7 +5,7 @@
 \title{Function to track the various users data during analysis
 The goal is to append a line to the log with}
 \usage{
-logger(functionName, timeInFunction, additionalInfo = NA)
+logger(functionName, timeInFunction, additionalInfo = NA, rate = F)
 }
 \description{
 Needs to happen before the function goes

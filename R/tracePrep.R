@@ -194,44 +194,70 @@ PeakFunc2 <- function(dat, i, shws=2, phws=20, Plotit=F, wr=NULL, SNR.lim=2, bl.
 
 #' This is our trace cleaning protocol
 #' @export 
-TraceBrewer<-function(dat, bscore = F){
-    cat('
-    #The current flow of our trace cleaning protocol is as follows, and this is
-    #what the function automatically fills in for the RD list
+#' @param dat is the RD.experiment to input
+#' @param bscore logical, if true all scores will be replaced by bscore2 function
+#' @param blcPrep logical, if this is true, an expensive baseline correction schema occurs. If false only some SNR occurs
+TraceBrewer <- function(dat, bscore = F, blcPrep = T, verbose = F){
 
-    #t.dat>                 Raw data                   t.dat
-    #t.dat.pad>             3 End points added at end  NA
-    #t.dat.pad.ds.s>        despike and smooth         mp
-    #t.dat.pad.ds.s.n>      normalize 0 to 1           t.norm
-    #t.dat.pad.ds.s.n.blc>  Baseline Corrected         blc
-    ')
-    tmp.rd<-dat
-    start.time<-proc.time()
-    # Kevin has created a new way of creating cleaned up traces.
-    # Add a 3 point padding to the end of the experiment which return the trace back to baseline
-    # This helps preserve the response shape
-    tmp.rd<-PadTdat(tmp.rd)
-    #print(paste("Completed Padding at:",(proc.time()-start.time))[3])
-    # Kevin now uses this to despike and smooth the data
-    tmp.rd<-DespikeSmooth(tmp.rd)
-    #print(paste("Completed Despiking at:",(proc.time()-start.time)[3]))
-    # Now what we need to do is provide the analysis with some type of normalized trace
-    tmp.rd<-TraceNormal(tmp.rd,'mp')
-    #print(paste("Completed Normalizing at:",(proc.time()-start.time)[3]))
+    tmp.rd <- dat
+    start.time <- proc.time()
+    if(blcPrep){
+        if(verbose){
+        cat('
+#The current flow of our trace cleaning protocol is as follows, and this is\n
+#what the function automatically fills in for the RD list
 
-    # Now do a baseline correction based on the trace padding, and the despike smooth function, and
-    # the normalized trace 
-    pcp.tmp<-ProcConstPharm(tmp.rd$t.norm)
-    #print(paste("Completed Baseline Correction at:",(proc.time()-start.time)[3]))
-    tmp.rd$blc<-pcp.tmp$blc
-    tmp.rd$snr<-pcp.tmp$snr
+#t.dat>                 Raw data                   t.dat
+#t.dat.pad>             3 End points added at end  NA
+#t.dat.pad.ds.s>        despike and smooth         mp
+#t.dat.pad.ds.s.n>      normalize 0 to 1           t.norm
+#t.dat.pad.ds.s.n.blc>  Baseline Corrected         blc
+        ')
+        }
+        # Kevin has created a new way of creating cleaned up traces.
+        # Add a 3 point padding to the end of the experiment which return the trace back to baseline
+        # This helps preserve the response shape
+        tmp.rd <- PadTdat(tmp.rd)
+        #print(paste("Completed Padding at:",(proc.time()-start.time))[3])
+        # Kevin now uses this to despike and smooth the data
+        tmp.rd <- DespikeSmooth(tmp.rd)
+        #print(paste("Completed Despiking at:",(proc.time()-start.time)[3]))
+        # Now what we need to do is provide the analysis with some type of normalized trace
+        tmp.rd <- TraceNormal(tmp.rd, 'mp')
+        #print(paste("Completed Normalizing at:",(proc.time()-start.time)[3]))
+        # Now do a baseline correction based on the trace padding, and the despike smooth function, and
+        # the normalized trace 
+        pcp.tmp <- ProcConstPharm(tmp.rd$t.norm)
+        #print(paste("Completed Baseline Correction at:",(proc.time()-start.time)[3]))
+        tmp.rd$blc <- pcp.tmp$blc
+        tmp.rd$snr <- pcp.tmp$snr
+    }else{
+        # We need to grab the snr data to proceed
+        dat <- tmp.rd$blc
+        t.names <- names(dat)[-1]#Time in first column
+        dat1.snr <- dat #peak calls stored as SNR
+        dat1.snr[,t.names] <- 0
+        for(i in 1:length(t.names)){
+            s1 <- MALDIquant::createMassSpectrum(dat[,"Time"],dat[,t.names[i]])
+            peaks <- MALDIquant::detectPeaks(s1, method="MAD", halfWindowSize=20, SNR=2)
+            dat1.snr[match(MALDIquant::mass(peaks),dat[,1]),t.names[i]] <- MALDIquant::snr(peaks)
+        }
+        tmp.rd$snr <- dat1.snr
+    }
+    
     # Now perform trace statistics on the specified trace
+    tmp.rd$scp <- ScoreConstPharm(tmp.rd, t.type = 'blc')
+
+    # Skip scoring if specified. This helps to not overwrite hardwork done.
+    if(bscore){
+        tmp.rd <- bscore2(tmp.rd)
+    }
+
+    cat("\nCompleted Brew. CHEERS!:",round((proc.time()-start.time)[3], digits = 3),' seconds\n')
 
     # This is to get rid of the padding
     tmp.rd$blc <- tmp.rd$blc[1:dim(tmp.rd$t.dat)[1],]
 
-    tmp.rd$scp<-ScoreConstPharm.2(tmp.rd,'blc')
-    print(paste("Completed Window Statistics at:",(proc.time()-start.time)[3]))
     return(tmp.rd)
 }
 

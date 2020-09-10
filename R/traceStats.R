@@ -13,8 +13,8 @@ ProcConstPharm <- function(dat,shws=2,phws=20,bl.meth="SNIP"){
 
     for(i in t.names){
         p1 <- PeakFunc2(dat1, i, shws=shws, phws=phws, Plotit=F, bl.meth=bl.meth)
-        dat1.snr[match(mass(p1$peaks),dat1[,1]),i] <- snr(p1$peaks)
-        dat1.bc[i] <- intensity(p1$dat)
+        dat1.snr[match(MALDIquant::mass(p1$peaks),dat1[,1]),i] <- MALDIquant::snr(p1$peaks)
+        dat1.bc[i] <- MALDIquant::intensity(p1$dat)
     }
     return(list(snr=dat1.snr,blc=dat1.bc))
 
@@ -68,9 +68,9 @@ bScore <- function(blc, snr, snr.lim, blc.lim, levs, wr, cnames=NULL){
 #' @param wm.min= which max, Where within the window region does the maximun value occur
 #' @param wm.max= where to stop looking for the maximun value
 bscore2 <- function(dat, levs.1=NULL, snr.lim = 5 , blc.lim = 0.05){
-
     if(is.null(dat$bin)){
-        dat$bin <- data.frame(matrix(nrow = dat$))
+        dat$bin <- data.frame(matrix(nrow = dim(dat$c.dat)[1], ncol = 0))
+        row.names(dat$bin) <- row.names(dat$c.dat)
     }
 
     levs <- setdiff(unique(as.character(dat$w.dat$wr1)),"")
@@ -85,18 +85,13 @@ bscore2 <- function(dat, levs.1=NULL, snr.lim = 5 , blc.lim = 0.05){
         snr.name <- paste(levs.1[i],".snr", sep="")
         max.name <- paste(levs.1[i],".max", sep="")
 
-        logic <- dat$scp[,snr.name] >= snr.lim &
-                dat$scp[,max.name] >= blc.lim 
+        logic <-    dat$scp[,snr.name] >= snr.lim &
+                    dat$scp[,max.name] >= blc.lim 
             
-        dat$bin[,levs.1[i]] <- 1
-        if(logic){
-            dat$bin[levs.1[i]] <- 1
-        }else{
-            dat$bin[levs.1[i]] <- 0
-        }
+        dat$bin[logic, levs.1[i] ] <- 1
+        dat$bin[!logic, levs.1[i] ] <- 0
+
     }
-
-
     return(dat)
 }
 
@@ -191,7 +186,7 @@ probMaker <- function(dat){
 #' variance of smoothed - raw in window
 #' define and number blank windows.
 #' @export
-ScoreConstPharm <- function(dat, blc=NULL, snr=NULL, der=NULL, snr.lim=3, blc.lim=.03, shws=2, t.type = NA){
+ScoreConstPharm <- function(dat, blc=NULL, snr=NULL, der=NULL, snr.lim=5, blc.lim=.05, shws=2, t.type = NA){
     t.dat<-dat$t.dat
     if(is.null(blc)){
         if(!is.na(t.type)){
@@ -247,67 +242,5 @@ ScoreConstPharm <- function(dat, blc=NULL, snr=NULL, der=NULL, snr.lim=3, blc.li
         res.tab[paste(i,".max",sep="")] <- apply(blc[wr==i,cnames],2,max)
         res.tab[paste(i,".wm",sep="")] <- apply(blc[wr==i,cnames],2,which.max)
     }
-    return(res.tab)
-}
-#' calculate a table of cell characteristics globally and 
-#' within specific windows
-#' these specifics should include
-#' mean and sd, sum of in window peaks, sum of out of window peaks
-#' @export
-ScoreConstPharm.2 <- function(dat,t.type=NULL, snr=NULL, der=NULL, snr.lim=3,blc.lim=.03,shws=2){
-    require(MALDIquant)
-    t.dat <- dat$t.dat
-    
-    if(is.null(t.type)){
-        t.type<-'blc'
-    }else{
-        t.type <- t.type
-    }
-    
-    if(is.null(snr)){
-        snr <- dat$snr
-    }else{
-        snr<-snr
-    }
-    
-    wr <- dat$w.dat$wr1
-
-    gtfunc <- function(x,alph){sum(x > alph,na.rm=T)}
-        
-    lt5func <- function(x,y){
-        ltfunc <- function(i){summary(lm(y[i:(i+5)] ~ x[i:(i+5)]))$coefficients[2,3]}
-        iseq <- 1:(length(x)-5)
-        res <- sapply(iseq,ltfunc)
-        return(range(res))
-    }
-
-    levs <- setdiff(unique(wr),"")
-    cnames <- names(t.dat)[-1]
-    res.tab <- data.frame(mean=apply(dat[['blc']][,cnames],2,mean))
-    res.tab["sd"] <- apply(dat$blc[,cnames],2,sd)
-    res.tab["snr.iws"] <- apply(snr[is.element(wr,levs),cnames],2,sum)
-    res.tab["snr.ows"] <- apply(snr[!is.element(wr,levs),cnames],2,sum)
-    res.tab["snr.iwc"] <- apply(snr[is.element(wr,levs),cnames],2,gtfunc,alph = snr.lim)
-    res.tab["snr.owc"] <- apply(snr[!is.element(wr,levs),cnames],2,gtfunc,alph = snr.lim)
-    
-    for(i in cnames){
-        s1 <- createMassSpectrum(t.dat[,"Time"], t.dat[,i])
-        s3 <- smoothIntensity(s1, method="SavitzkyGolay", halfWindowSize=shws)
-        bl.th <- estimateBaseline(s3, method="TopHat")[,"intensity"]
-        bl.snp <- estimateBaseline(s3, method="SNIP")[,"intensity"]
-        eseq <- 1:ceiling((nrow(t.dat)/2))
-        lseq <- max(eseq):nrow(t.dat)
-        res.tab[i,"bl.diff"] <- mean(bl.th-bl.snp)
-        res.tab[i,"earl.bl.diff"] <- mean(bl.th[eseq]-bl.snp[eseq])
-        res.tab[i,"late.bl.diff"] <- mean(bl.th[lseq]-bl.snp[lseq])        
-    }
-    
-    for(i in levs){
-        res.tab[paste(i,".snr",sep="")] <- apply(snr[wr==i,cnames],2,max)
-        res.tab[paste(i,".tot",sep="")] <- apply(dat[[t.type]][wr==i,cnames],2,sum)
-        res.tab[paste(i,".max",sep="")] <- apply(dat[[t.type]][wr==i,cnames],2,max)
-        res.tab[paste(i,".wm",sep="")] <- apply(dat[[t.type]][wr==i,cnames],2,which.max)
-    }
-
     return(res.tab)
 }

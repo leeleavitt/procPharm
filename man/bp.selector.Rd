@@ -6,6 +6,7 @@
 \usage{
 bp.selector(
   dat,
+  stat = NA,
   cell = NULL,
   cells = NULL,
   groups = NULL,

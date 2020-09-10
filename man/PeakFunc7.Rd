@@ -8,10 +8,8 @@ added dat.n for insertation of the name for the rd file}
 \usage{
 PeakFunc7(
   dat,
-  n.names,
+  cell,
   t.type = "t.dat",
-  Plotit.trace = T,
-  Plotit.both = F,
   info = T,
   lmain = NULL,
   bcex = 0.7,

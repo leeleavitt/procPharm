@@ -20,9 +20,10 @@ ScoreConstPharm(
   blc = NULL,
   snr = NULL,
   der = NULL,
-  snr.lim = 3,
-  blc.lim = 0.03,
-  shws = 2
+  snr.lim = 5,
+  blc.lim = 0.05,
+  shws = 2,
+  t.type = NA
 )
 }
 \description{

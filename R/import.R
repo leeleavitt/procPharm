@@ -270,51 +270,25 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
         c.dat[,"area"]<-c.dat$area*area_conversion
 
         # Initial and simple Data processing
-        tmp.rd <- list(t.dat=t.dat,w.dat=w.dat,c.dat=c.dat)
+        tmp.rd <- list(t.dat=t.dat, t.340=t.340, t.380=t.380, w.dat=w.dat, c.dat=c.dat)
+
         levs<-setdiff(unique(as.character(w.dat[,2])),"")
         snr.lim=5; hab.lim=.05; sm=2; ws=3; blc="SNIP"
-        pcp <- ProcConstPharm(tmp.rd,sm,ws,blc)
-        scp <- ScoreConstPharm(tmp.rd,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
-        bin <- bScore(pcp$blc, pcp$snr, snr.lim, hab.lim, levs, tmp.rd$w.dat[,"wr1"])
-        bin <- bin[,levs]
-        bin["drop"] <- 0 #maybe try to generate some drop criteria from the scp 
+        pcp <- ProcConstPharm(tmp.rd, sm, ws, blc)
+        tmp.rd$scp <- ScoreConstPharm(tmp.rd, pcp$blc, pcp$snr, pcp$der, snr.lim, hab.lim, sm)
+        tmp.rd$blc <- pcp$blc
+        #bin <- bScore(pcp$blc, pcp$snr, snr.lim, hab.lim, levs, tmp.rd$w.dat[,"wr1"])
+        #bin <- bin[,levs]
+        tmp.rd <- bscore2(tmp.rd)
+        tmp.rd$bin["drop"] <- 0 #maybe try to generate some drop criteria from the scp 
 
-        tmp.rd <- list(
-            t.dat=t.dat,
-            t.340=t.340,
-            t.380=t.380, 
-            w.dat=w.dat,
-            c.dat=c.dat, 
-            bin=bin, 
-            scp=scp, 
-            #snr=pcp$snr, 
-            blc=pcp$blc)
-            #der=pcp$der) 
-        
         tmp.rd <- TraceBrewer(tmp.rd) 
         
-        tmp.rd <- list(
-            t.dat=t.dat,
-            t.340=t.340,
-            t.380=t.380, 
-            w.dat=w.dat,
-            c.dat=c.dat, 
-            bin=bin, 
-            scp=tmp.rd$scp, 
-            #snr=pcp$snr, 
-            blc=tmp.rd$blc)
-            #der=pcp$der) 
-        
-
-        #tmp.rd <- fancyBin(tmp.rd)
         tmp.rd <- c(tmp.rd, img_list)
 
         # Add the models
-        tryCatch({
-            tmp.rd <- traceProbMaker(tmp.rd)
-            tmp.rd <- imageProbMaker(tmp.rd)
-            tmp.rd <- uncertaintyMaker(tmp.rd)
-        },error=function(e)print('Something went wrong during your model making.'))
+        tmp.rd <- traceProbMaker(tmp.rd)
+        tmp.rd <- imageProbMaker(tmp.rd, verbose = T)
 
         rd.name <- rd.names[i]
         f.name <- paste(rd.name,".Rdata",sep="")
@@ -642,9 +616,9 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
 docx.wr1.importer<-function(file.name='wr1.docx'){
     #if( !library(docxtractr, logical.return=T) ){install.packages('docxtractr')}else{}
     #read in docx
-    wr1<- docxtractr::read_docx(file.name)
+    wr1<- invisible(docxtractr::read_docx(file.name))
     #Extract each table
-    wr1 <- docxtractr::docx_extract_all_tbls(wr1, guess_header=F)
+    wr1 <- invisible(docxtractr::docx_extract_all_tbls(wr1, guess_header=F))
 
     #out table is the third one
     wr1<-Reduce(c,wr1[[length(wr1)]])
@@ -654,39 +628,29 @@ docx.wr1.importer<-function(file.name='wr1.docx'){
     #Now perform a test and provide a wait if there is an error where the window 
     #region has to little information
     error<-0
-    print("There is an >1 <2 info error at")
     for(i in 1:length(wr1)){
         if(length(wr1[[i]])>1 & length(wr1[[i]])<3){
-            print(wr1[[i]])
+            cat("\nThere is an >1 <2 info error at\n",wr1[[i]])
             error<-error+1
         }
     }
     
-    print("There is an >3 info error at")
     for(i in 1:length(wr1)){
         if(length(wr1[[i]])>3){
-            print(wr1[[i]])
+            cat("\nThere is an >3 info error at\n",wr1[[i]])
             error<-error+1
         }
     }
 
-    print(paste("You have a total of",error,"errors")) 
     if(error>0){
+        cat("\nYou have a total of ",error," errors\n")
         alarm()
-        print("Fix these Errors")
-        print("PRESS ANY KEY TO CONTINUE")
+        cat("\nFix these Errors\n")
+        cat("Once fixed PRESS ENTER\n")
         scan(n=1)
-        cat("These are your window region definitions
+        cat("\nThese are your window region definitions
         If you would like to make anymore changes do so now
         ")
-        
-        for(i in 1:length(wr1)){
-            if(length(wr1[[i]])==3){
-                print(wr1[[i]])
-            }
-        }
-        print("PRESS ANY KEY TO CONTINUE")
-        scan(n=1)
         
         wr1<-read_docx(file.name)
         #Extract each table
@@ -695,15 +659,15 @@ docx.wr1.importer<-function(file.name='wr1.docx'){
         wr1<-Reduce(c,wr1[[length(wr1)]])
         #split up each vaue based on a single space
         wr1<-strsplit(wr1, ' ')
-    }else{}
+    }
 
-    wr1.logic<-unlist(lapply(wr1, function(x) length(x)>1 ))
-    wr1.locations<-which(wr1.logic, arr.ind=T)
-    wr1<-wr1[wr1.locations]
+    wr1.logic <- unlist(lapply(wr1, function(x) length(x)>1 ))
+    wr1.locations <- which(wr1.logic, arr.ind=T)
+    wr1 <- wr1[wr1.locations]
     #wr1<-Reduce(rbind,wr1)
-    wr1<-do.call(cbind, lapply(wr1, data.frame, stringsAsFactors=F))
-    row.names(wr1)<-c('at','treatment','duration')
-    wr1['at',]<-as.numeric(wr1['at',])-(10/60)
+    wr1 <- do.call(cbind, lapply(wr1, data.frame, stringsAsFactors=F))
+    row.names(wr1) <- c('at','treatment','duration')
+    wr1['at',] <- as.numeric(wr1['at',])-(10/60)
     return(wr1)
 }
 
@@ -743,10 +707,8 @@ MakeWr <- function(t.dat,wr1,padL=0,padR=0){
 #' if the naming is off, then make complete=F.  You will need to do a complete reapri
 #' you will lose all information from RDView
 #' @export 
-WindowRepair_docx<-function(dat, complete=F, trace_brew=F){
-    require(docxtractr)
-    tmp <- dat #first create a tmp to repair
-    tmp.rd <- dat # then create a tmp.rd to completely screwup for repairs
+WindowRepair_docx<-function(dat){
+    datOrig <- dat
 
     #Now do all of this to tmp.rd
     wrdef <- "wr1.docx"
@@ -761,13 +723,13 @@ WindowRepair_docx<-function(dat, complete=F, trace_brew=F){
     # If it is a wr1.docx, continue
     if( length(wrdef_logic) == 1 ){
         wr <- docx.wr1.importer(wrdef)
-        w.dat <- MakeWr.docx(t.dat, wr)		
+        dat$w.dat <- MakeWr.docx(dat$t.dat, wr)		
 
         ## Check for duplicated rows	
-        if(length(which(duplicated(row.names(t.dat))))>=1){
-            dup<-which(duplicated(row.names(t.dat)))
-            t.dat <- t.dat[-dup,]
-            w.dat <- w.dat[-dup,]
+        if(length(which(duplicated(row.names(dat$t.dat))))>=1){
+            dup<-which(duplicated(row.names(dat$t.dat)))
+            dat$t.dat <- dat$t.dat[-dup,]
+            dat$w.dat <- dat$w.dat[-dup,]
         }
     }else{
         tryCatch(wr <- ReadResponseWindowFile(wrdef)
@@ -776,58 +738,63 @@ WindowRepair_docx<-function(dat, complete=F, trace_brew=F){
         # Since this is the csv we need to move the window back ten seconds
         wr['at'] <- wr['at'] - (10/60)
 
-        w.dat <- MakeWr(t.dat,wr)
-    }
-    levs<-setdiff(unique(as.character(tmp.rd$w.dat$wr1)),"")
-
-    # Set the thresholds for scoring and run the automatic scoring
-    sm <- 2 #smooth window size set
-    ws <- 30 #window peak size
-    snr.lim <- 4 #signal to noise threshold
-    hab.lim <- .05 #height above baseline threshold
-    blc = "SNIP"
-    
-    pcp <- ProcConstPharm(tmp.rd,sm,ws,blc)
-    scp <- ScoreConstPharm(tmp.rd,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
-    bin <- bScore(pcp$blc,pcp$snr,snr.lim,hab.lim,levs,tmp.rd$w.dat[,"wr1"])
-    bin <- bin[,levs]
-    bin["drop"] <- 0 #maybe try to generate some drop criteria from the scp file.
-    bin<-pf.function(bin,levs)
-
-    tmp.rd$bin<-bin
-    tmp.rd$blc<-pcp$blc
-    tmp.rd$snr<-pcp$snr
-    tmp.rd$der<-pcp$der
-    tmp.rd$bin<-bin
-    tmp.rd$scp<-scp
-
-    #Now surgically add the selected corrected data from tmp.rd to the tmp
-    #starting with the window region
-    tmp$w.dat$wr1<-tmp.rd$w.dat$wr1
-    
-	if('t.norm' %in% names(tmp.rd) | trace_brew ){
-        tmp.rd <- TraceBrewer(tmp.rd)
+        dat$w.dat <- MakeWr(t.dat,wr)
     }
 
-    #select the window region you want to repair
-    if(complete==T){
-        tmp$scp<-tmp.rd$scp
-        tmp$bin<-tmp.rd$bin
-    }else{
-        print("Select windows to repair")
-        windows.tp<-select.list(names(tmp.rd$bin), multiple=T)
-    
-        if(length(windows.tp)>1){
-            #next add the binary information
-            for(i in windows.tp){
-                tmp$bin[i]<-tmp.rd$bin[i]
-                win.stats<-grep(i,names(tmp$scp), value=T)
-                tmp$scp[win.stats]<-tmp.rd$scp[win.stats]
-            }
-        }else{}
+    dat <- TraceBrewer(dat, F, F)
+
+    # Now we need to understand a few aspects of this series of data
+    # 1: Are there more or less window regions?
+    ## if more window regions we need to do a 
+    newPulses <- setdiff(unique(as.character(dat$w.dat$wr1)),"")
+    origPulses <- setdiff(unique(as.character(datOrig$w.dat$wr1)), "")
+
+    # If the number ofPulses have not changed, then determine which window regions have changed
+    if(length(newPulses) == length(origPulses)){
+        origStarts <- tapply(datOrig$w.dat$Time, as.factor(datOrig$w.dat$wr1),min)[origPulses]
+        newStarts <- tapply(dat$w.dat$Time, as.factor(dat$w.dat$wr1),min)[newPulses]
+        
+        origEnds <- tapply(datOrig$w.dat$Time, as.factor(datOrig$w.dat$wr1),max)[origPulses]
+        newEnds <- tapply(dat$w.dat$Time, as.factor(dat$w.dat$wr1),max)[newPulses]
+        
+        startsLog <- origStarts %in% newStarts
+        endsLog <- origEnds %in% newEnds
+
+        # This shows me which windows have changed
+        changedWindowsLogic <- apply(cbind(!startsLog, !endsLog), 1, any)
+        newPulsesToUpdate <- newPulses[changedWindowsLogic]
+
+        # Now we need to see if the windows can enter specific neural networks
+        toCatch <- c("^[aA][iI][Tt][Cc]","^[mM][eE][nN][tT][hH]", "^[cC][aA][pP][sS]","[kK].*40")
+        pulsesToAddInNN <- unlist(sapply(toCatch, function(x) grep(x, newPulsesToUpdate, value = T)))
+        if(length(pulsesToAddInNN) > 0){
+            cat("These pulses will enter neuralNets (smart score):\n", pulsesToAddInNN,"\n")
+            dat <- traceProbMaker(dat, T, names(pulsesToAddInNN))
+        }
+
+        pulsesToBscore <- setdiff(newPulsesToUpdate, pulsesToAddInNN)
+        if(length(pulsesToBscore) > 0){
+            cat("These pulses will enter bScore (dumb score):\n", pulsesToBscore,"\n")
+            dat <- bscore2(dat, pulsesToBscore)
+        }
+        
+    } else if(length(newPulses) != length(origPulses)){
+        cat("There seem to be too many changes for us to deal with, all scores will be\n wiped. Do you want to continue?\n")
+        
+        alarm()
+        
+        sel <- c('yes', 'no')
+        sel <- sel[menu(sel)]
+
+        if(sel == 'yes'){
+            dat <- bscore2(dat)
+            dat <- traceProbMaker(dat)
+        }else if(sel == 'no'){
+            stop("No changes were made")
+        }
     }
-    #now save back to the RD object
-    dat<-tmp
+
+
     return(dat)
 }
 

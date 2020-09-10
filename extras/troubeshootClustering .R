@@ -25,5 +25,21 @@ plot(asw, type= "b", main = "pam() clustering assessment",
 axis(1, k.best, paste("best",k.best,sep="\n"), col = "red", col.axis = "red")
 
 
-tmpRD <- get(load("./extras/RD.200309.30.m.m3.p1.Rdata"))
- dat <- tmpRD
+main_dir <- "Y:/Dermaxon/200901.23.f.p1/"
+setwd(main_dir)
+tmpRD <- get(load(list.files(pattern = "^RD.*[.]Rdata$")))
+
+source("C:\\Users\\leele\\Documents\\procPharm\\R\\import.R")
+source("C:\\Users\\leele\\Documents\\procPharm\\R\\tracePrep.R")
+source("C:\\Users\\leele\\Documents\\procPharm\\R\\traceStats.R")
+
+
+dat <- tmpRD
+
+.libPaths()
+.libPaths(.libPaths()[3] )
+
+devtools::document()
+devtools::install()
+
+

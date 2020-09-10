@@ -5,14 +5,7 @@
 \title{Binary scoring dependent upon score const pharm talbe values
  Best way to determine parameters is to look through trace click before hand}
 \usage{
-bscore2(
-  dat,
-  levs.1 = NULL,
-  snr.min = 2.8,
-  max.min = 0.03,
-  wm.min = 0,
-  wm.max = 600
-)
+bscore2(dat, levs.1 = NULL, snr.lim = 5, blc.lim = 0.05)
 }
 \arguments{
 \item{snr.min}{= minimun signal to noise value}

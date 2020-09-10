@@ -4,7 +4,14 @@
 \alias{traceProbMaker}
 \title{This function creates the binary scores for AITC, menthol, capsaicin and K40}
 \usage{
-traceProbMaker(dat, minute = TRUE)
+traceProbMaker(dat, minute = TRUE, pulsesToScore = NA)
+}
+\arguments{
+\item{dat}{this is the RD.experiment}
+
+\item{minute}{This is a question for collecting the window region if it is minute then the window will be prepared such that from the input window 4 minutes following. This is useful when the data points are not normallly collected or if there was a pause.}
+
+\item{pulsesToScore}{This is a vector of regular expressions to select the nn for the pulses of AITC, Menthol, Capsaicin, and K.40mM}
 }
 \description{
 This function creates the binary scores for AITC, menthol, capsaicin and K40

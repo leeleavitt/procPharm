@@ -1,4 +1,4 @@
-require(procPharm)
+#require(procPharm)
 #require(devtools)
 options(locatorBell=F)
 

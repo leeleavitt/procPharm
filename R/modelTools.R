@@ -39,17 +39,28 @@
 
 #' This function creates the binary scores for AITC, menthol, capsaicin and K40
 #' @export
-traceProbMaker <- function(dat, minute = TRUE){
+#' @param dat this is the RD.experiment
+#' @param minute This is a question for collecting the window region if it is minute then the window will be prepared such that from the input window 4 minutes following. This is useful when the data points are not normallly collected or if there was a pause.
+#' @param pulsesToScore This is a vector of regular expressions to select the nn for the pulses of AITC, Menthol, Capsaicin, and K.40mM
+traceProbMaker <- function(dat, minute = TRUE, pulsesToScore = NA){
     pyPharm <- reticulate::import('python_pharmer')
-    pulsesWithNN <- c("^AITC.*", "^[cC]aps.*", "^[mM]enth.*", "[kK][.]40.*")
+
     nnNames <- c('aitc','capsaicin', 'menthol', 'k40')
-    
+    if(is.na(pulsesToScore)){
+        pulsesWithNN <- c("^[aA][iI][Tt][Cc]","^[mM][eE][nN][tT][hH]", "^[cC][aA][pP][sS]","^[kK].*40")    
+    }else{
+        pulsesWithNN <- pulsesToScore
+        nnNames <- unlist(sapply(pulsesWithNN, function(x) grep(x, nnNames, value = T)))
+    }
+
+    # Make an uncertainty matrix, or collect it.
     if(is.null(dat$uncMat)){
         uncertainMat <- data.frame(matrix(nrow = dim(dat$c.dat)[1], ncol = 0))
         row.names(uncertainMat) <- row.names(dat$c.dat)
     }else{
         uncertainMat <- dat$uncMat
     }
+    
     for( i in 1:length(pulsesWithNN)){        
         # Make sure the pulse exists
         window <- grep(pulsesWithNN[i], unique(dat$w.dat$wr1), value=T)
@@ -148,7 +159,10 @@ imageExtractor <- function(dat, image = 'img3', channel = 1, range = 20){
 #' Function to create the cy5.bin and the gfp.bin collumns in the binary
 #' data frame. This also adds probability scores for the images
 #' @export 
-imageProbMaker <- function(dat){
+imageProbMaker <- function(dat, verbose = T){
+    if(verbose){
+        cat("\nThis function scores the cy5,gfp, and drops\nMake sure that:\nimg3: cy5 only\nimg4: gfp only\nimg8: dapi.lab.png")
+    }
     # Load in the data
     tryCatch({
         pyPharm <- reticulate::import('python_pharmer')
