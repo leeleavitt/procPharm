@@ -215,7 +215,7 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat", info=T,lmain=NULL, bcex=.7, yvar=
 
     # Adding the uncertainty  to the windows
     #tryCatch({
-        uncNames <- names(tmpRD$uncMat)
+        uncNames <- names(dat$uncMat)
         uncLevs <- intersect(uncNames, levs)
         val <- apply(dat$uncMat[cell, uncLevs], 1, round, digits=2)
         yLoc <- par('usr')[3] + (yinch(.09))
