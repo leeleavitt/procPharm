@@ -4,7 +4,7 @@
 \alias{ImageFillerv2}
 \title{Add images to the RD.experiment file}
 \usage{
-ImageFillerv2(dat, img_name_vec)
+ImageFillerv2(dat, img_name_vec = NULL)
 }
 \arguments{
 \item{dat}{RD.experiment input}

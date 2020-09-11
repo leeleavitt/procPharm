@@ -8,7 +8,7 @@ then make complete F.  This will allow you to select the windows that need reapr
 if the naming is off, then make complete=F.  You will need to do a complete reapri
 you will lose all information from RDView}
 \usage{
-WindowRepair(dat, complete = T)
+WindowRepair(dat, rescore = F)
 }
 \description{
 Made a mistake in you window regions?

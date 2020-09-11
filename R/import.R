@@ -707,11 +707,18 @@ MakeWr <- function(t.dat,wr1,padL=0,padR=0){
 #' if the naming is off, then make complete=F.  You will need to do a complete reapri
 #' you will lose all information from RDView
 #' @export 
-WindowRepair_docx<-function(dat){
+WindowRepair <- function(dat, rescore = F){
+    # Get rid of that dam epad!
+    if('epad' %in% dat$w.dat$wr1){
+        epadRM <- dat$w.dat$wr1 != "epad"
+        
+        dat$blc <- dat$blc[epadRM,]
+        dat$w.dat <- dat$w.dat[epadRM,]
+        dat$t.dat <- dat$t.dat[epadRM,]
+    }
+    
     datOrig <- dat
-
     #Now do all of this to tmp.rd
-    wrdef <- "wr1.docx"
     wrdef <- list.files(pattern = '^wr1')
     if(length(wrdef) > 1){
         cat("\nWhich file contains the updated information?\n")
@@ -751,14 +758,17 @@ WindowRepair_docx<-function(dat){
 
     # If the number ofPulses have not changed, then determine which window regions have changed
     if(length(newPulses) == length(origPulses)){
+        # Here we look at if the starting points have changes
         origStarts <- tapply(datOrig$w.dat$Time, as.factor(datOrig$w.dat$wr1),min)[origPulses]
         newStarts <- tapply(dat$w.dat$Time, as.factor(dat$w.dat$wr1),min)[newPulses]
+        startsLog <- origStarts %in% newStarts
         
+        # Here we look if the ending points have changed
         origEnds <- tapply(datOrig$w.dat$Time, as.factor(datOrig$w.dat$wr1),max)[origPulses]
         newEnds <- tapply(dat$w.dat$Time, as.factor(dat$w.dat$wr1),max)[newPulses]
-        
-        startsLog <- origStarts %in% newStarts
         endsLog <- origEnds %in% newEnds
+
+        # Here we look if the window regions have the same names
 
         # This shows me which windows have changed
         changedWindowsLogic <- apply(cbind(!startsLog, !endsLog), 1, any)
@@ -777,13 +787,51 @@ WindowRepair_docx<-function(dat){
             cat("These pulses will enter bScore (dumb score):\n", pulsesToBscore,"\n")
             dat <- bscore2(dat, pulsesToBscore)
         }
+
+        # Now see if there has been any name changes
+        nameChange <- newPulses %in% origPulses
+        if(any(!nameChange)){
+            changedNameLogic <- !nameChange
+            
+            # This shows me which windows have changed
+            changedWindowsLogic <- apply(cbind(changedNameLogic), 1, any)
+            newPulsesToUpdate <- newPulses[changedWindowsLogic]
+            originalPulsesToUpdate <- origPulses[changedWindowsLogic]
+
+            for(i in 1:length(newPulsesToUpdate)){
+                # the w.dat and the scp have the correct names
+                # bin
+                names(dat$bin)[names(dat$bin) == originalPulsesToUpdate[i]] <- newPulsesToUpdate[i]
+                
+                # uncMat
+                tryCatch({
+                    names(dat$uncMat)[names(dat$uncMat) == originalPulsesToUpdate[i]] <- newPulsesToUpdate[i]
+                }, error = function(e) NULL)
+            }
+
+            if(rescore){
+                # Now we need to see if the windows can enter specific neural networks
+                toCatch <- c("^[aA][iI][Tt][Cc]","^[mM][eE][nN][tT][hH]", "^[cC][aA][pP][sS]","[kK].*40")
+                pulsesToAddInNN <- unlist(sapply(toCatch, function(x) grep(x, newPulsesToUpdate, value = T)))
+                if(length(pulsesToAddInNN) > 0){
+                    cat("These pulses will enter neuralNets (smart score):\n", pulsesToAddInNN,"\n")
+                    dat <- traceProbMaker(dat, T, names(pulsesToAddInNN))
+                }
+
+                pulsesToBscore <- setdiff(newPulsesToUpdate, pulsesToAddInNN)
+                if(length(pulsesToBscore) > 0){
+                    cat("These pulses will enter bScore (dumb score):\n", pulsesToBscore,"\n")
+                    dat <- bscore2(dat, pulsesToBscore)
+                }
+            }
+        }
         
     } else if(length(newPulses) != length(origPulses)){
         cat("There seem to be too many changes for us to deal with, all scores will be\n wiped. Do you want to continue?\n")
         
         alarm()
         
-        sel <- c('yes', 'no')
+        sel <- c('1: yes', '2: no')
         sel <- sel[menu(sel)]
 
         if(sel == 'yes'){
@@ -795,80 +843,6 @@ WindowRepair_docx<-function(dat){
     }
 
 
-    return(dat)
-}
-
-#' Made a mistake in you window regions?
-#' If it is only the time sequence, but all other info is corrected
-#' then make complete F.  This will allow you to select the windows that need reapri
-#' if the naming is off, then make complete=F.  You will need to do a complete reapri
-#' you will lose all information from RDView
-#' @export 
-WindowRepair<-function(dat, complete=T){
-
-    tmp<-dat #first create a tmp to repair
-
-    tmp.rd<-dat # then create a tmp.rd to completely screwup for repairs
-
-    #Now do all of this to tmp.rd
-    wrdef<-"wr1.csv"
-    t.dat<-tmp.rd$t.dat
-    if(!is.null(wrdef)){
-            wr <- ReadResponseWindowFile(wrdef)
-            Wr<-length(wr[,1])#complete and revise this section
-            if(length(colnames(wr))<2){w.dat<-WrMultiplex(t.dat,wr,n=Wr)}
-            else{
-                wr['at'] <- wr['at'] - (10/60)
-                w.dat <- MakeWr(t.dat,wr)
-            }
-            tmp.rd$w.dat<-w.dat
-        }
-    levs<-setdiff(unique(as.character(tmp.rd$w.dat$wr1)),"")
-
-    #5 set the thresholds for scoring and run the automatic scoring
-    sm <- 2 #smooth window size set
-    ws <- 30 #window peak size
-    snr.lim <- 4 #signal to noise threshold
-    hab.lim <- .05 #height above baseline threshold
-    blc="SNIP"
-
-    pcp <- ProcConstPharm(tmp.rd,sm,ws,blc)
-    scp <- ScoreConstPharm(tmp.rd,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
-    bin <- bScore(pcp$blc,pcp$snr,snr.lim,hab.lim,levs,tmp.rd$w.dat[,"wr1"])
-    bin <- bin[,levs]
-    bin["drop"] <- 0 #maybe try to generate some drop criteria from the scp file.
-    bin<-pf.function(bin,levs)
-
-    tmp.rd$bin<-bin
-    tmp.rd$blc<-pcp$blc
-    tmp.rd$snr<-pcp$snr
-    tmp.rd$der<-pcp$der
-    tmp.rd$bin<-bin
-    tmp.rd$scp<-scp
-
-    #Now surgically add the selected corrected data from tmp.rd to the tmp
-    #starting with the window region
-    tmp$w.dat$wr1<-tmp.rd$w.dat$wr1
-
-    #select the window region you want to repair
-    if(complete==T){
-        tmp$scp<-tmp.rd$scp
-        tmp$bin<-tmp.rd$bin
-    }else{
-        print("Select windows to repair")
-        windows.tp<-select.list(names(tmp.rd$bin), multiple=T)
-    
-    if(length(windows.tp)>1){
-        #next add the binary information
-        for(i in windows.tp){
-            tmp$bin[i]<-tmp.rd$bin[i]
-            win.stats<-grep(i,names(tmp$scp), value=T)
-            tmp$scp[win.stats]<-tmp.rd$scp[win.stats]
-        }
-    }else{}
-    }
-    #now save back to the RD object
-    dat<-tmp
     return(dat)
 }
 

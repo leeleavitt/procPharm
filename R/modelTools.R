@@ -45,7 +45,7 @@
 traceProbMaker <- function(dat, minute = TRUE, pulsesToScore = NA){
     pyPharm <- reticulate::import('python_pharmer')
 
-    nnNames <- c('aitc','capsaicin', 'menthol', 'k40')
+    nnNames <- c('aitc', 'menthol', 'capsaicin', 'k40')
     if(is.na(pulsesToScore)){
         pulsesWithNN <- c("^[aA][iI][Tt][Cc]","^[mM][eE][nN][tT][hH]", "^[cC][aA][pP][sS]","^[kK].*40")    
     }else{
@@ -79,7 +79,7 @@ traceProbMaker <- function(dat, minute = TRUE, pulsesToScore = NA){
                 windowStart <- min(pulseWindow$Time)
                 windowEnd <- windowStart + 4
                 windowLogic <- dat$w.dat$Time > windowStart & dat$w.dat$Time < windowEnd
-                pulseToScore <- as.data.frame(t(dat$blc[windowLogic,-1]))
+                pulseToScore <- t(dat$blc[windowLogic,-1])
             }
 
             # Now use the python score all the responses of interest
@@ -210,17 +210,23 @@ imageProbMaker <- function(dat, verbose = T){
         model <- pyPharm$modelLoader('drop')
         # predict classes
         predictedClasses <- model$predict_classes(image$imageArray)
-        # assign classes
-        dat$bin[image$cellNames, 'drop'] <- predictedClasses
-        
-        # Grab the probabilities
-        predictedClassProbs <- model$predict(image$imageArray)
-        predictedClassProbsDF <- dat$bin[, c(1,2)]
-        predictedClassProbsDF[,c(1,2)] <- NA
-        colnames(predictedClassProbsDF) <- c(0,1)
-        predictedClassProbsDF[image$cellNames,] <- predictedClassProbs
 
-        dat[['probs']][['drop']] <- predictedClassProbsDF
+        if(sum(predictedClasses) < (.6 * length(dat$c.dat$id)) ){
+            # assign classes
+            dat$bin[image$cellNames, 'drop'] <- predictedClasses
+            
+            # Grab the probabilities
+            predictedClassProbs <- model$predict(image$imageArray)
+            predictedClassProbsDF <- dat$bin[, c(1,2)]
+            predictedClassProbsDF[,c(1,2)] <- NA
+            colnames(predictedClassProbsDF) <- c(0,1)
+            predictedClassProbsDF[image$cellNames,] <- predictedClassProbs
+
+            dat[['probs']][['drop']] <- predictedClassProbsDF
+        }else{
+            dat$bin[image$cellNames, 'drop'] <- 0
+            cat("\nThe drop model dropped too many cells.\nImage 8 is most likely the wrong image.")
+        }
     }, error=function(e)print("Could not score drop, you are most likely missing image 8"))
 
     return(dat)

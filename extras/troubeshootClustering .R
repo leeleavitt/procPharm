@@ -27,7 +27,7 @@ axis(1, k.best, paste("best",k.best,sep="\n"), col = "red", col.axis = "red")
 
 main_dir <- "Y:/Dermaxon/200901.23.f.p1/"
 setwd(main_dir)
-tmpRD <- get(load(list.files(pattern = "^RD.*[.]Rdata$")))
+tmpRD <- get(load(list.files(pattern ="^RD.*[.]Rdata$")))
 
 source("C:\\Users\\leele\\Documents\\procPharm\\R\\import.R")
 source("C:\\Users\\leele\\Documents\\procPharm\\R\\tracePrep.R")

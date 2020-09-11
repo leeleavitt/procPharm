@@ -5,7 +5,7 @@
 \title{Function to create the cy5.bin and the gfp.bin collumns in the binary
 data frame. This also adds probability scores for the images}
 \usage{
-imageProbMaker(dat)
+imageProbMaker(dat, verbose = T)
 }
 \description{
 Function to create the cy5.bin and the gfp.bin collumns in the binary

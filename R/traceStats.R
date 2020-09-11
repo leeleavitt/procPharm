@@ -67,6 +67,7 @@ bScore <- function(blc, snr, snr.lim, blc.lim, levs, wr, cnames=NULL){
 #' @param tot.min= area minimun to consider
 #' @param wm.min= which max, Where within the window region does the maximun value occur
 #' @param wm.max= where to stop looking for the maximun value
+#' @export
 bscore2 <- function(dat, levs.1=NULL, snr.lim = 5 , blc.lim = 0.05){
     if(is.null(dat$bin)){
         dat$bin <- data.frame(matrix(nrow = dim(dat$c.dat)[1], ncol = 0))

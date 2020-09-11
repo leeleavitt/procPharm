@@ -74,20 +74,25 @@ PadTdat <- function(tmp,n=5){
     tmp$scp[row.names(r1),"rlm.b"] <- r1[,2]
     x <- xdat[,1]
     dx <- x[-1]-x[-length(x)]
+    
     tmax <- max(x)
     tseq <- seq(1,n)*median(dx)+tmax
+    
     r2 <- data.frame(t(r1[,"x"] %*% t(tseq) + r1[,1]))
     names(r2) <- row.names(r1)
     r2[,"Time"] <- tseq
+    
     xdat <- rbind(xdat,r2[,names(xdat)])
     w1 <- tmp$w.dat[1:n,]
     w1[,"Time"] <- tseq	
-    for(i in names(w1)[sapply(w1,is.character)]){w1[,i] <- "epad"}
+    
+    for(i in names(w1)[sapply(w1,is.character)]){
+        w1[,i] <- "epad"
+    }
     tmp$w.dat <- rbind(tmp$w.dat,w1)
-    row.names(tmp$w.dat)<-tmp$w.dat$Time #Lee's additions
+    row.names(tmp$w.dat) <- tmp$w.dat$Time #Lee's additions
     tmp$t.dat <- xdat
-    row.names(tmp$t.dat)<-tmp$t.dat$Time #Lee's additions
-    tmp$bin['epad']<-0 #Lee's additions
+    row.names(tmp$t.dat) <- tmp$t.dat$Time #Lee's additions
     return(tmp)
 }
 
@@ -256,8 +261,11 @@ TraceBrewer <- function(dat, bscore = F, blcPrep = T, verbose = F){
     cat("\nCompleted Brew. CHEERS!:",round((proc.time()-start.time)[3], digits = 3),' seconds\n')
 
     # This is to get rid of the padding
-    tmp.rd$blc <- tmp.rd$blc[1:dim(tmp.rd$t.dat)[1],]
-
+    epadRM <- tmp.rd$w.dat$wr1 != "epad"
+        
+    tmp.rd$blc <- tmp.rd$blc[epadRM,]
+    tmp.rd$w.dat <- tmp.rd$w.dat[epadRM,]
+    tmp.rd$t.dat <- tmp.rd$t.dat[epadRM,]
     return(tmp.rd)
 }
 

@@ -26,7 +26,7 @@ ImageFiller<-function(dat){
 #' 
 #' @param dat RD.experiment input
 #' @export 
-ImageFillerv2 <- function(dat, img_name_vec){
+ImageFillerv2 <- function(dat, img_name_vec = NULL){
 
     if( is.null(img_name_vec) ){
         img_name_vec<-c(
