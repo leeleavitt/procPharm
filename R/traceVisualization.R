@@ -214,7 +214,7 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat", info=T,lmain=NULL, bcex=.7, yvar=
     )
 
     # Adding the uncertainty  to the windows
-    #tryCatch({
+    tryCatch({
         uncNames <- names(dat$uncMat)
         uncLevs <- intersect(uncNames, levs)
         val <- apply(dat$uncMat[cell, uncLevs], 1, round, digits=2)
@@ -233,7 +233,7 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat", info=T,lmain=NULL, bcex=.7, yvar=
             'unc',
             cex = bcex
         )
-    #},error=function(e) print('cant UNC'))
+    },error=function(e) print('cant UNC'))
 
     # Add lines or points
     if(lns){

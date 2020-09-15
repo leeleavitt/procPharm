@@ -156,6 +156,78 @@ imageExtractor <- function(dat, image = 'img3', channel = 1, range = 20){
     return(image)
 }
 
+#' Function to gather images used inside cell_type_modeler. Unlike imageExtractor, this function
+#' can collect all cells. Where ImageExtractor struggles with cells near the border by simply ignoring them
+#' this function pads these images with zeros in these regions.
+#' @param dat RD.experiment
+#' @param range is the side in all directions from center to define your view
+#' @param image is the character name of the image within your list
+#' @param channel is the rgb channel of your image to extrace
+#' @export
+
+imageExtractorAll <- function(dat, range = 20, image = 'img3', channel = 1){
+    slice <- (range * 2) + 1
+    mainImageArray <- array(dim = c(0, slice, slice, length(channel)))
+    # Gather the center x and y data
+    cellXValue <- dat$c.dat$center.x.simplified
+    cellYValue <- dat$c.dat$center.y.simplified
+
+    # This checks to see if we will be able to observe the cell
+    canView <- 
+        0 < (cellXValue - range) & 
+        (cellXValue + range) < dim(dat[[ image ]] )[2] &
+        0 < (cellYValue - range) &
+        (cellYValue + range) < dim(dat[[ image ]])[1] 
+    
+
+    subImageArray <- array(
+        dim = c(
+            dim(dat$c.dat)[1], 
+            slice, 
+            slice, 
+            length(channel)
+        ) 
+    )
+
+    # dev.new()
+    # mfrowSize <- ceiling(sqrt(length(dat$c.dat$id[!canView])))
+    # par(mfrow = c(mfrowSize, mfrowSize), mai = c(0,0,0,0))
+
+    for( j in 1:dim(dat$c.dat)[1] ){
+        xLeft <- cellXValue[j] - range
+        xRight <- cellXValue[j] + range
+        xDims <- xLeft:xRight
+
+        yTop <- cellYValue[j] - range
+        yBottom <- cellYValue[j] + range
+        yDims <- yTop:yBottom
+
+        yLogic <-   yDims > 0 &
+                    yDims < dim(dat[[ image ]] )[2]
+
+        xLogic <-   xDims > 0 &
+                    xDims < dim(dat[[ image ]] )[2]
+        
+        # Make a temporary array full of zeros
+        tmpArray <- array(dim = c(slice, slice, 3))
+        tmpArray[is.na(tmpArray)] <- 0
+        
+        # This is how i obtain the region of the image that is within the boundaries.
+        tmpArray[yLogic, xLogic, channel] <-  dat[[ image ]][yDims[yLogic], xDims[xLogic], channel]
+                
+        #if(!canView[j]){
+        #     print(dat$c.dat$id[j])
+        #     plot(1, xlim=c(0,1), ylim = c(1,0))
+        #     rasterImage(as.raster(tmpArray), 0,1,1,0)
+        # }
+
+        subImageArray[j, , , ] <- tmpArray[,,channel]
+    }
+    mainImageArray <- abind::abind(mainImageArray, subImageArray, along = 1)
+
+    return(mainImageArray)
+}
+
 #' Function to create the cy5.bin and the gfp.bin collumns in the binary
 #' data frame. This also adds probability scores for the images
 #' @export 
@@ -374,4 +446,102 @@ labelBinder <- function(dat, windowSizeMin = 3, tType = "t.dat", winMin = 1.2, w
     return(dat)
 }
 
+#' Using marios cell type models I will create the cell_type model list. This is BETA version,
+#' Simply inputing a RD.experiment which contains AMCK, R3J, and and image of IB4 only at
+#' img3 and an image of GFP only at img4, this function returns a list of model output matrices.
+#' 
+#' @export
+cell_type_modeler <- function(dat){
+    pyPharm <- reticulate::import("python_pharmer")
+    # R12 is very dirty lots of N15 reassignment
+    # R13 vs N14 is very dirty, so I am going to try and clean it up using neuralNets
+    aitcModel <- "G:/My Drive/cellTypePredictor/marioModels/models/aitc.h5"
+    menthModel <- "G:/My Drive/cellTypePredictor/marioModels/models/menth.h5"
+    capsModel <- "G:/My Drive/cellTypePredictor/marioModels/models/caps.h5"
+    k40Model <- "G:/My Drive/cellTypePredictor/marioModels/models/k40.h5"
+    r3jModel <- "G:/My Drive/cellTypePredictor/marioModels/models/r3j.h5"
+
+    # ImageModels
+    ib4Model <- "G:/My Drive/cellTypePredictor/marioModels/models/ib4.h5"
+    gfpModel <- "G:/My Drive/cellTypePredictor/marioModels/models/gfp.h5"
+
+    models <- c(aitcModel, menthModel, capsModel, k40Model, r3jModel, ib4Model, gfpModel)
+
+    modelNames <- c('aitc', 'menth', 'caps', 'k40', 'r3J', 'gfp', 'ib4')
+    predictedClasses <- list()
+
+    # Traces
+    pulsesWithNN <- c("^[aA][iI][Tt][Cc]","^[mM][eE][nN][tT][hH]", "^[cC][aA][pP][sS]","^[kK].*40", '[rR](3|[I]{3})[jJ]')
+
+    predictedClasses <- list()
+    rowNames <- dat$c.dat$id
+    for(i in 1:4){
+        model <- invisible(keras::load_model_hdf5(models[i]))
+        window <- grep(pulsesWithNN[i], unique(dat$w.dat$wr1), value=T)
+        pulseWindow <- dat$w.dat[dat$w.dat$wr1 == window,]
+        
+        windowStart <- min(pulseWindow$Time)
+        windowEnd <- windowStart + 4
+        windowLogic <- dat$w.dat$Time > windowStart & dat$w.dat$Time < windowEnd
+        pulseToScore <- t(dat$blc[windowLogic,-1])
+
+        featureFrame <- pyPharm$featureMaker2(pulseToScore, 12)
+        predictedClasses[[ modelNames[i] ]] <- model$predict(featureFrame)
+        row.names(predictedClasses[[ modelNames[i] ]]) <- rowNames
+    }
+
+    # R3J
+    i = 5
+    model <- invisible(keras::load_model_hdf5(models[i]))
+    winRegs <- unique(dat$w.dat$wr1)
+    r3JLoc <- grep('[rR](3|[I]{3})[jJ]', winRegs)[1]
+    kBeforeR3JLoc <- r3JLoc - 1
+    kAfterR3JLoc <- r3JLoc + 1
+    r3JStart <- min(which(dat$w.dat$wr1 == winRegs[kBeforeR3JLoc] , arr.ind=T))
+    r3JEnd <- max(which(dat$w.dat$wr1 == winRegs[kAfterR3JLoc] , arr.ind=T))
+
+    pulseToScore <- t(dat$blc[r3JStart:r3JEnd, -1])
+
+    featureFrame <- pyPharm$featureMaker2(pulseToScore, 22)
+    predictedClasses[[ modelNames[i] ]] <- model$predict(featureFrame)
+    row.names(predictedClasses[[ modelNames[i] ]]) <- rowNames
+
+    # Ib4
+    i = 6
+    model <- invisible(keras::load_model_hdf5(models[i]))
+    image <- imageExtractor(dat, range = 20, 'img3', c(1))
+    predictedClasses[[ modelNames[i] ]] <- model$predict(image)
+    
+    # GFP
+    i = 7
+    model <- invisible(keras::load_model_hdf5(models[i]))
+    image <- imageExtractor(dat, range = 20, 'img4', c(2))
+    predictedClasses[[ modelNames[i] ]] <- model$predict(image)
+
+    # Unpack the predicted classes into a list of model frames
+    modelFrames <- list()
+    classNames <- c('L1', "L2", "L3", "L4", "L5", "L6", "G7", "G8", "G9", 'G10', 'R11', 'R12', 'R13', 'N14', 'N15', 'N16')
+    for( i in 1:length(dat$c.dat$id)){
+        # Create the data frame of all collected models
+        modelFrame <- data.frame(
+            matrix(
+                nrow = length(predictedClasses), 
+                ncol = dim(predictedClasses[[1]])[2]
+        ))
+        row.names(modelFrame) <- names(predictedClasses)
+        
+        # Loop through each model and collect the cells scores
+        for(j in 1:length(predictedClasses)){
+            modelFrame[j, ] <- predictedClasses[[j]]
+        }
+        
+        colnames(modelFrame) <- classNames
+
+        modelFrames[[ dat$c.dat$id[i] ]] <- modelFrame
+    }
+
+    dat$cell_type_model <- modelFrames
+
+    return(dat)
+}
 

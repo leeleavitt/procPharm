@@ -201,6 +201,12 @@ barPlotter <- function(dat = NULL, cols = 'YlOrRd', selectCT = T, horiz=T){
         cat("\nSelect Cell Types to display\n") 
         tableNames <- select.list(tableNames, multiple=T, title="Select CellTypes")
         table <- table[tableNames]
+
+        tableList <- list()
+        for(i in 2:dim(table)[1]){
+            tableList[[ row.names(table)[i] ]] <- table[c(1,i),,drop=F]
+        }
+
     }
 
 
@@ -214,7 +220,7 @@ barPlotter <- function(dat = NULL, cols = 'YlOrRd', selectCT = T, horiz=T){
     if(!horiz){
         tablePercsMut <- as.matrix(rev(tablePercs[nrow(tablePercs):1,]))
         require(RColorBrewer)
-        cols <- rev(brewer.pal(10, cols))[length(tableList):1]
+        cols <- brewer.pal(10, cols)[1:length(tableList)]
         graphics.off()
         dev.new(width=5, height=12)
         par(mar=c(5,4,4,7))
@@ -263,7 +269,9 @@ barPlotter <- function(dat = NULL, cols = 'YlOrRd', selectCT = T, horiz=T){
         require(RColorBrewer)
         tablePercsMut <- as.matrix(tablePercs)
 
-        cols <- rev(brewer.pal(10, cols))[1:length(tableList)]
+        #cols <- rev(brewer.pal(10, cols))[1:length(tableList)]
+        cols <- brewer.pal(10, cols)[1:length(tableList)]
+
         graphics.off()
         dev.new(width=12, height=5)
         par(mar=c(5,5,5,2))

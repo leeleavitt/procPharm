@@ -111,9 +111,9 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
         K+_40mM, and capsaicin_300nM
     ")
     #identfy Neurons
-    neurons<-cellzand(tmp_rd$bin, , 1)
+    neurons <- cellzand(tmp_rd$bin, , 1)
     #Remove dropped cells from he neuron class
-    neurons<-setdiff(neurons, dropped)
+    neurons <- setdiff(neurons, dropped)
     
     #Identify green cells_ Corrected with ROIReview
     if(GFP){
@@ -122,13 +122,13 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
     
     #identify red cells
     ib4_label <- grep("cy5|tritc", names(tmp_rd$bin), value=T)
-    red_cells<-cellzand(tmp_rd$bin,ib4_label ,1, neurons)
+    red_cells <- cellzand(tmp_rd$bin,ib4_label ,1, neurons)
     
     #define Unlabeled cells as not green or red labeling
     if(GFP){
-        unlabeled<-setdiff(neurons, green_cells)
+        unlabeled <- setdiff(neurons, green_cells)
     }else{
-        unlabeled<-neurons
+        unlabeled <- neurons
     }
     unlabeled<-setdiff(unlabeled, red_cells)
 
@@ -266,13 +266,13 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
     # If these exist
     if(length(menth_and_aitc_cells) > 0 ){
         # extract them
-		menth_and_aitc_neurons<-intersect(neurons, menth_and_aitc_cells)
+		menth_and_aitc_neurons <- intersect(neurons, menth_and_aitc_cells)
 		trpm8_trpa1<-c()
 		for(i in 1:length(menth_and_aitc_neurons)){
             # Is the menthol Response bigger than the AITC response
             menthGreaterAitcLogic <- tmp_rd$scp[menth_and_aitc_neurons[i],menth_stat] >= ((tmp_rd$scp[menth_and_aitc_neurons[i],aitc_stat])*1.1)
 			if(menthGreaterAitcLogic){
-				trpm8_trpa1<-c(trpm8_trpa1, menth_and_aitc_neurons[i])
+				trpm8_trpa1 <- c(trpm8_trpa1, menth_and_aitc_neurons[i])
 			}
 		}
 		N15_a <- trpm8_trpa1
