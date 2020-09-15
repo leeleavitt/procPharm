@@ -511,12 +511,14 @@ cell_type_modeler <- function(dat){
     model <- invisible(keras::load_model_hdf5(models[i]))
     image <- imageExtractor(dat, range = 20, 'img3', c(1))
     predictedClasses[[ modelNames[i] ]] <- model$predict(image)
-    
+    row.names(predictedClasses[[ modelNames[i] ]]) <- rowNames
+
     # GFP
     i = 7
     model <- invisible(keras::load_model_hdf5(models[i]))
     image <- imageExtractor(dat, range = 20, 'img4', c(2))
     predictedClasses[[ modelNames[i] ]] <- model$predict(image)
+    row.names(predictedClasses[[ modelNames[i] ]]) <- rowNames
 
     # Unpack the predicted classes into a list of model frames
     modelFrames <- list()
@@ -529,14 +531,13 @@ cell_type_modeler <- function(dat){
                 ncol = dim(predictedClasses[[1]])[2]
         ))
         row.names(modelFrame) <- names(predictedClasses)
-        
-        # Loop through each model and collect the cells scores
-        for(j in 1:length(predictedClasses)){
-            modelFrame[j, ] <- predictedClasses[[j]]
-        }
-        
         colnames(modelFrame) <- classNames
 
+        # Loop through each model and collect the cells scores
+        for(j in 1:length(predictedClasses)){
+            modelFrame[j, ] <- predictedClasses[[j]][dat$c.dat$id[i],]
+        }
+        
         modelFrames[[ dat$c.dat$id[i] ]] <- modelFrame
     }
 
