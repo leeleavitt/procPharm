@@ -124,17 +124,16 @@ boxPlotList<-function(dat,l.cells=NULL,dat.name="c.dat",col.name=NULL,jitter.f=.
 
 # tmpRD<- get(load("./extras/RD.200309.30.m.m3.p1.Rdata"))
 # dat <- tmpRD
-# #stat <- tmpRD[['c.dat']][,'area',drop=F]
+# stat <- tmpRD[['c.dat']][,'area',drop=F]
 # cell <- NULL
-# cells <- tmpRD$cell_types$neurons
-# groups <- tmpRD$cell_types
+# cells <- tmpRD$c.dat$id
+# groups <- gt.names
 # dat.name <- NULL
 # plot.new=T
 # save.bp=F
 # view.cells=F
 # env=NULL
 # statType = "minMax"
-# source("./R/interactive.R")
 
 #' Interactive statistic maker. This creates a statistic based on peak heights or peak areas.
 #' @export
@@ -314,16 +313,16 @@ bp.selector<-function(dat, stat = NA, cell=NULL, cells=NULL, groups = NULL, dat.
             #change focus back to the peakwindow for active window selection
             dev.set(peakfunc.window)
             controlwindows <- identify(x=levs.mean,y=ys,labels="X",plot=T, col="blue",cex=1.5,n=1)
-            controlwindows<-levs[controlwindows]
+            controlwindows <- levs[controlwindows]
             
             #Find the scp collumn to provide the best stat
-            aftermax<-paste(activewindows, type, sep="")
-            aftermaxmean<-dat$scp[,aftermax, drop=F]
+            aftermax <- paste(activewindows, type, sep="")
+            aftermaxmean <- dat$scp[,aftermax, drop=F]
             
-            beforemax<-paste(controlwindows, type, sep="")
-            beforemaxmean<-dat$scp[,beforemax, drop=F]
+            beforemax <- paste(controlwindows, type, sep="")
+            beforemaxmean <- dat$scp[,beforemax, drop=F]
             
-            max_amp_mean<-(aftermaxmean-beforemaxmean)/(aftermaxmean+beforemaxmean)
+            max_amp_mean <- (aftermaxmean-beforemaxmean)/(aftermaxmean+beforemaxmean)
             #max_amp_mean[,2] <- seq(from=1,to=dim(max_amp_mean)[1],by=1)
             
             # Calculate percent change and select for cells
@@ -334,8 +333,8 @@ bp.selector<-function(dat, stat = NA, cell=NULL, cells=NULL, groups = NULL, dat.
             save_stat_op<- sel[menu(sel, title="Save Stat?")]
             if(save_stat_op == 'yes'){
                 cat("Enter the name of the statistic to be added to scp \n")
-                stat.name<-scan(n=1, what='character')
-                dat$scp[stat.name]<-max_amp_mean
+                stat.name <- scan(n=1, what='character')
+                dat$scp[stat.name] <- max_amp_mean
                 assign(dat.name,dat, envir=env)
             }
             xlim_top = 1

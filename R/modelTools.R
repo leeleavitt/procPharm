@@ -509,14 +509,14 @@ cell_type_modeler <- function(dat){
     # Ib4
     i = 6
     model <- invisible(keras::load_model_hdf5(models[i]))
-    image <- imageExtractor(dat, range = 20, 'img3', c(1))
+    image <- imageExtractorAll(dat, range = 20, 'img3', c(1))
     predictedClasses[[ modelNames[i] ]] <- model$predict(image)
     row.names(predictedClasses[[ modelNames[i] ]]) <- rowNames
 
     # GFP
     i = 7
     model <- invisible(keras::load_model_hdf5(models[i]))
-    image <- imageExtractor(dat, range = 20, 'img4', c(2))
+    image <- imageExtractorAll(dat, range = 20, 'img4', c(2))
     predictedClasses[[ modelNames[i] ]] <- model$predict(image)
     row.names(predictedClasses[[ modelNames[i] ]]) <- rowNames
 
@@ -546,3 +546,67 @@ cell_type_modeler <- function(dat){
     return(dat)
 }
 
+
+#' Add the original cell types to the RD.experiment
+#' This fucntion will look for double classified cells and return 
+#' what is double classified
+#' @export
+cellTypeAdder <- function(dat){
+    cell_type_id <- grep("^cell",names(tmpRD),value = T )[1]
+
+    #selectedCT <- select.list(names(dat$cell_types), multiple = T)
+    selectedCT <- c('L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'G7', 'G8', 'G9', 'G10', 'R11', 'R12', 'R13', 'N14', 'N15', 'N16', 'UC')
+
+    cell_types <- data.frame(matrix(nrow = dim(dat$c.dat)[1], ncol = length(dat[[cell_type_id]][selectedCT])))
+    colnames(cell_types) <- names(dat[[cell_type_id]][selectedCT])
+    row.names(cell_types) <- dat$c.dat$id
+    cell_types[is.na(cell_types)] <- 0
+
+    dat$c.dat['cell_types'] <- NA
+    for(i in 1:length(dat[[cell_type_id]][selectedCT])){
+        cell_types[dat[[cell_type_id]][selectedCT][[i]], names(dat[[cell_type_id]][selectedCT])[i]] <- 1
+        dat$c.dat[dat[[cell_type_id]][selectedCT][[i]], 'cell_types'] <- names(dat[[cell_type_id]][selectedCT])[i]
+    }
+
+    # How many cells are double classified?
+    ctSum <- apply(cell_types, 1, sum)
+    multiClassCells <- names(ctSum[ctSum > 1])
+    if(length(multiClassCells) > 0){
+        cat("\nThese cells were double classified.\nThey will be referred to as the later class\n")
+        for(i in 1:length(multiClassCells)){
+            cat(multiClassCells[i],": ")
+            ctLogic <- as.logical(cell_types[multiClassCells[i],])
+            cat(names(cell_types[multiClassCells[i],][ctLogic]), sep=" ")
+            cat("\n")
+        }
+    }
+
+    return(dat)
+}
+
+#' Function taken from e1071 package
+#' This observes the tails of a distribution
+#' big kurtosis means small tails: certain
+#' small kurtosis means long tails: uncertain
+kurtosis <- function(x, na.rm = FALSE, type = 3){
+    x <- x[!is.na(x)]
+    
+    if(!(type %in% (1 : 3)))
+       stop("Invalid 'type' argument.")
+    
+    n <- length(x)
+    x <- x - mean(x)
+    r <- n * sum(x ^ 4) / (sum(x ^ 2) ^ 2)
+    y <- if(type == 1)
+        r - 3
+    else if(type == 2) {
+        if(n < 4){
+            stop("Need at least 4 complete observations.")
+        }
+        ((n + 1) * (r - 3) + 6) * (n - 1) / ((n - 2) * (n - 3))
+    }else{
+        r * (1 - 1 / n) ^ 2 - 3
+    }
+
+    return(y)
+}

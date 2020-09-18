@@ -91,14 +91,12 @@ def featureMaker2(traces, numWindows = 12):
 
     timeSteps = np.linspace(start = int(0), stop = int(dataPoints), num=int(numWindows+1))
     timeSteps = np.floor(timeSteps).astype('int')
-    print(timeSteps)
     # Start my breaking up the traces into segments based on the
     # number of points in the trace.
     features = 4
     featureFrame = np.empty([samples, len(timeSteps) - 1, features])
 
     for i in range(len(timeSteps) - 1):
-        print(timeSteps[i], ":", timeSteps[i+1])
         meanFeat = traces[:,timeSteps[i]:timeSteps[i+1]].mean(axis=1)
         stdFeat = traces[:,timeSteps[i]:timeSteps[i+1]].std(axis=1)
         semFeat = stats.sem(traces[:,timeSteps[i]:timeSteps[i+1]], axis=1)

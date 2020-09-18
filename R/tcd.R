@@ -812,9 +812,9 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 #give the focus to the new window
                 dev.set(bp.selector.window)
                 #empty gt.names[[12]]
-                gt.names[[12]]<-NA
+                gt.names[[12]] <- NA
                 #remove the NA, which will be repalced with a logical(0)
-                gt.names[[12]]<-lapply(gt.names[[12]], function(x) x[!is.na(x)])
+                gt.names[[12]] <- lapply(gt.names[[12]], function(x) x[!is.na(x)])
                 #do the function bp.selector to gather data
                 tryCatch(bringToTop(-1), error=function(e)NULL)
                 cat("##############################################################################\nStat Maker: CUSTOM\n##############################################################################\n\nThis function allows you to create statistics based on the statistic you select.\nThis Function finds a represention of peak amplification and or block \nThis function will take in what ever you are currently scrolling through\n\nYou have the option to localize your boxplot. This means, select cells\nspecifically based on where you click on the boxplot.\n\nTwo clicks means you need\nto specify the lower range followed by the upper range.\nOne click will take everything greater than your click\n\nThe Other option that will arise is, would you like the save the stat.\nIf you do, the console will prompt you to enter a name. Ensure no spaces in the name\nThe next option will be whether you would like to make another statistic.\n")

@@ -54,13 +54,34 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat", info=T,lmain=NULL, bcex=.7, yvar=
     plot(
         1, 
         type='n',
-        main=lmain,
+        main='',
         xlim=xlim,
         ylim=ylim,
         xlab="", 
         ylab="",
         xaxt = 'n'
     )
+
+    # Add Cell name top left
+    text(
+        par('usr')[1] - xinch(1.1),
+        par('usr')[4] + yinch(.5),
+        lmain,
+        cex = 1.5, 
+        font =2, adj = 0
+    )
+
+    # add the cell type
+    tryCatch({
+        text(
+            par('usr')[1] - xinch(1.1),
+            par('usr')[4] + yinch(.25),
+            dat$c.dat[cell, 'cell_types'],
+            cex = 1, 
+            font =2, 
+            adj = 0
+        )
+    })
 
     axis(1, at= seq(0, max(dat.t[,1]),10), tick=TRUE)
     
@@ -120,7 +141,7 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat", info=T,lmain=NULL, bcex=.7, yvar=
     }
 
     legend(
-        x=par("usr")[1]-xinch(1.45), 
+        x=par("usr")[1]-xinch(1.4), 
         y=par("usr")[3]-yinch(.25), 
         xpd=TRUE, 
         inset=c(0,-.14),
@@ -131,13 +152,14 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat", info=T,lmain=NULL, bcex=.7, yvar=
     
     # Adds the rd name
     legend(
-        x=par("usr")[2]+xinch(.8), 
-        y=par("usr")[3]-yinch(.9), 
+        x=par("usr")[2], 
+        y=par("usr")[3]-yinch(1.2), 
         xpd=TRUE, 
         inset=c(0,-.14), 
         bty="n", 
         cex=.7, 
-        legend=dat.name
+        legend=dat.name, 
+        adj = 0
     )
 
     #Adding binary scoring for labeling to plot

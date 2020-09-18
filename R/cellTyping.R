@@ -283,7 +283,7 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
     #Unlabeled
     ################################
     # Unlabeled smaller neurons responding to menthol and not AITC
-    N15 <- menth_only
+    N15 <- menth_cells
     if(GFP){
         N15 <- setdiff(N15, G7)
     }
@@ -318,6 +318,7 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
     
     # N15: menthol cells
     N15 <- union(N15, US_menth_cells)
+    N14 <- setdiff(N14, menth_cells)
 	N15_m <- setdiff(N15, c(N15_c, N15_a))
 
     #N16 unlabeled, capsaicin positive
@@ -446,5 +447,49 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
             )
         )
     }
+
+    # # This adds the cells to c.dat
+    # if(!any(names(tmp_rd) == "cell_type_model")){
+    #     tmp_rd <- cellTypeAdder(tmp_rd)
+    #     # This models the cells
+    #     tmp_rd <- cell_type_modeler(tmp_rd)
+
+    #     # Now lets use the neuralnetworks to correctly place R13, N14, N15
+    #     toReClassify <- Reduce(union, list(tmp_rd$cell_types$R13, tmp_rd$cell_types$N14))
+
+    #     x <- tmp_rd$cell_type_model[toReClassify]
+    #     for(i in 1:length(x)){
+    #         x[[i]]['gfp',] <- x[[i]]['gfp',] * 0.8
+    #         x[[i]]['k40',] <- x[[i]]['k40',] * 2
+    #         x[[i]]['menth',] <- x[[i]]['menth',] * .8
+    #         x[[i]]['caps',] <- x[[i]]['caps',] * 0.6
+    #         x[[i]]['ib4',] <- x[[i]]['ib4',] * 1.2
+
+    #     }
+    #     tmp_rd$cell_type_model[toReClassify] <- x
+    # }
+    # # Here i noticed we need to understand the uncertain vs certain
+    # # cells. To do this we will use the kurtosis function
+    # # This is now added to the scp
+    # kurtosisinfo <- lapply(tmp_rd$cell_type_model, function(x){kurtosis(apply(x,2,sum))})
+    # tmp_rd$scp['cell_type_kurtosis'] <- Reduce(c,kurtosisinfo)
+
+    # # Correct the cell type
+    # selectCT <- c("G8", "R13", "N14")
+    # correctedCT <- sapply(tmp_rd$cell_type_model[toReClassify], function(x){
+    #     rowSums <- apply(x[selectCT], 2, sum)
+    #     rowMaxLogic <- rowSums == max(rowSums)
+    #     names(rowSums)[rowMaxLogic]
+    # })
+
+    # # Now remove all of the names from the selectCT
+    # tmp_rd$cell_types[selectCT] <- lapply(tmp_rd$cell_types[selectCT], function(x) setdiff(x,names(correctedCT)))
+
+    # # Now add the cells to the correct class
+    # toCorrectTo <- unique(correctedCT)
+    # for(i in 1:length(toCorrectTo)){
+    #     tmp_rd$cell_types[[ toCorrectTo[i] ]]<- union(tmp_rd$cell_types[[ toCorrectTo[i] ]], names(which(correctedCT == toCorrectTo[i] , arr.ind = T)))
+    # }
+
     return(tmp_rd)
 }

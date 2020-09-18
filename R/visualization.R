@@ -107,9 +107,11 @@ density_ct_plotter<-function(dat, cells, cell_types = NA, stat=dat$c.dat["area"]
     if(overlay==T){
         for(i in 1:length(cell_types)){
             if(length(cell_types[[i]])>2){
-                cell_type_density<-density(stat[cell_types[[i]],])
-                lines(cell_type_density, col="black", lwd=5) 
-                lines(cell_type_density, col=color[i], lwd=2)  
+                tryCatch({
+                    cell_type_density <- density(stat[cell_types[[i]],])
+                    lines(cell_type_density, col="black", lwd=5) 
+                    lines(cell_type_density, col=color[i], lwd=2)  
+                }, error = function(e) NULL)
             }
         }
     legend("topleft",legend=names(cell_types), fill=color, cex=.6,box.col="Black")
