@@ -334,30 +334,37 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         dev.set(which=click.window)
         p1 <- PeakFunc7(dat, cell.pick, t.type=SETTINGS$t.type, yvar=yvar, info=info, bcex=bcex, pts=pts, lns=lns, levs=SETTINGS$levs, underline=SETTINGS$underline, dat.n=dat.name, zf=zf)
         p1.par <- par()
-            
-        if("cellTypeModel" %in% names(dat)){
-            dev.set(which = model.window)
-            modelViewer(dat, cell.pick, F)
-        }
+        
+        tryCatch({
+            if("cellTypeModel" %in% names(dat)){
+                dev.set(which = model.window)
+                modelViewer(dat, cell.pick, F)
+            }
+        }, error = function(e) NULL)
 
-        ##LinesEvery
+        # LinesEvery
         if(lines.flag == 1){
             if(length(p.names) < 500){
-                if(length(p.names)>11){
-                    tryCatch(dev.off(which=lines.window), error=function(e)NULL)
-                    tryCatch(windows(width=10,height=12,xpos=0, ypos=100), error=function(e)windows(width=10,height=12))
-                    lines.window<-dev.cur()
+                if(length(p.names) > 0){
+                    if(length(p.names) > 11){
+                        tryCatch(dev.off(which=lines.window), error=function(e)NULL)
+                        tryCatch(windows(width=10,height=12,xpos=0, ypos=100), error=function(e)windows(width=10,height=12))
+                        lines.window<-dev.cur()
+                    }else{
+                        tryCatch(dev.off(which=lines.window), error=function(e)NULL)
+                        tryCatch(windows(width=10,height=7,xpos=0, ypos=250) , error=function(e)windows(width=10,height=7))
+                        lines.window<-dev.cur()
+                    }
+                    dev.set(which=lines.window)
+                    tryCatch(LinesEvery.5(dat,p.names,plot.new=F, img=SETTINGS$l.img,lmain=paste(gsub("[$]","",p.namez), 'n=',length(p.names)), t.type=SETTINGS$t.type, lw=lw, col=lines.color, lns=lns, levs=SETTINGS$levs, bcex=1, underline=SETTINGS$underline, dat.n=dat.name, zf=zf, sf=sf, values=values),error=function(e) print("You haven't stacked traces yet, yo."))
+                    lines.flag <- 0
                 }else{
                     tryCatch(dev.off(which=lines.window), error=function(e)NULL)
-                    tryCatch(windows(width=10,height=7,xpos=0, ypos=250) , error=function(e)windows(width=10,height=7))
-                    lines.window<-dev.cur()
                 }
-                dev.set(which=lines.window)
-                tryCatch(LinesEvery.5(dat,p.names,plot.new=F, img=SETTINGS$l.img,lmain=paste(gsub("[$]","",p.namez), 'n=',length(p.names)), t.type=SETTINGS$t.type, lw=lw, col=lines.color, lns=lns, levs=SETTINGS$levs, bcex=1, underline=SETTINGS$underline, dat.n=dat.name, zf=zf, sf=sf, values=values),error=function(e) print("You haven't stacked traces yet, yo."))
-                lines.flag <- 0
             }
         }
         
+        # LinesEvery sample
         if(lines.flag == 2){
             sample.to.display <- as.numeric(select.list(as.character(c(5,10,20,50,70,100))),title='Sample Number?')
             
@@ -388,35 +395,34 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             }
         }
 
-        ##Pic zoom
+        # Cell image Zoom
         if(window.flag == 1){
             tryCatch(dev.off(which=view.window), error=function(e)NULL)
             tryCatch({
                 dimx<-dim(SETTINGS$img)[2]
                 dimy<-dim(SETTINGS$img)[1]
                 haight<-10*dimy/dimx
-                tryCatch(windows(width=haight*dimx/dimy, height=haight,xpos=1130, ypos=200), error=function(e) windows(width=haight*dimx/dimy, height=haight))
-            }, error = function(e)NULL)
+                tryCatch(windows(width=haight*dimx/dimy, height=haight, xpos=1130, ypos=200), error=function(e) windows(width=haight*dimx/dimy, height=haight))
+            }, error = function(e) NULL)
             view.window <- dev.cur()
 
             tryCatch(dev.off(which=mulitpic.window), error=function(e)NULL)
             tryCatch(windows(width=8, height=8,xpos=1130, ypos=0), error=function(e) windows(width=8, height=8))
             multipic.window<-dev.cur()
             
+            dev.set(which=view.window)
+            tryCatch({
+                cell.view(dat,
+                    cell=p.names, 
+                    img=SETTINGS$img,
+                    cols="Yellow",
+                    plot.new=F,
+                    cell.name=T, 
+                    lmain=paste(gsub("[$]","",p.namez)), 
+                    zoom=FALSE)
+            }, error=function(e) print("You haven't collected cells to view"))
+            
             if(length(p.names) < 500 ){
-                dev.set(which=view.window)
-                tryCatch(
-                    cell.view(dat,
-                        cell=p.names, 
-                        img=SETTINGS$img,
-                        cols="Yellow",
-                        plot.new=F,
-                        cell.name=T, 
-                        lmain=paste(gsub("[$]","",p.namez)), 
-                        zoom=FALSE)
-                    ,error=function(e) print("You haven't collected cells to view")
-                )
-                
                 dev.set(which=multipic.window)
                 tryCatch(
                     multi.pic.zoom(
@@ -434,15 +440,15 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             window.flag <- 0
         }
         
-        #if(lines.flag==0){
-            dev.set(which=click.window)
-        #}		
+        dev.set(which=click.window)	
         
-        #title(sub=paste("Group ",group.i," n=",g.num," Cell ",cell.i,sep=""))
-        ## How many cells are you looking at
-        text(par("usr")[1], par("usr")[4]+yinch(.5),paste(cell.i, ":",length(cnames)))
-        #click.i <- identify(x=xs,y=ys,n=1,plot=F)
+        # How many cells are you looking at
+        text(par("usr")[1], 
+            par("usr")[4]+yinch(.5), 
+            paste(cell.i, ":", length(cnames))
+        )
         
+        # Read the keyboard and mouse clicks
         keyPressed <- readkeygraph("[press any key to continue]")
         if(class(keyPressed) == 'list'){
             keyPressed <- keyPressed$buttons
@@ -461,13 +467,24 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 
         additionalInfo <- c(additionalInfo, keyPressed)
         
-        if(keyPressed=="Up")
-        {cell.i <- cell.i + 1;if(cell.i>length(cnames)){cell.i<-1};lines.flag<-0}
+        if(keyPressed=="Up"){
+            cell.i <- cell.i + 1
+            if(cell.i > length(cnames)){
+                cell.i<-1
+            }
+            lines.flag <- 0
+        }
         
-        if(keyPressed=="Down")
-        {cell.i <- cell.i - 1;if(cell.i<1){cell.i<-length(cnames)};lines.flag<-0}
+        if(keyPressed=="Down"){
+            cell.i <- cell.i - 1
+            
+            if(cell.i<1){
+                cell.i<-length(cnames)
+            }
+            lines.flag<-0
+        }
         
-    #a: Assign this will place the cell of interest into the correct cell class
+        #a: Assign this will place the cell of interest into the correct cell class
         if(keyPressed=='a'){
             #need to see if the dat has a cell_types
             cellToReassign <- cnames[cell.i]
@@ -496,18 +513,21 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             }
         }
 
-    #c: add cells to g.names
+        #c: add cells to g.names
         if(keyPressed=="c"){
 			g.names<-union(g.names,cnames[cell.i]);print(g.names)}
-    #C: Remove cells from g.names
+        
+        #C: Remove cells from g.names
         if(keyPressed=="C"){
 			g.names<-setdiff(g.names,cnames[cell.i]);print(g.names)}
-    #d: details for peakfunc	
+        
+        #d: details for peakfunc	
         if(keyPressed=="d"){
             if(info){info=F}else{info=T}
             lines.flag<-1
         }
-    #D: LinesEvery seperation	
+        
+        #D: LinesEvery seperation	
         if(keyPressed=="D"){
             tryCatch(bringToTop(-1), error=function(e)NULL)
             print("change the zoom factor")
@@ -516,8 +536,9 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             if(sf==0){sf<-.001}
             lines.flag<-1
         }
-    # ctrl-F: Fixes the scoring
-    # This function will allow you to fix the region you click on
+        
+        # ctrl-F: Fixes the scoring
+        # This function will allow you to fix the region you click on
         if(keyPressed == 'ctrl-F' | keyPressed == ' '){
 
             #First input a nonsense press to get the party started
@@ -562,14 +583,15 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         options(warn = 0)
         }
 
-    #F: New smoothing factor for fit trace
+        #F: New smoothing factor for fit trace
         if(keyPressed=="F"){
             print("Change the loess smoothing factor")
             print(paste("This is the current smoothing",sft))
             sft<-scan(n=1)
             lines.flag<-3
         }
-    #h: Change the hue/color of the traces
+        
+        #h: Change the hue/color of the traces
         if(keyPressed=="h"){
             lines.color<-select.list(c('rainbow','black','brew.pal','topo'))
             if(lines.color==''){
@@ -577,18 +599,21 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             }
             lines.flag<-1
         }
-    #i: Select image to display on Stacked Traces
+        
+        #i: Select image to display on Stacked Traces
         if(keyPressed=="i"){
-            SETTINGS$l.img<-image.selector(dat)
-            lines.flag<-1
+            SETTINGS$l.img <- image.selector(dat)
+            lines.flag <- 1
         }
-    #I: image for Multiview
+        
+        #I: image for Multiview
         if(keyPressed=="I"){
-            SETTINGS$img<-dat[[image.selector(dat, multi=F)]]
+            SETTINGS$img <- dat[[image.selector(dat, multi=F)]]
             #lines.flag<-1
             window.flag<-1
         }
-    #l: choose window region to display on stack trace plot
+        
+        #l: choose window region to display on stack trace plot
         if(keyPressed=="l"){
             #if(lns){lns<-FALSE}else{lns<-TRUE}
             SETTINGS$levs <- select.list(
@@ -598,7 +623,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             if( (SETTINGS$levs=="") || identical(SETTINGS$levs,character(0)) ){SETTINGS$levs<-NULL}
             lines.flag<-1
         }
-    #m: Move groups to another group
+        
+        #m: Move groups to another group
         if(keyPressed=="m"){
             tryCatch(bringToTop(-1), error=function(e)NULL)
             cat("
@@ -617,7 +643,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             gt.names[[gt_to_replace]]<-gt.names[[gt_to_move]]
         }    
 
-    #o: order all cells in a new way
+        #o: order all cells in a new way
         if(keyPressed=="o"){
             toMatch<-c("c.dat", "bin", "scp", 'uncMat')
             order_dat <- grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
@@ -628,7 +654,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             tryCatch(cnames <- c.sort.2(dat[[datfram]], cnames, collumn=collumn),error=function(e) print("Something went wrong try again"))
             cell.i<-1
         }	
-    #O: order cells in Stacked Traces and multiview
+        
+        #O: order cells in Stacked Traces and multiview
         if(keyPressed=="O"){
             tryCatch({
                 toMatch<-c("c.dat", "bin", "scp", 'uncMat')
@@ -647,12 +674,14 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 ,error=function(e) print("You have not stacked traces yet.")
             )
         }	
-    #p: Toggles points on graph
+        
+        #p: Toggles points on graph
         if(keyPressed=="p"){
             if(pts){pts<-FALSE}else{pts<-TRUE}
             lines.flag<-1
         }
-    #P: Pick a group/cells to click through
+        
+        #P: Pick a group/cells to click through
         if(keyPressed=="P"){
             tryCatch(bringToTop(-1), error=function(e)NULL)
             cat("\nPick a Group of cells or a single cell to observe \nIf you Click cancel, all cells will be returned\n")
@@ -688,7 +717,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             }
         }
 
-    #R: reset group specified
+        #R: reset group specified
         if(keyPressed=="R"){
             p.namez<-paste(select.list(names(gt.names)),sep="")
             if(p.namez!=""){
@@ -699,7 +728,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 print(paste("You Emptied", p.namez))
             }else{}
         }
-    #r: rename group names
+        
+        #r: rename group names
         if(keyPressed=="r"){
             tryCatch(bringToTop(-1), error=function(e)NULL)
             print("Select a group to rename")
@@ -711,7 +741,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             #lines.flag<-1
         }
 
-    #s: stack selected groups
+        
+        #s: stack selected groups
         if(keyPressed=="s"){
             p.namez<-paste(select.list(names(gt.names)),sep="")
             p.names<-gt.names[[p.namez]]
@@ -719,7 +750,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             lines.flag<-1
         }
         
-    #S: Sample selected groups
+        #S: Sample selected groups
         if(keyPressed=="S"){
             # p.namez<-paste(select.list(names(gt.names)),sep="")
             # print(p.namez)
@@ -728,7 +759,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             # print(p.names)
             lines.flag <- 2
         }
-    #t: brings up list of RD file. Select Trace (anything starting with t or mp)
+        
+        #t: brings up list of RD file. Select Trace (anything starting with t or mp)
         if(keyPressed=="t"){
             toMatch<-c("t[.]","blc","snr","mp")
             trace_dat<-grep(paste(toMatch,collapse="|"),names(dat),value=TRUE)
@@ -737,12 +769,14 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             if(SETTINGS$t.type==""){SETTINGS$t.type <- t.type1}
             lines.flag<-1
         }
-    #u: Underlines the Trace
+        
+        #u: Underlines the Trace
         if(keyPressed=="u"){
             if(SETTINGS$underline){SETTINGS$underline=F}else{SETTINGS$underline=T}
             lines.flag<-1
         }
-    #v: Show where cells are located and give zoomed in view
+        
+        #v: Show where cells are located and give zoomed in view
         if(keyPressed=="v"){
             p.namez<-paste(select.list(names(gt.names)),sep="")
             print(p.namez)
@@ -750,14 +784,15 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             print(p.names)
             window.flag<-1
         }
-    #V: choose cell info to display on traces
+        
+        #V: choose cell info to display on traces
         if(keyPressed=="V"){
             #if(lns){lns<-FALSE}else{lns<-TRUE}
             values<-select.list(names(dat$c.dat), multiple=T)
             lines.flag<-1
         }
 
-    #w: Change Line Width on plot
+        #w: Change Line Width on plot
         if(keyPressed=="w"){
             tryCatch(bringToTop(-1), error=function(e)NULL)
             print("change the line width (lw) for LinesEvery")
@@ -765,9 +800,9 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             lw<-scan(n=1)
             lines.flag<-1
         }
-    #x: Drop cell
-        if(keyPressed=="x")
-        {
+        
+        #x: Drop cell
+        if(keyPressed=="x"){
             print(cnames[cell.i])
             dat$bin[cnames[cell.i], "drop"]<-1
             print(dat$bin[cnames[cell.i], "drop"])
@@ -782,19 +817,21 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 assign(dat.name,dat, envir=.GlobalEnv)
             }else{assign(dat.name,dat, envir=.GlobalEnv)}
         }
-    #X: undrop cell
-        if(keyPressed=="X")
-        {
+        
+        #X: undrop cell
+        if(keyPressed=="X"){
             print(cnames[cell.i])
             dat$bin[cnames[cell.i], "drop"]<-0
             print(dat$bin[cnames[cell.i], "drop"])
             print(paste("You Dropped Cell",cnames[cell.i]))
         }
-    #y: Zoom yaxis automatically
+        
+        #y: Zoom yaxis automatically
         if(keyPressed=="y"){
             if(yvar){yvar<-FALSE}else{yvar<-TRUE}
         }
-    #z: image zoom
+        
+        #z: image zoom
         if(keyPressed=="z"){
             tryCatch(bringToTop(-1), error=function(e)NULL)
             print("change the zoom factor")
@@ -804,13 +841,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             window.flag<-1
         }
         
-        #if(keyPressed=="k")
-        #{
-        #	dat$bin[cnames[cell.i], "drop"]<-0
-        #	print(paste("You Dropped Cell",cnames[cell.i]))
-        #}
         
-    #F1: Simple bp.selector. Create the statistic labeled on the plot. The localize question
+        #F1: Simple bp.selector. Create the statistic labeled on the plot. The localize question
         #allows you to click the boxplot to select a subset of cells to observe
         if(keyPressed=="F1"){
             tryCatch({
@@ -846,7 +878,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             }, error = function(e) cat("\nDid not work. Review documentation\n"))
         }
         
-    #F2: Advanced Statistic maker This function uses the function (After-Before)/(After+Before)
+        #F2: Advanced Statistic maker This function uses the function (After-Before)/(After+Before)
         #this function allows you to save the stat.  This will be added to the scp dataframe at the bottom.
         #if you have created statistics, be sure to save your RD file before you close
         if(keyPressed=="F2"){
@@ -885,8 +917,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             )
         }
         
-
-    #F3: Plotting the Density plots.  There are many options for this plot
+        #F3: Plotting the Density plots.  There are many options for this plot
         if(keyPressed=="F3"){
             if(length(ls(pattern="density_win"))==0){
                 dev.new(width=10,height=10)
@@ -962,6 +993,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         #     TopView(dat, p.names, 12, 6, dat_name=dat.name, aux.var=aux_var)
         # }
         
+        # Density Plotter
         if(keyPressed=="F4"){
             if(length(ls(pattern="density_win"))==0){
                 dev.new(width=10,height=10)
@@ -1008,7 +1040,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             lines.flag<-1
         }
 
-    #F5: Censusus Viewer
+        #F5: Censusus Viewer
         if(keyPressed=="F5"){
             cat("\nSelect a binary column to add to the 12th group\n")
 			cnames_orig <- cnames
@@ -1039,7 +1071,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             )
 		}   
         
-        #F6: Censusus Viewer
+        #F6: Bin Viewer
         if(keyPressed=="F6"){
             cat("\n This is a temporary function to view the responses per cell class.\n")
 
@@ -1086,6 +1118,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             }
         }
 
+        #F8: Boxplot selector
         if(keyPressed=="F8"){
             tryCatch({
                 #first open a new window
@@ -1256,7 +1289,6 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 
         return(gt.names)
     }
-    #print(rd.name)
 }
 
 ### Function to select rows based on collumn parameters

@@ -368,42 +368,69 @@ SelectGrid <- function(tmp,x.names,pad=1.05,stain.name="area",title1="SelectRed"
     
 #}
 
-image.selector <- function(tmp.rd, multi=T){
-    img.names<-grep(names(tmp.rd),pattern="img", value=T)
+image.selector <- function(tmp.rd, multi = T, size = 200, title = "Images"){
+    img.names <- sort(grep("^img", names(tmp.rd), value=T))
     
-    null.images<-vector()
-    for(i in 1:length(img.names)){null.images[i]<-!is.null(tmp.rd[[img.names[i]]])}
-    img.logical<-cbind(img.names,null.images)
-    real.imgs<-which(img.logical[,2]=="TRUE")
+    imgLogic <- !(sapply(tmp.rd[img.names], is.null))
     
-    img.names<-img.logical[real.imgs, 1]
+    img.names <- img.names[imgLogic]
+
+    dev.new(
+        width=ceiling(sqrt(length(img.names)))*4, 
+        height=ceiling(sqrt(length(img.names)))*4
+    )
+    imgView <- dev.cur()
     
-    
-    dev.new(width=ceiling(sqrt(length(img.names)))*4, height=ceiling(sqrt(length(img.names)))*4)
-    img.sel<-dev.cur()
-    par(mfrow=c(ceiling(sqrt(length(img.names))),ceiling(sqrt(length(img.names)))))
+    par(mfrow = c(
+        ceiling( sqrt( length(img.names) ) ),
+        ceiling( sqrt( length(img.names) ) )
+    ))
     
     for(i in 1:length(img.names)){
-        par(mar=c(0,0,0,0))
-        img<-tmp.rd[[img.names[[i]]]]
-        img.dim.y<-dim(img)[1]
-        img.dim.x<-dim(img)[2]	
+        par(mar = c(0,0,0,0))
         
-        top<-img.dim.y*.25
-        bottom<-img.dim.y*.75
-        left<-img.dim.x*.25
-        right<-img.dim.x*.75
+        img <- tmp.rd[[img.names[[i]]]]
+        img.dim.y <- dim(img)[1]
+        img.dim.x <- dim(img)[2]	
+        
+        top <- (img.dim.y / 2) - size
+        bottom <- (img.dim.y / 2) + size
+        
+        left <- (img.dim.x / 2) - size
+        right <- (img.dim.x / 2) + size
         
         plot(0, 0, 
-            xlim=c(img.dim.x*.4, img.dim.x*.6),
-            ylim=c(img.dim.y*.4,img.dim.y*.6),xaxt="n", yaxt="n",pch="."
-            )
-        rasterImage(img[top:bottom,left:right,], 0, img.dim.y, img.dim.x, 0)
-        text(img.dim.x*.45,img.dim.y*.45,labels=paste(i), cex=2, col="white")
+            xlim = c(0,1),
+            ylim = c(1,0),
+            xaxt="n", 
+            yaxt="n",
+            xaxs="i",
+            yaxs="i"
+        )
+
+        rasterImage(
+            img[top:bottom,left:right,], 
+            0, 
+            0, 
+            1, 
+            1
+        )
+        
+        legend(
+            0 + xinch(0.1),
+            0 - yinch(0.1),
+            img.names[i], 
+            cex=1, 
+            col="black",
+            bg = "white",
+            box.col = "white",
+            adj = 0.5
+
+        )
     }
-    img<-select.list(img.names, title="Images", multiple=multi)
-    dev.off(img.sel)
-    return(img)
+    imgName <- select.list(img.names, title="Images", multiple = multi)
+    dev.off(imgView)
+    return(imgName)
 }
 
 #' three tests Drop (confirm), Red (confirm) and Green (confirm)
@@ -424,9 +451,9 @@ ROIreview <- function(tmp, x.names=NULL, pad=2, wh=7,hh=7, subset.n=500, roi.img
     additionalInfo <- choices
     print("how to display ROI")
     if(is.null(roi.img)){
-        roi.img<-image.selector(tmp)
+        roi.img <- image.selector(tmp, title = "Img with ROI")
     }else{
-        roi.img<-roi.img
+        roi.img <- roi.img
     }
 
     dice <- function(x, n,min.n=10)

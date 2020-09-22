@@ -164,7 +164,6 @@ imageExtractor <- function(dat, image = 'img3', channel = 1, range = 20){
 #' @param image is the character name of the image within your list
 #' @param channel is the rgb channel of your image to extrace
 #' @export
-
 imageExtractorAll <- function(dat, image = 'img3', channel = 1, range = 20){
     slice <- (range * 2) + 1
     mainImageArray <- array(dim = c(0, slice, slice, length(channel)))
@@ -241,7 +240,7 @@ imageProbMaker <- function(dat, verbose = T){
         cat("\nThis function scores the cy5,gfp, and drops\nMake sure that:\nimg3: cy5 only\nimg4: gfp only\nimg8: dapi.lab.png\n")
     }
     # Load in the data
-    #tryCatch({
+    tryCatch({
         pyPharm <- reticulate::import('python_pharmer')
         image <- imageExtractorAll(dat, 'img3', 1)
         # grab correct model
@@ -259,7 +258,7 @@ imageProbMaker <- function(dat, verbose = T){
         predictedClassProbsDF[image$cellNames,] <- predictedClassProbs
 
         dat[['probs']][['cy5']] <- predictedClassProbsDF
-    #}, error=function(e) print("Could not score IB4, you are most likely missing image 3"))
+    }, error=function(e) print("Could not score IB4, you are most likely missing image 3"))
 
     tryCatch({
         image <- imageExtractorAll(dat, 'img4', 2)
@@ -495,20 +494,22 @@ cell_type_modeler <- function(dat){
     }
 
     # R3J
-    i = 5
-    model <- invisible(keras::load_model_hdf5(models[i]))
-    winRegs <- unique(dat$w.dat$wr1)
-    r3JLoc <- grep('[rR](3|[I]{3})[jJ]', winRegs)[1]
-    kBeforeR3JLoc <- r3JLoc - 1
-    kAfterR3JLoc <- r3JLoc + 1
-    r3JStart <- min(which(dat$w.dat$wr1 == winRegs[kBeforeR3JLoc] , arr.ind=T))
-    r3JEnd <- max(which(dat$w.dat$wr1 == winRegs[kAfterR3JLoc] , arr.ind=T))
+    tryCatch({
+        i = 5
+        model <- invisible(keras::load_model_hdf5(models[i]))
+        winRegs <- unique(dat$w.dat$wr1)
+        r3JLoc <- grep('[rR](3|[I]{3})[jJ]', winRegs)[1]
+        kBeforeR3JLoc <- r3JLoc - 1
+        kAfterR3JLoc <- r3JLoc + 1
+        r3JStart <- min(which(dat$w.dat$wr1 == winRegs[kBeforeR3JLoc] , arr.ind=T))
+        r3JEnd <- max(which(dat$w.dat$wr1 == winRegs[kAfterR3JLoc] , arr.ind=T))
 
-    pulseToScore <- t(dat$blc[r3JStart:r3JEnd, -1])
+        pulseToScore <- t(dat$blc[r3JStart:r3JEnd, -1])
 
-    featureFrame <- pyPharm$featureMaker2(pulseToScore, 22)
-    predictedClasses[[ modelNames[i] ]] <- model$predict(featureFrame)
-    row.names(predictedClasses[[ modelNames[i] ]]) <- rowNames
+        featureFrame <- pyPharm$featureMaker2(pulseToScore, 22)
+        predictedClasses[[ modelNames[i] ]] <- model$predict(featureFrame)
+        row.names(predictedClasses[[ modelNames[i] ]]) <- rowNames
+    }, error = function(e) NULL)
 
     # Ib4
     i = 6
@@ -548,7 +549,6 @@ cell_type_modeler <- function(dat){
     dat$cellTypeModel <- modelFrames
     
     # Add the kurtosis to the experiment
-    kurtosis(apply(dat$cellTypeModel[[1]], 2, sum))
     kurtosisinfo <- lapply(dat$cellTypeModel, function(x){kurtosis(apply(x,2,sum))})
     dat$scp['cell_type_kurtosis'] <- Reduce(c,kurtosisinfo)
 
@@ -560,7 +560,7 @@ cell_type_modeler <- function(dat){
 #' what is double classified
 #' @export
 cellTypeAdder <- function(dat){
-    cell_type_id <- grep("^cell",names(tmpRD),value = T )[1]
+    cell_type_id <- grep("^cell",names(dat),value = T )[1]
 
     #selectedCT <- select.list(names(dat$cell_types), multiple = T)
     selectedCT <- c('L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'G7', 'G8', 'G9', 'G10', 'R11', 'R12', 'R13', 'N14', 'N15', 'N16', 'UC')
@@ -629,7 +629,7 @@ modelViewer <- function(dat, cell, plot.new = T){
         dev.new(width = 8, height = 3)
     }
     par(mar=c(5,4,4,5))
-    kurtStat <- round(tmpRD$scp[cell,"cell_type_kurtosis"], digits = 3)
+    kurtStat <- round(dat$scp[cell,"cell_type_kurtosis"], digits = 3)
     
     ctName <- ifelse(is.na(dat$c.dat[cell,'cell_types']), "Not classified", dat$c.dat[cell,'cell_types'])
 
@@ -687,6 +687,6 @@ modelViewer <- function(dat, cell, plot.new = T){
         cex = .5,
         adj = 0
     )
-)
+
 
 }

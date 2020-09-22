@@ -499,18 +499,30 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
 #' @param dat RD.experiment
 #' @param UL_classify boolean decision to classify large diameter cells
 #' @export
-Cell_Typer_3 <- function(dat, UL_classify = T){
-    UL_classify <- T
+Cell_Typer_3 <- function(dat){
+    # This logic assesess whether to reclassify
+    largeClassifiedAlready <- any(c("L1","L2", "L3", "L4", "L5", "L6") %in% names(dat$cell_types))
+
+    # Is gfp present?
     gfpLogic <- grep("gfp", names(dat$c.dat))
     if(length(gfpLogic) > 0){
         gfpLogic <- T
     }else{
         gfpLogic <- F
     }
-    cell_types <- list()
-    # Lets make a cell typing script instead of setdiff etc, we will use logical operators
-    allCells <- dat$c.dat$id
 
+    # Is there R3J?
+    r3jLogic <- grep('^[rR](3|[I]{3})[jJ].*[mM]$', names(dat$bin), value = T)
+    if(length(r3jLogic) > 0){
+        UL_classify <- T
+    }else{
+        UL_classify <- F
+    }
+    
+    # Begin Cell typing
+    cell_types <- list()
+    
+    allCells <- dat$c.dat$id
     # find the windowNames
     menthName <- grep("^[mM][eE][nN][tT]", names(dat$bin), value = T)
     aitcName <- grep("^[aA][iI][tT][cC]", names(dat$bin), value = T)
@@ -625,85 +637,90 @@ Cell_Typer_3 <- function(dat, UL_classify = T){
                 dat$bin[neurons, capsName] == 1
     cell_types$N16 <- neurons[n16Logic]
 
+    if(!largeClassifiedAlready){
+        if(UL_classify){
+            cat(" Sort the Unlabled Large into
+                1:Propriocepters
+                2:Jagged
+                
+                Use F1/F2 for God's sake
+                press X to discard
+                Press ENTER to continue
+            ")
+            scan(n=1)
+            uLLogic <- dat$c.dat[neurons, "area"] > 400 &
+                        dat$bin[neurons, "gfp.bin"] != 1 &
+                        dat$bin[neurons, "cy5.bin"] != 1 &
+                        dat$bin[neurons, aitcName] != 1 &
+                        dat$bin[neurons, menthName] != 1 &
+                        dat$bin[neurons, capsName] != 1
+            UL <- neurons[uLLogic]
+            largeCells <- tcd(dat, UL, save_question = F)[1:2]
+            names(largeCells) <- c("L1", "L2")
 
-    if(UL_classify){
-        cat(" Sort the Unlabled Large into
-            1:Propriocepters
-            2:Jagged
+            levs <- unique(dat$w.dat$wr1)
+            r3jLocation <- grep('[rR](3|[I]{3})[jJ]', levs)
+            beforeR3j <- r3jLocation - 1
+            afterR3j <- r3jLocation + 1
+
+            tot <- Reduce(c, largeCells)
+            L3L4 <- setdiff(UL, tot)
             
-            Use F1/F2 for God's sake
-            press X to discard
-            Press ENTER to continue
-        ")
-        scan(n=1)
-        uLLogic <- dat$c.dat[neurons, "area"] > 400 &
+            l3Logic <-  (dat$scp[L3L4, paste0(levs[afterR3j], ".max")] * 0.7) > dat$scp[L3L4, paste0(levs[beforeR3j], ".max")] 
+            L3 <- L3L4[l3Logic]
+
+            l4Logic <-  (dat$scp[L3L4, paste0(levs[afterR3j], ".max")] * 0.7) <= dat$scp[L3L4, paste0(levs[beforeR3j], ".max")]
+            L4 <- L3L4[l4Logic]
+
+            largeCells <- c(largeCells, list(L3 = L3, L4 = L4))
+
+            if(gfpLogic){
+                # L5   
+                l5Logic <-  (dat$scp[neurons, paste0(levs[afterR3j], ".max")] * 0.7) > dat$scp[neurons, paste0(levs[beforeR3j], ".max")] &
+                            dat$bin[neurons, "gfp.bin"] == 1 &
+                            dat$bin[neurons, aitcName] != 1 &
+                            dat$bin[neurons, menthName] != 1 &
+                            dat$bin[neurons, capsName] != 1
+                L5 <- neurons[l5Logic]
+
+                # L6
+                l6Logic <-  (dat$scp[neurons, paste0(levs[afterR3j], ".max")] * 0.7) <= dat$scp[neurons, paste0(levs[beforeR3j], ".max")] &
+                            dat$bin[neurons, "gfp.bin"] == 1 &
+                            dat$bin[neurons, aitcName] != 1 &
+                            dat$bin[neurons, menthName] != 1 &
+                            dat$bin[neurons, capsName] != 1
+                L6 <- neurons[l6Logic]
+                
+                largeCells <- c(largeCells, list(L5 = L5, L6 = L6, L5.split = NA, L6.split = NA))
+            }
+        }else{
+            uLLogic <- dat$c.dat[neurons, "area"] > 300 &
                     dat$bin[neurons, "gfp.bin"] != 1 &
                     dat$bin[neurons, "cy5.bin"] != 1 &
+                    #dat$c.dat[neurons, 'area'] > 400 &
                     dat$bin[neurons, aitcName] != 1 &
                     dat$bin[neurons, menthName] != 1 &
                     dat$bin[neurons, capsName] != 1
-        UL <- neurons[uLLogic]
-        largeCells <- tcd(dat, UL, save_question = F)[1:2]
-        names(largeCells) <- c("L1", "L2")
+            UL <- neurons[uLLogic]
+            largeCells <- list(UL = UL)
+            if(gfpLogic){
+                uLgLogic <- dat$c.dat[neurons, "area"] > 300 &
+                    dat$bin[neurons, "gfp.bin"] == 1 &
+                    dat$bin[neurons, "cy5.bin"] != 1 &
+                    #dat$c.dat[neurons, 'area'] > 400 &
+                    dat$bin[neurons, aitcName] != 1 &
+                    dat$bin[neurons, menthName] != 1 &
+                    dat$bin[neurons, capsName] != 1
 
-        levs <- unique(dat$w.dat$wr1)
-        r3jLocation <- grep('[rR](3|[I]{3})[jJ]', levs)
-        beforeR3j <- r3jLocation - 1
-        afterR3j <- r3jLocation + 1
-
-        tot <- Reduce(c, largeCells)
-        L3L4 <- setdiff(UL, tot)
-        
-        l3Logic <-  (dat$scp[L3L4, paste0(levs[afterR3j], ".max")] * 0.7) > dat$scp[L3L4, paste0(levs[beforeR3j], ".max")] 
-        L3 <- L3L4[l3Logic]
-
-        l4Logic <-  (dat$scp[L3L4, paste0(levs[afterR3j], ".max")] * 0.7) <= dat$scp[L3L4, paste0(levs[beforeR3j], ".max")]
-        L4 <- L3L4[l4Logic]
-
-        largeCells <- c(largeCells, list(L3 = L3, L4 = L4))
-
-        if(gfpLogic){
-            # L5   
-            l5Logic <-  (dat$scp[neurons, paste0(levs[afterR3j], ".max")] * 0.7) > dat$scp[neurons, paste0(levs[beforeR3j], ".max")] &
-                        dat$bin[neurons, "gfp.bin"] == 1 &
-                        dat$bin[neurons, aitcName] != 1 &
-                        dat$bin[neurons, menthName] != 1 &
-                        dat$bin[neurons, capsName] != 1
-            L5 <- neurons[l5Logic]
-
-            # L6
-            l6Logic <-  (dat$scp[neurons, paste0(levs[afterR3j], ".max")] * 0.7) <= dat$scp[neurons, paste0(levs[beforeR3j], ".max")] &
-                        dat$bin[neurons, "gfp.bin"] == 1 &
-                        dat$bin[neurons, aitcName] != 1 &
-                        dat$bin[neurons, menthName] != 1 &
-                        dat$bin[neurons, capsName] != 1
-            L6 <- neurons[l6Logic]
-            
-            largeCells <- c(largeCells, list(L5 = L5, L6 = L6, L5.split = NA, L6.split = NA))
+                UL.g <- neurons[uLgLogic]
+                largeCells <- c(largeCells, list(UL.g = UL.g))
+            }
         }
     }else{
-        uLLogic <- dat$c.dat[neurons, "area"] > 300 &
-                dat$bin[neurons, "gfp.bin"] != 1 &
-                dat$bin[neurons, "cy5.bin"] != 1 &
-                #dat$c.dat[neurons, 'area'] > 400 &
-                dat$bin[neurons, aitcName] != 1 &
-                dat$bin[neurons, menthName] != 1 &
-                dat$bin[neurons, capsName] != 1
-        UL <- neurons[uLLogic]
-        largeCells <- list(UL = UL)
-        if(gfpLogic){
-            uLgLogic <- dat$c.dat[neurons, "area"] > 300 &
-                dat$bin[neurons, "gfp.bin"] == 1 &
-                dat$bin[neurons, "cy5.bin"] != 1 &
-                #dat$c.dat[neurons, 'area'] > 400 &
-                dat$bin[neurons, aitcName] != 1 &
-                dat$bin[neurons, menthName] != 1 &
-                dat$bin[neurons, capsName] != 1
-
-            UL.g <- neurons[uLgLogic]
-            largeCells <- c(largeCells, list(UL.g = UL.g))
-        }
+        largeNames <- grep("^L", names(dat$cell_types), value = T)
+        largeCells <- dat$cell_types[largeNames]
     }
+
     cell_types <- c(largeCells, cell_types)
 
     # UC
@@ -711,9 +728,12 @@ Cell_Typer_3 <- function(dat, UL_classify = T){
     UC <- setdiff(neurons, assignedCellTypes)
 
     cell_types <- c(cell_types, list(UC = UC))
+    cell_types <- lapply(cell_types, function(x){x = x[!is.na(x)]; return(x)})
     dat$cell_types <- cell_types
 
-    # Power through the R13 to correct the score to N14
+    # Send the R13 and N14 through the neural networks to get the correct class
+    selectCT <- c("R13", "N14")
+    toReClassify <- Reduce(union, cell_types[selectCT])
     if( !("cellTypeModel" %in% names(dat)) ){
         # Correct my models to improve things a bit
         dat <- cell_type_modeler(dat)
@@ -730,8 +750,6 @@ Cell_Typer_3 <- function(dat, UL_classify = T){
     }
 
     # Correct the cell type
-    selectCT <- c("R13", "N14")
-    toReClassify <- Reduce(union, cell_types[selectCT])
     correctedCT <- sapply(dat$cellTypeModel[toReClassify], function(x){
         rowSums <- apply(x[selectCT], 2, sum)
         rowMaxLogic <- rowSums == max(rowSums)

@@ -6,16 +6,16 @@
 can collect all cells. Where ImageExtractor struggles with cells near the border by simply ignoring them
 this function pads these images with zeros in these regions.}
 \usage{
-imageExtractorAll(dat, range = 20, image = "img3", channel = 1)
+imageExtractorAll(dat, image = "img3", channel = 1, range = 20)
 }
 \arguments{
 \item{dat}{RD.experiment}
 
-\item{range}{is the side in all directions from center to define your view}
-
 \item{image}{is the character name of the image within your list}
 
 \item{channel}{is the rgb channel of your image to extrace}
+
+\item{range}{is the side in all directions from center to define your view}
 }
 \description{
 Function to gather images used inside cell_type_modeler. Unlike imageExtractor, this function
