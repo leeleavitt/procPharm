@@ -163,33 +163,35 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat", info=T,lmain=NULL, bcex=.7, yvar=
     )
 
     #Adding binary scoring for labeling to plot
-    par(xpd=TRUE)
-    binLabs <- c(
-        "gfp.bin",      "GFP",
-        "tritc.bin",    "IB4",
-        "cy5.bin",      "IB4",
-        "drop",         "Drop"
-    )
-    dim(binLabs) <- c(2, length(binLabs)/2)
-    binLabs <- t(binLabs)
+    tryCatch({
+        par(xpd=TRUE)
+        binLabs <- c(
+            "gfp.bin",      "GFP",
+            "tritc.bin",    "IB4",
+            "cy5.bin",      "IB4",
+            "drop",         "Drop"
+        )
+        dim(binLabs) <- c(2, length(binLabs)/2)
+        binLabs <- t(binLabs)
 
-    binLabsToAdd <- c()
-    for(i in 1:dim(binLabs)[1]){
-        if( !is.null(dat$bin[cell, binLabs[i,1] ]) ){
-            toAdd <- paste0(binLabs[i,2],": ", dat$bin[cell, binLabs[i,1] ])
-            binLabsToAdd <- c(binLabsToAdd, toAdd)
+        binLabsToAdd <- c()
+        for(i in 1:dim(binLabs)[1]){
+            if( !is.null(dat$bin[cell, binLabs[i,1] ]) ){
+                toAdd <- paste0(binLabs[i,2],": ", dat$bin[cell, binLabs[i,1] ])
+                binLabsToAdd <- c(binLabsToAdd, toAdd)
+            }
         }
-    }
 
-    legend(
-        x=par("usr")[2]+xinch(1.8), 
-        y=par("usr")[4]+yinch(.5), 
-        xpd=TRUE, 
-        inset=c(0,-.14), 
-        bty="n", 
-        cex=.7, 
-        legend=binLabsToAdd
-    )
+        legend(
+            x=par("usr")[2]+xinch(1.8), 
+            y=par("usr")[4]+yinch(.5), 
+            xpd=TRUE, 
+            inset=c(0,-.14), 
+            bty="n", 
+            cex=.7, 
+            legend=binLabsToAdd
+        )
+    }, error = function(e) NULL)
 
     # Tool for lableing window region information
     levs.loc <- tapply(dat$w.dat[,"Time"], as.factor(wr), mean)[levs]

@@ -199,7 +199,13 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     if(is.null(sft)){sft<-7}
     
     tryCatch(windows(width=14,height=4,xpos=0, ypos=50), error=function(e) windows(width=14,height=4))
-    click.window<-dev.cur()
+    click.window <- dev.cur()
+
+    if("cellTypeModel" %in% names(dat)){
+        tryCatch(windows(width=11, height=4, xpos=0, ypos=480), error=function(e) windows(width=11,height=4))
+        model.window <- dev.cur()
+    }
+
     
     # tryCatch(windows(width=10,height=6,xpos=0, ypos=450), error=function(e) windows(width=14,height=4))
     # lines.window<-dev.cur()
@@ -303,7 +309,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     # selected images
     if( ! "SETTINGS" %in% names(dat)){
         SETTINGS <- list()
-        SETTINGS$levs <- levs
+        SETTINGS$levs <- setdiff(levs,'epad')
         SETTINGS$l.img <- l.img
         SETTINGS$img <- img
         SETTINGS$underline <- underline
@@ -326,9 +332,14 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         cell.pick <- cnames[cell.i]
         
         dev.set(which=click.window)
-        p1 <- PeakFunc7(dat,cell.pick, t.type=SETTINGS$t.type, yvar=yvar, info=info, bcex=bcex, pts=pts, lns=lns, levs=SETTINGS$levs, underline=SETTINGS$underline, dat.n=dat.name, zf=zf)
-        p1.par<-par()
-        
+        p1 <- PeakFunc7(dat, cell.pick, t.type=SETTINGS$t.type, yvar=yvar, info=info, bcex=bcex, pts=pts, lns=lns, levs=SETTINGS$levs, underline=SETTINGS$underline, dat.n=dat.name, zf=zf)
+        p1.par <- par()
+            
+        if("cellTypeModel" %in% names(dat)){
+            dev.set(which = model.window)
+            modelViewer(dat, cell.pick, F)
+        }
+
         ##LinesEvery
         if(lines.flag == 1){
             if(length(p.names) < 500){
@@ -1055,7 +1066,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 
         #F7: Load cell Types into the groups to pick with 'P'
         if(keyPressed=='F7')  {
-           cellTypeId <- grep('^cell',names(dat), value=T)
+           cellTypeId <- grep('^cell([_]|[.])types$',names(dat), value=T)
             if(length(cellTypeId)>0){
 				if(length(cellTypeId)>1){
 					tryCatch(bringToTop(-1), error=function(e)NULL)
@@ -1065,7 +1076,6 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 tryCatch(bringToTop(-1), error=function(e)NULL)             
                 cat("\nI have filled in your cell_types to choose by pressing \'P\' ENJOY!\n")
                 flush.console()
-                Sys.sleep(0.5)
                 gt.names <- list()
                 for(i in 1:length(dat[[cellTypeId]])){
                     #Fill in the gt.names with each cell type

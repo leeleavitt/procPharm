@@ -165,7 +165,7 @@ imageExtractor <- function(dat, image = 'img3', channel = 1, range = 20){
 #' @param channel is the rgb channel of your image to extrace
 #' @export
 
-imageExtractorAll <- function(dat, range = 20, image = 'img3', channel = 1){
+imageExtractorAll <- function(dat, image = 'img3', channel = 1, range = 20){
     slice <- (range * 2) + 1
     mainImageArray <- array(dim = c(0, slice, slice, length(channel)))
     # Gather the center x and y data
@@ -223,9 +223,14 @@ imageExtractorAll <- function(dat, range = 20, image = 'img3', channel = 1){
 
         subImageArray[j, , , ] <- tmpArray[,,channel]
     }
+
     mainImageArray <- abind::abind(mainImageArray, subImageArray, along = 1)
 
-    return(mainImageArray)
+    image <- list()
+    image[['imageArray']] <- mainImageArray
+    image[['cellNames']] <- dat$c.dat$id
+
+    return(image)
 }
 
 #' Function to create the cy5.bin and the gfp.bin collumns in the binary
@@ -233,12 +238,12 @@ imageExtractorAll <- function(dat, range = 20, image = 'img3', channel = 1){
 #' @export 
 imageProbMaker <- function(dat, verbose = T){
     if(verbose){
-        cat("\nThis function scores the cy5,gfp, and drops\nMake sure that:\nimg3: cy5 only\nimg4: gfp only\nimg8: dapi.lab.png")
+        cat("\nThis function scores the cy5,gfp, and drops\nMake sure that:\nimg3: cy5 only\nimg4: gfp only\nimg8: dapi.lab.png\n")
     }
     # Load in the data
-    tryCatch({
+    #tryCatch({
         pyPharm <- reticulate::import('python_pharmer')
-        image <- imageExtractor(dat, 'img3', 1)
+        image <- imageExtractorAll(dat, 'img3', 1)
         # grab correct model
         model <- pyPharm$modelLoader('cy5')
         # predict classes
@@ -254,11 +259,10 @@ imageProbMaker <- function(dat, verbose = T){
         predictedClassProbsDF[image$cellNames,] <- predictedClassProbs
 
         dat[['probs']][['cy5']] <- predictedClassProbsDF
-    },
-    error=function(e) print("Could not score IB4, you are most likely missing image 3"))
+    #}, error=function(e) print("Could not score IB4, you are most likely missing image 3"))
 
     tryCatch({
-        image <- imageExtractor(dat, 'img4', 2)
+        image <- imageExtractorAll(dat, 'img4', 2)
         # grab correct model
         model <- pyPharm$modelLoader('gfp')
         # predict classes
@@ -277,7 +281,7 @@ imageProbMaker <- function(dat, verbose = T){
     }, error=function(e)print("Could not score GFP, you are most likely missing image 4"))
 
     tryCatch({
-        image <- imageExtractor(dat, 'img8', c(1,2,3))
+        image <- imageExtractorAll(dat, 'img8', c(1,2,3))
         # grab correct model
         model <- pyPharm$modelLoader('drop')
         # predict classes
@@ -455,15 +459,15 @@ cell_type_modeler <- function(dat){
     pyPharm <- reticulate::import("python_pharmer")
     # R12 is very dirty lots of N15 reassignment
     # R13 vs N14 is very dirty, so I am going to try and clean it up using neuralNets
-    aitcModel <- "G:/My Drive/cellTypePredictor/marioModels/models/aitc.h5"
-    menthModel <- "G:/My Drive/cellTypePredictor/marioModels/models/menth.h5"
-    capsModel <- "G:/My Drive/cellTypePredictor/marioModels/models/caps.h5"
-    k40Model <- "G:/My Drive/cellTypePredictor/marioModels/models/k40.h5"
-    r3jModel <- "G:/My Drive/cellTypePredictor/marioModels/models/r3j.h5"
+    aitcModel <- "Y:/Computer Setup/R/models/aitc.h5"
+    menthModel <- "Y:/Computer Setup/R/models/menth.h5"
+    capsModel <- "Y:/Computer Setup/R/models/caps.h5"
+    k40Model <- "Y:/Computer Setup/R/models/k40.h5"
+    r3jModel <- "Y:/Computer Setup/R/models/r3j.h5"
 
     # ImageModels
-    ib4Model <- "G:/My Drive/cellTypePredictor/marioModels/models/ib4.h5"
-    gfpModel <- "G:/My Drive/cellTypePredictor/marioModels/models/gfp.h5"
+    ib4Model <- "Y:/Computer Setup/R/models/ib4.h5"
+    gfpModel <- "Y:/Computer Setup/R/models/gfp.h5"
 
     models <- c(aitcModel, menthModel, capsModel, k40Model, r3jModel, ib4Model, gfpModel)
 
@@ -509,14 +513,14 @@ cell_type_modeler <- function(dat){
     # Ib4
     i = 6
     model <- invisible(keras::load_model_hdf5(models[i]))
-    image <- imageExtractorAll(dat, range = 20, 'img3', c(1))
+    image <- imageExtractorAll(dat, 'img3', c(1))[[1]]
     predictedClasses[[ modelNames[i] ]] <- model$predict(image)
     row.names(predictedClasses[[ modelNames[i] ]]) <- rowNames
 
     # GFP
     i = 7
     model <- invisible(keras::load_model_hdf5(models[i]))
-    image <- imageExtractorAll(dat, range = 20, 'img4', c(2))
+    image <- imageExtractorAll(dat, 'img4', c(2))[[1]]
     predictedClasses[[ modelNames[i] ]] <- model$predict(image)
     row.names(predictedClasses[[ modelNames[i] ]]) <- rowNames
 
@@ -541,11 +545,15 @@ cell_type_modeler <- function(dat){
         modelFrames[[ dat$c.dat$id[i] ]] <- modelFrame
     }
 
-    dat$cell_type_model <- modelFrames
+    dat$cellTypeModel <- modelFrames
+    
+    # Add the kurtosis to the experiment
+    kurtosis(apply(dat$cellTypeModel[[1]], 2, sum))
+    kurtosisinfo <- lapply(dat$cellTypeModel, function(x){kurtosis(apply(x,2,sum))})
+    dat$scp['cell_type_kurtosis'] <- Reduce(c,kurtosisinfo)
 
     return(dat)
 }
-
 
 #' Add the original cell types to the RD.experiment
 #' This fucntion will look for double classified cells and return 
@@ -564,8 +572,10 @@ cellTypeAdder <- function(dat){
 
     dat$c.dat['cell_types'] <- NA
     for(i in 1:length(dat[[cell_type_id]][selectedCT])){
-        cell_types[dat[[cell_type_id]][selectedCT][[i]], names(dat[[cell_type_id]][selectedCT])[i]] <- 1
-        dat$c.dat[dat[[cell_type_id]][selectedCT][[i]], 'cell_types'] <- names(dat[[cell_type_id]][selectedCT])[i]
+        tryCatch({
+            cell_types[ dat[[cell_type_id]][[ selectedCT[i] ]], names(dat[[cell_type_id]][selectedCT])[i] ] <- 1
+            dat$c.dat[dat[[cell_type_id]][selectedCT][[i]], 'cell_types'] <- names(dat[[cell_type_id]][selectedCT])[i]
+        }, error = function(e) NULL)
     }
 
     # How many cells are double classified?
@@ -609,4 +619,74 @@ kurtosis <- function(x, na.rm = FALSE, type = 3){
     }
 
     return(y)
+}
+
+#' Function to view the cell type models. Pretty good vis
+modelViewer <- function(dat, cell, plot.new = T){
+    cellTypes <- c('L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'G7', 'G8', 'G9', 'G10', 'R11', 'R12', 'R13', 'N14', 'N15', 'N16', 'UC')
+    cols <- RColorBrewer::brewer.pal(n = dim(dat$cellTypeModel[[1]])[1], 'Dark2')
+    if(plot.new){
+        dev.new(width = 8, height = 3)
+    }
+    par(mar=c(5,4,4,5))
+    kurtStat <- round(tmpRD$scp[cell,"cell_type_kurtosis"], digits = 3)
+    
+    ctName <- ifelse(is.na(dat$c.dat[cell,'cell_types']), "Not classified", dat$c.dat[cell,'cell_types'])
+
+    bpDims <- barplot(
+        as.matrix(dat$cellTypeModel[[ cell ]]), 
+        beside = F, 
+        col = cols,
+        ylim = c(0,10),
+        xaxt = 'n',
+        border = NA,
+    )
+    
+    mainName <- paste(ctName, " : ", kurtStat)
+    text(
+        par('usr')[1] - xinch(.5),
+        par('usr')[4] + yinch(.5),
+        "Cell Name : Certainty",
+        cex = 1.5, 
+        font =2, adj = 0
+    )
+
+    tryCatch({
+        text(
+            par('usr')[1] - xinch(.5),
+            par('usr')[4] + yinch(.25),
+            mainName,
+            cex = 1, 
+            font =2, 
+            adj = 0
+        )
+    })
+
+    legend(par('usr')[2] + xinch(0),
+        par('usr')[4] + yinch(0.1),
+        legend = row.names(dat$cellTypeModel[[1]]),
+        fill = cols,
+        horiz = F,
+        bty='n',
+        border = NA)
+
+    par(xpd=T)
+    text(
+        apply(as.matrix(bpDims), 1, mean),
+        par('usr')[3] -yinch(.2),
+        colnames(dat$cellTypeModel[[1]]),
+        col = ifelse(dat$c.dat[cell,'cell_types'] == cellTypes, 'red', 'black'),
+        font = ifelse(dat$c.dat[cell,'cell_types'] == cellTypes, 2, 1),
+        cex = ifelse(dat$c.dat[cell,'cell_types'] == cellTypes, 1.5, 1)
+        )
+    
+    text(
+        par('usr')[1] - xinch(.5),
+        par('usr')[3] - yinch(.65),
+        "Mario: Neuralnetworks",
+        cex = .5,
+        adj = 0
+    )
+)
+
 }
