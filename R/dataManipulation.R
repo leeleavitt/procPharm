@@ -426,6 +426,10 @@ gif_png_maker<-function(dense=200,fps=2,file.name=NULL){
 }
 
 #' Funciton to save the work along with create a unique savehistory
+#' This function can now take a tmp.rd tmpRD or tmp as input. From there the
+#' function looks for a RD.experiemnt in the global environemnt. If it finds 
+#' one, it will save the RD.experiment as RD.experiment not tmp
+#' If more than one RD.exepriment are in the work space it will stop and not save
 #' @export
 saveRD <- function(dat){
     cat("\nDO NOT CLOSE UNTIL I SAY YOU CAN!\nWait for the sound...")
@@ -445,6 +449,14 @@ saveRD <- function(dat){
 
     #Exp Saver
     expName <- deparse(substitute(dat))
+    
+    if(any(expName %in% c("tmp.rd", "tmpRD","tmp"))){
+        expName <- ls(pattern = "^RD[.]", envir = .GlobalEnv)
+        if(length(expName) > 1){
+            stop("There are to many RD.experiments open")
+        }
+    }
+
     #expToSave <- get(expName, envir = .GlobalEnv)
     assign(expName, dat)
     save(list=expName, file=paste0(expName,".Rdata") )
