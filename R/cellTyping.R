@@ -773,9 +773,9 @@ Cell_Typer_3 <- function(dat){
     for(i in 1:length(cell_types)){
         print(
             paste( 
-                names(tmp_rd$cell_types)[i],
+                names(dat$cell_types)[i],
                 "=",
-                length( tmp_rd$cell_types[[i]] ) 
+                length( dat$cell_types[[i]] ) 
             )
         )
     }
