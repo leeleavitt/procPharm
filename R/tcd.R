@@ -489,24 +489,22 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             #need to see if the dat has a cell_types
             cellToReassign <- cnames[cell.i]
             cat('\nReassigning cell', cellToReassign,'\n')
-            #cellTypeId <- grep('^cell',names(dat), value=T)
+            cellTypeId <- grep('cell_types',names(dat), value=T)
             if(length(cellTypeId) > 0){
                 #get only cell types that we want to reassign
                 cellTypeNames <- names(dat[[cellTypeId]])
-                cellTypesToNotClean <- c('neurons')
-                cellTypesToClean <- setdiff(cellTypeNames, cellTypesToNotClean)
+                toAssignTo <- c("L1", "L2", "L3", "L4", "L5", "L6", "G7", "G8", "G9", "G10", "R11", "R12","R13", "N14", "N15", "N16", "UC")
+                cellTypesToClean <- c(intersect(cellTypeNames, toAssignTo), "glia")
                 
-                #remove it from all groups
-                dat[[cellTypeId]][cellTypesToClean] <- lapply(dat[[cellTypeId]][cellTypesToClean], function(X) setdiff(X,cellToReassign))
+                #remove it from all groups except neurons
+                dat[[cellTypeId]][setdiff(cellTypeNames, 'neurons')] <- lapply(dat[[cellTypeId]][setdiff(cellTypeNames, 'neurons')], function(x) setdiff(x,cellToReassign))
                 
                 ###now that we have indicated that we would like to place this cell into a new group
                 #First lets find all groups we can assign to\
                 tryCatch(bringToTop(-1), error=function(e)NULL)
                 cat('\nWhich cell class does this actually belong to?\n')
                 correctCellClass <- cellTypesToClean[menu(cellTypesToClean)]
-                print(dat[[cellTypeId]][[correctCellClass]])
                 dat[[cellTypeId]][[correctCellClass]] <- union(dat[[cellTypeId]][[correctCellClass]], cellToReassign)
-                print(dat[[cellTypeId]][correctCellClass])
                 assign(dat.name, dat, envir=.GlobalEnv)
             }else{
                 cat('\nSorry You haven\'t defined cell types yet. Please do this first!\n')
@@ -815,7 +813,9 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
 				print(drops)
                 dat[[cellTypeId]] <- lapply(dat[[cellTypeId]], function(X) setdiff(X,drops))
                 assign(dat.name,dat, envir=.GlobalEnv)
-            }else{assign(dat.name,dat, envir=.GlobalEnv)}
+            }else{
+                assign(dat.name,dat, envir=.GlobalEnv)
+            }
         }
         
         #X: undrop cell

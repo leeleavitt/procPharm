@@ -524,19 +524,19 @@ Cell_Typer_3 <- function(dat){
     
     allCells <- dat$c.dat$id
     # find the windowNames
-    menthName <- grep("^[mM][eE][nN][tT]", names(dat$bin), value = T)
-    aitcName <- grep("^[aA][iI][tT][cC]", names(dat$bin), value = T)
-    capsName <- grep("^[cC][aA][pP][sS]", names(dat$bin), value = T)
-    k40Name <- grep("[kK].*40", names(dat$bin), value = T)
+    menthName <- grep("^[mM][eE][nN][tT]", names(dat$bin), value = T)[1]
+    aitcName <- grep("^[aA][iI][tT][cC]", names(dat$bin), value = T)[1]
+    capsName <- grep("^[cC][aA][pP][sS]", names(dat$bin), value = T)[1]
+    k40Name <- grep("[kK].*40", names(dat$bin), value = T)[1]
 
     # Define drops
     dropLogic <- dat$bin$drop == 1
     drops <- allCells[dropLogic]
 
     # First define neurons 
-    resps <- c("^[aA][iI][tT][cC]", "^[cC][aA][pP][sS]", "[kK].*40")
-    neuronResps <- sapply(resps, function(x) grep(x,names(dat$bin), value  = T))
-    neuronLogic <- apply(dat$bin[,neuronResps] == 1, 1, any)
+    resps <- c(aitcName, capsName, k40Name)
+    #neuronResps <- sapply(resps, function(x) grep(x,names(dat$bin), value  = T))
+    neuronLogic <- apply(dat$bin[,resps] == 1, 1, any)
     neurons <- allCells[neuronLogic]
     neurons <- setdiff(neurons, drops)
 
@@ -655,11 +655,12 @@ Cell_Typer_3 <- function(dat){
                         dat$bin[neurons, menthName] != 1 &
                         dat$bin[neurons, capsName] != 1
             UL <- neurons[uLLogic]
+            UL <- UL[!is.na(UL)]
             largeCells <- tcd(dat, UL, save_question = F)[1:2]
             names(largeCells) <- c("L1", "L2")
 
             levs <- unique(dat$w.dat$wr1)
-            r3jLocation <- grep('[rR](3|[I]{3})[jJ]', levs)
+            r3jLocation <- grep('[rR](3|[I]{3})[jJ].*[mM]$', levs)[1]
             beforeR3j <- r3jLocation - 1
             afterR3j <- r3jLocation + 1
 
@@ -767,6 +768,18 @@ Cell_Typer_3 <- function(dat){
     cell_types <- c(list(neurons = neurons, glia = setdiff(allCells, neurons)), cell_types)
     dat$cell_types <- cell_types
     dat <- cellTypeAdder(dat)
+    
+    # Print the cell types at the end
+    for(i in 1:length(cell_types)){
+        print(
+            paste( 
+                names(tmp_rd$cell_types)[i],
+                "=",
+                length( tmp_rd$cell_types[[i]] ) 
+            )
+        )
+    }
+
     return(dat)
 }
 

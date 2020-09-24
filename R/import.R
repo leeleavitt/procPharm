@@ -745,7 +745,7 @@ WindowRepair <- function(dat, rescore = F){
         # Since this is the csv we need to move the window back ten seconds
         wr['at'] <- wr['at'] - (10/60)
 
-        dat$w.dat <- MakeWr(t.dat,wr)
+        dat$w.dat <- MakeWr(dat$t.dat, wr)
     }
 
     dat <- TraceBrewer(dat, F, F)
@@ -842,7 +842,7 @@ WindowRepair <- function(dat, rescore = F){
         }
     }
 
-
+    dat$SETTINGS <- NULL
     return(dat)
 }
 

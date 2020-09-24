@@ -15,32 +15,67 @@ col_binner<-function(dat,cells){
 #' LEVS, IS AN OPTIONAL ARGUEMENT, IF LEFT BLACK THE FUNCTION WILL LOOK IN THE BIN DATA.FRAME COLLUMN ANMES
 #' TO ALLOW TO MANUALLY SECT THE COLLUMNS YOU WANT TO COMBINE
 #' @export
-combinner<-function(dat, levs=NULL, bin_it=T){     
+combinner<-function(dat, levs=NA, bin_it=T){     
     tmp<-dat$bin
-    if(is.null(levs)){
+    if(is.na(levs)){
         levs<-select.list(names(dat$bin), multiple=T)
-    }else{}
-    
-    newcolnames<-paste(levs,collapse="___")
-    pf<-apply(tmp[,levs],1,paste, collapse="")
-    pf.sum<-summary(as.factor(pf), maxsum=1500)
-    pf.sum<-pf.sum[order(pf.sum, decreasing=T)]
-    pf.ord<-pf.sum
-    pf.ord[]<-seq(1,length(pf.sum))
-    
-    dat$scp[newcolnames]<-as.factor(pf)
-    
-    dat$bin<-tmp
-    cat("We have added this barcode to the scp dataframes","\n")
-    cat(newcolnames,"\n")
-    cat(sort(summary(dat$scp[newcolnames], maxsum=1500), T), sep="\n" )
-
-    if(bin_it){
-        dat <- pf_summary(dat,,ncol(dat$scp))
     }
+    
+    pf <- apply(tmp[,levs], 1, paste, collapse="")
+    pf.sum <- sort(summary(as.factor(pf), maxsum=1500), TRUE)
+    
+    # Now name the pf.sum correctly
+    origNames <- names(pf.sum)
+    
+    pf.sumNewName <- sapply(names(pf.sum), function(x){
+        nameLogic <- as.logical(as.numeric(strsplit(x, split="")[[1]]))
+        x <- paste(levs[nameLogic], collapse = "__")
+        if(x == ""){x <- "NULL"}
+        return(x)
+    })
+
+    names(pf.sum) <- pf.sumNewName
+
+    # Add it to the bin dataFrame
+    for(i in 1:length(origNames)){
+        logic <- pf == origNames[i]
+        dat$bin[pf.sumNewName[i]] <- 0
+        dat$bin[names(pf[logic]), pf.sumNewName[i]] <- 1
+    }
+
+    cat(paste(names(pf.sum), ":\n ", pf.sum), sep="\n" )
+    
+    dev.new(width = 10, height = 8)
+    par(mar=c(15,4,4,2))
+    bpDim <- barplot(
+        pf.sum,
+        border = NA,
+        xaxt = "n"
+    )
+    
+    par(xpd=T)
+    text(
+        bpDim,
+        par('usr')[1] - xinch(.3),
+        names(pf.sum),
+        srt = 60,
+        adj = 1,
+        cex = .8
+    )
+
+    text(
+        bpDim,
+        pf.sum + yinch(.2),
+        pf.sum,
+        srt = 60,
+        adj = 0,
+        cex = .8
+    )
+
 
     return(dat)
 }
+#tmpRD <- combinner(RD.200915.153.m.m3.e1.Lung)
 
 #' Create Binary Classes of cells
 #' @export
