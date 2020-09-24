@@ -831,7 +831,7 @@ WindowRepair <- function(dat, rescore = F){
         
         alarm()
         
-        sel <- c('1: yes', '2: no')
+        sel <- c('yes', 'no')
         sel <- sel[menu(sel)]
 
         if(sel == 'yes'){

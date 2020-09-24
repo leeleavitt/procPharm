@@ -63,7 +63,7 @@ traceProbMaker <- function(dat, minute = TRUE, pulsesToScore = NA){
     
     for( i in 1:length(pulsesWithNN)){        
         # Make sure the pulse exists
-        window <- grep(pulsesWithNN[i], unique(dat$w.dat$wr1), value=T)
+        window <- grep(pulsesWithNN[i], unique(dat$w.dat$wr1), value=T)[1]
         pulseWindow <- dat$w.dat[dat$w.dat$wr1 == window,]
         
         if(dim(pulseWindow)[1] > 0){
@@ -560,7 +560,7 @@ cell_type_modeler <- function(dat){
 #' what is double classified
 #' @export
 cellTypeAdder <- function(dat){
-    cell_type_id <- grep("^cell",names(dat),value = T )[1]
+    cell_type_id <- grep("^cell([_]|[.])types$",names(dat),value = T )[1]
 
     #selectedCT <- select.list(names(dat$cell_types), multiple = T)
     selectedCT <- c('L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'G7', 'G8', 'G9', 'G10', 'R11', 'R12', 'R13', 'N14', 'N15', 'N16', 'UC')

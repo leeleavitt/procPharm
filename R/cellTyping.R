@@ -20,7 +20,7 @@ cell.ti<-function(dat, x.names, img=NA){
 #' @export
 census.brewer<-function(dat){
 
-    cellTypesOptions <- grep('^cell', names(dat), value=TRUE)
+    cellTypesOptions <- grep('^cell([_]|[.])types$', names(dat), value=TRUE)
     if(length(cellTypesOptions) > 1){
         correctCellTypesName <- select.list(cellTypesOptions, title='Select the correct Cell Types')
     }else{
@@ -47,8 +47,7 @@ census.brewer<-function(dat){
     print(selected.cell.groups)
     census<-list()
 
-    for(i in 1:length(selected.cell.groups))
-    {
+    for(i in 1:length(selected.cell.groups)){
         print(selected.cell.groups[i])
         
         if(length(cell.types[[selected.cell.groups[i]]])>1){
@@ -65,7 +64,7 @@ census.brewer<-function(dat){
 
     dat$census<-census
 
-    dat <- census_to_table(dat)        
+    dat <- census_to_table(dat)
     return(dat)
 }
 
@@ -779,6 +778,8 @@ Cell_Typer_3 <- function(dat){
             )
         )
     }
+
+    dat$cell_types <- lapply(dat$cell_types, function(x) {setdiff(x,drops)})
 
     return(dat)
 }

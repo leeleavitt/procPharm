@@ -296,7 +296,7 @@ TableBrewer<-function(dat, ct.names=NULL, save=T, xlsx=F){
 
     if(is.null(ct.names)){
         #F7: Load cell Types into the groups to pick with 'P'
-        cellTypeId <- grep('^cell', names(dat), value=T)
+        cellTypeId <- grep('^cell([_]|[.])types$', names(dat), value=T)
         if(length(cellTypeId)>0){
 			if(length(cellTypeId)>1){
 				tryCatch(bringToTop(-1), error=function(e)NULL)
@@ -453,7 +453,7 @@ saveRD <- function(dat){
     if(any(expName %in% c("tmp.rd", "tmpRD","tmp"))){
         expName <- ls(pattern = "^RD[.]", envir = .GlobalEnv)
         if(length(expName) > 1){
-            stop("There are to many RD.experiments open")
+            stop("There are too many RD.experiments open")
         }
     }
 
@@ -476,7 +476,7 @@ census_viewer <- function(dat){
     "
     )
 
-	(cell_list_name <- grep("^cell", names(dat), value=T))
+	(cell_list_name <- grep("^cell([_]|[.])types$", names(dat), value=T))[1]
 	(cell_types <- names( dat[[ cell_list_name ]] ))
 	(cell_type_name <- select.list( cell_types, title="Select the cell_type" ))
 	

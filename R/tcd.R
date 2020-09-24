@@ -100,7 +100,15 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     graphics.off()
     print(environment())
     if(is.null(dat.name)){
-        dat.name<-deparse(substitute(dat))
+        dat.name <- deparse(substitute(dat))
+        
+        if(any(dat.name %in% c("tmp.rd", "tmpRD","tmp"))){
+            dat.name <- ls(pattern = "^RD[.]", envir = .GlobalEnv)
+        if(length(dat.name) > 1){
+            dat.name <- deparse(substitute(dat))
+        }
+    }
+
     }else{
         dat.name<-dat.name
     }
@@ -802,16 +810,13 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         
         #x: Drop cell
         if(keyPressed=="x"){
-            print(cnames[cell.i])
             dat$bin[cnames[cell.i], "drop"]<-1
-            print(dat$bin[cnames[cell.i], "drop"])
-            print(paste("You Dropped Cell",cnames[cell.i]))
+            cat("You Dropped Cell ",cnames[cell.i],"\n")
             # now that you have dropped a cell, this need to be removed from
             # cell types
-            cellTypeId <- grep('^cell',names(dat), value=T)
+            cellTypeId <- grep('^cell([_]|[.])types$', names(dat), value=T)
             if(length(cellTypeId) > 0){
-                drops <- row.names(dat$bin[dat$bin$drop==1,])
-				print(drops)
+                drops <- dat$c.dat$id[dat$bin$drop==1]
                 dat[[cellTypeId]] <- lapply(dat[[cellTypeId]], function(X) setdiff(X,drops))
                 assign(dat.name,dat, envir=.GlobalEnv)
             }else{
@@ -822,7 +827,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         #X: undrop cell
         if(keyPressed=="X"){
             print(cnames[cell.i])
-            dat$bin[cnames[cell.i], "drop"]<-0
+            dat$bin[cnames[cell.i], "drop"] <- 0
             print(dat$bin[cnames[cell.i], "drop"])
             print(paste("You Dropped Cell",cnames[cell.i]))
         }
