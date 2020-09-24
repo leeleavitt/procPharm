@@ -7,7 +7,7 @@ dat IS THE rd. INPUT
 LEVS, IS AN OPTIONAL ARGUEMENT, IF LEFT BLACK THE FUNCTION WILL LOOK IN THE BIN DATA.FRAME COLLUMN ANMES
 TO ALLOW TO MANUALLY SECT THE COLLUMNS YOU WANT TO COMBINE}
 \usage{
-combinner(dat, levs = NULL, bin_it = T)
+combinner(dat, levs = NA, bin_it = T)
 }
 \description{
 Create Binary Classes of cells

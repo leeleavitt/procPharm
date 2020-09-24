@@ -399,8 +399,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         if(window.flag == 1){
             tryCatch(dev.off(which=view.window), error=function(e)NULL)
             tryCatch({
-                dimx<-dim(SETTINGS$img)[2]
-                dimy<-dim(SETTINGS$img)[1]
+                dimx<-dim(dat[[SETTINGS$img]])[2]
+                dimy<-dim(dat[[SETTINGS$img]])[1]
                 haight<-10*dimy/dimx
                 tryCatch(windows(width=haight*dimx/dimy, height=haight, xpos=1130, ypos=200), error=function(e) windows(width=haight*dimx/dimy, height=haight))
             }, error = function(e) NULL)
@@ -414,7 +414,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
             tryCatch({
                 cell.view(dat,
                     cell=p.names, 
-                    img=SETTINGS$img,
+                    img=dat[[SETTINGS$img]],
                     cols="Yellow",
                     plot.new=F,
                     cell.name=T, 
@@ -428,7 +428,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                     multi.pic.zoom(
                         dat,
                         p.names,
-                        SETTINGS$img, 
+                        dat[[SETTINGS$img]], 
                         plot.new=F, 
                         zf=zf, 
                         labs=F)
@@ -606,7 +606,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
         
         #I: image for Multiview
         if(keyPressed=="I"){
-            SETTINGS$img <- dat[[image.selector(dat, multi=F)]]
+            #SETTINGS$img <- dat[[image.selector(dat, multi=F)]]
+            SETTINGS$img <- image.selector(dat, multi=F)
             #lines.flag<-1
             window.flag<-1
         }
