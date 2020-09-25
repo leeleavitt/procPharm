@@ -652,9 +652,9 @@ docx.wr1.importer<-function(file.name='wr1.docx'){
         If you would like to make anymore changes do so now
         ")
         
-        wr1<-read_docx(file.name)
+        wr1<-docxtractr::read_docx(file.name)
         #Extract each table
-        wr1<-docx_extract_all_tbls(wr1, guess_header=F)
+        wr1<-docxtractr::docx_extract_all_tbls(wr1, guess_header=F)
         #out table is the third one
         wr1<-Reduce(c,wr1[[length(wr1)]])
         #split up each vaue based on a single space
@@ -748,7 +748,11 @@ WindowRepair <- function(dat, rescore = F){
         dat$w.dat <- MakeWr(dat$t.dat, wr)
     }
 
-    dat <- TraceBrewer(dat, F, F)
+    tmp <- TraceBrewer(dat, F, F)
+    # magic i need todo to keep the additional scp stats if there are any
+    tmpscp <- cbind(tmp$scp, dat$scp[ (dim(tmp$scp)[2] + 1) : dim(dat$scp)[2] ])
+    tmp$scp <- tmpscp
+    dat <- tmp
 
     # Now we need to understand a few aspects of this series of data
     # 1: Are there more or less window regions?

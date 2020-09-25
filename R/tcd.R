@@ -93,7 +93,7 @@ keybdFixer <- function(key){
 #' @param F3 Density plot visualization
 #' @param F5 does something
 #' @export
-tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type="t.dat", plot.new=F, info=T, pts=T, lns=T, bcex=1, levs=NULL, klevs=NULL, sft=NULL, underline=T, zf=20, lw=2, sf=1, dat.name=NULL, view_func_description=F, save_question = T, track = T){
+tcd<-function(dat, cells=NULL,img="img1", l.img=c("img1"), yvar=FALSE, t.type="t.dat", plot.new=F, info=T, pts=T, lns=T, bcex=1, levs=NULL, klevs=NULL, sft=NULL, underline=T, zf=20, lw=2, sf=1, dat.name=NULL, view_func_description=F, save_question = T, track = T){
     time1 <- proc.time()
 	additionalInfo <- c()
 
@@ -101,6 +101,7 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     print(environment())
     if(is.null(dat.name)){
         dat.name <- deparse(substitute(dat))
+        inputName <- deparse(substitute(dat))
         
         if(any(dat.name %in% c("tmp.rd", "tmpRD","tmp"))){
             dat.name <- ls(pattern = "^RD[.]", envir = .GlobalEnv)
@@ -514,6 +515,8 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 correctCellClass <- cellTypesToClean[menu(cellTypesToClean)]
                 dat[[cellTypeId]][[correctCellClass]] <- union(dat[[cellTypeId]][[correctCellClass]], cellToReassign)
                 assign(dat.name, dat, envir=.GlobalEnv)
+                assign(inputName, dat, envir=.GlobalEnv)
+
             }else{
                 cat('\nSorry You haven\'t defined cell types yet. Please do this first!\n')
             }
@@ -819,8 +822,10 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
                 drops <- dat$c.dat$id[dat$bin$drop==1]
                 dat[[cellTypeId]] <- lapply(dat[[cellTypeId]], function(X) setdiff(X,drops))
                 assign(dat.name,dat, envir=.GlobalEnv)
+                assign(inputName, dat, envir=.GlobalEnv)
             }else{
                 assign(dat.name,dat, envir=.GlobalEnv)
+                assign(inputName, dat, envir=.GlobalEnv)
             }
         }
         
@@ -1252,6 +1257,10 @@ tcd<-function(dat, cells=NULL,img=dat$img1, l.img=c("img1"), yvar=FALSE, t.type=
     dat$SETTINGS <- SETTINGS
 
     assign(dat.name, dat, envir=.GlobalEnv)
+    print("hi")
+    assign(inputName, dat, envir=.GlobalEnv)
+    print("hihi")
+    
     tryCatch(bringToTop(-1), error=function(e)NULL)
     if(save_question){
         print('Would y ou like to save you cell groups?')

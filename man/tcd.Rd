@@ -8,7 +8,7 @@ ev(tcd)}
 tcd(
   dat,
   cells = NULL,
-  img = dat$img1,
+  img = "img1",
   l.img = c("img1"),
   yvar = FALSE,
   t.type = "t.dat",

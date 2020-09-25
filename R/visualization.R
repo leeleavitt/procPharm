@@ -176,7 +176,7 @@ density_ct_plotter<-function(dat, cells, cell_types = NA, stat=dat$c.dat["area"]
 #' barPlotter(tables)
 #' }
 #' @export 
-barPlotter <- function(dat = NULL, cols = 'YlOrRd', selectCT = T, horiz=T){
+barPlotter <- function(dat = NULL, cols = 'Dark2', selectCT = T, horiz=T){
     print(deparse(substitute(dat)))
     cat("\nREAD ME\nWelcome to barPlotter to use me,\nbarPlotter(dat=RD.experiment, col = \'YlOrRd\')\n\nCustomize your colors, TRY \n\n\'Set1\', \'Set2\', \'Pastel1\', \'Dark2\', \'PuBu\', \'Reds\'\n\nGo to this webpage to get other names \nhttps://www.datanovia.com/en/wp-content/uploads/dn-tutorials/ggplot2/figures/0101-rcolorbrewer-palette-rcolorbrewer-palettes-1.png")
 
@@ -319,7 +319,16 @@ barPlotter <- function(dat = NULL, cols = 'YlOrRd', selectCT = T, horiz=T){
             text(xLocs, yLocs, textToPlace, cex=.6, srt=90)
         }
     }
-    text(par('usr')[1]-xinch(.1), par('usr')[3]-yinch(.88), deparse(substitute(dat)), cex=.7)
+    
+    dat.name <- deparse(substitute(dat))
+    if(any(dat.name %in% c("tmp.rd", "tmpRD","tmp"))){
+        dat.name <- ls(pattern = "^RD[.]", envir = .GlobalEnv)
+        if(length(dat.name) > 1){
+            dat.name <- deparse(substitute(dat))
+        }
+    }
+
+    text(par('usr')[1]-xinch(.1), par('usr')[3]-yinch(.88), dat.name, cex=.7)
 
 }
 

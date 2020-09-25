@@ -4,7 +4,7 @@
 \alias{barPlotter}
 \title{Display census in a barplot}
 \usage{
-barPlotter(dat = NULL, cols = "YlOrRd", selectCT = T, horiz = T)
+barPlotter(dat = NULL, cols = "Dark2", selectCT = T, horiz = T)
 }
 \arguments{
 \item{dat}{this can either be and experiment RD.experiment or a vector of file paths see example}
