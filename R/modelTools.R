@@ -171,14 +171,6 @@ imageExtractorAll <- function(dat, image = 'img3', channel = 1, range = 20){
     cellXValue <- dat$c.dat$center.x.simplified
     cellYValue <- dat$c.dat$center.y.simplified
 
-    # This checks to see if we will be able to observe the cell
-    canView <- 
-        0 < (cellXValue - range) & 
-        (cellXValue + range) < dim(dat[[ image ]] )[2] &
-        0 < (cellYValue - range) &
-        (cellYValue + range) < dim(dat[[ image ]])[1] 
-    
-
     subImageArray <- array(
         dim = c(
             dim(dat$c.dat)[1], 
@@ -188,9 +180,6 @@ imageExtractorAll <- function(dat, image = 'img3', channel = 1, range = 20){
         ) 
     )
 
-    # dev.new()
-    # mfrowSize <- ceiling(sqrt(length(dat$c.dat$id[!canView])))
-    # par(mfrow = c(mfrowSize, mfrowSize), mai = c(0,0,0,0))
 
     for( j in 1:dim(dat$c.dat)[1] ){
         xLeft <- cellXValue[j] - range
@@ -202,7 +191,7 @@ imageExtractorAll <- function(dat, image = 'img3', channel = 1, range = 20){
         yDims <- yTop:yBottom
 
         yLogic <-   yDims > 0 &
-                    yDims < dim(dat[[ image ]] )[2]
+                    yDims < dim(dat[[ image ]] )[1]
 
         xLogic <-   xDims > 0 &
                     xDims < dim(dat[[ image ]] )[2]
@@ -214,12 +203,6 @@ imageExtractorAll <- function(dat, image = 'img3', channel = 1, range = 20){
         # This is how i obtain the region of the image that is within the boundaries.
         tmpArray[yLogic, xLogic, channel] <-  dat[[ image ]][yDims[yLogic], xDims[xLogic], channel]
                 
-        #if(!canView[j]){
-        #     print(dat$c.dat$id[j])
-        #     plot(1, xlim=c(0,1), ylim = c(1,0))
-        #     rasterImage(as.raster(tmpArray), 0,1,1,0)
-        # }
-
         subImageArray[j, , , ] <- tmpArray[,,channel]
     }
 

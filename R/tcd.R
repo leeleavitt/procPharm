@@ -502,8 +502,8 @@ tcd<-function(dat, cells=NULL,img="img1", l.img=c("img1"), yvar=FALSE, t.type="t
             if(length(cellTypeId) > 0){
                 #get only cell types that we want to reassign
                 cellTypeNames <- names(dat[[cellTypeId]])
-                toAssignTo <- c("L1", "L2", "L3", "L4", "L5", "L6", "G7", "G8", "G9", "G10", "R11", "R12","R13", "N14", "N15", "N16", "UC")
-                cellTypesToClean <- c(intersect(cellTypeNames, toAssignTo), "glia")
+                toAssignTo <- c("L1","L2","L3","L4","L5","L6","G7","G8","G9","G10","R11","R12","R13","N14","N15","N16","UC")
+                cellTypesToClean <- c(intersect(cellTypeNames, toAssignTo), intersect(cellTypeNames,c("glia", "L5_split","L6_split","G7_m","G7_c","N15_m","N15_a","N15_c","N15_ac")))
                 
                 #remove it from all groups except neurons
                 dat[[cellTypeId]][setdiff(cellTypeNames, 'neurons')] <- lapply(dat[[cellTypeId]][setdiff(cellTypeNames, 'neurons')], function(x) setdiff(x,cellToReassign))
