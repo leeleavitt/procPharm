@@ -6,7 +6,7 @@
 #' @export 
 pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec = NULL, image_question=T){
     cat('#########################################\nPHARM HARVEST\n#########################################\n')
-    tryCatch(cat(readLines("Y:/Box Sync/procpharm/farm.txt"),sep='\n'), error=function(e) cat('\nPHARM ON PHARM ANIMAL\n'))
+    #tryCatch(cat(readLines("Y:/Box Sync/procpharm/farm.txt"),sep='\n'), error=function(e) cat('\nPHARM ON PHARM ANIMAL\n'))
     cat('\nI am your data harvester. In this function I will\nextract data from any video files you have, and package everything together\n')
     #MAIN DIRECTORY SELECTION
     if(is.null(main_dir)){
