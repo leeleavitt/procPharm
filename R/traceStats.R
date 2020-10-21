@@ -245,3 +245,74 @@ ScoreConstPharm <- function(dat, blc=NULL, snr=NULL, der=NULL, snr.lim=5, blc.li
     }
     return(res.tab)
 }
+
+### These functions create automatic stats but only if the window regions are completely fill out and corred 
+# Indirect effect stat maker
+#' Function taht creates a ide stat automatically if you have all control and test window regions in the data.
+#' To make this work you can't half ass your window regions you must include all control window regions
+#' @param statType this is the scp stat you would use
+#' @param testPulseNames this is the test pulse names that contains the experiments
+#' @export
+ideStatMaker <- function(dat, statType = "max", testPulseNames = "^[kK][.]30"){
+    # statType <- ".max"
+    # testPulseNames <- "^[kK][.]20"
+    # controlToView <- c(1,2)
+
+    testPulses <- grep(testPulseNames, names(dat$bin), value = F, ignore.case = T)
+    testPulsesNames <- grep(testPulseNames, names(dat$bin), value = T, ignore.case = T)
+
+    # Within this region we will compute a specific minmax norm stat
+    control <- names(dat$bin)[testPulses]
+    test <- names(dat$bin)[testPulses + 1]
+
+    for(i in 1:(length(testPulses) - 1) ){
+        z <- i +1
+        
+        respLogic <- !(dat$bin[testPulses[i]] == 1 |
+            dat$bin[testPulses[z]] == 1)
+
+        statsToComp <- dat$scp[paste0(testPulsesNames[i:z], ".", statType)]
+
+        statsToComp[respLogic,] <- NA
+
+        collumnstat <- (statsToComp[2] - statsToComp[1] ) / (statsToComp[2] + statsToComp[1])
+        newName <- paste0(test[i], ".",statType,".","ide", ".mmnorm")
+
+        dat$scp[newName] <- collumnstat
+    }
+    return(dat)
+}
+
+#' Function to create a direct effect stat. 
+#' this stat is automatically tested against the control to use.
+#' Due to nature of these experiments there are ususally only one
+#' window region really compare to, to observe the direct effect.
+#' a major weakness of this statistic is taht direct effects cannot be automatically scored
+#' if they are automatically score this would be significantly better.
+#' since we are unable to compute this we compare window regions of anything. This confuses the outpu
+#' of this analysis
+deStatMaker <- function(dat, statType = "tot", testPulseNames = "^[kK][.]30", controlToUse = 1){
+    # Within this region we will compute a specific minmax norm stat
+    testPulses <- grep(testPulseNames, names(dat$bin), value = F, ignore.case = T)
+    windows <- names(dat$bin)[testPulses + 1]
+    comparisons <- windows[-1]
+    controlWindows <- grep('control', windows, value = T)[controlToUse]
+
+    for(i in 2:length(comparisons)){
+        # If the cell doesn't respond to the potassium pulse or the potassium pulse following
+        # the comparison, then dis regard it
+        # respLogic <- !(dat$bin[testPulses[i]] == 1 |
+        #     dat$bin[testPulses[0]] == 1)
+
+        statsToComp <- dat$scp[paste0(c(controlWindows, windows[i]),'.', statType)]
+        
+        #statsToComp[respLogic,] <- NA
+
+        collumnstat <- (statsToComp[2] - statsToComp[1] ) / (statsToComp[2] + statsToComp[1])
+        newName <- paste0(comparisons[i], ".",statType,".","de", ".mmnorm")
+
+        dat$scp[newName] <- collumnstat
+    }
+    return(dat)
+}
+

@@ -14,7 +14,7 @@ Description: This package analyzes calcium imaging data collected from the exper
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Imports: 
     reticulate,
     png,
@@ -23,6 +23,6 @@ Imports:
     data.table,
     docxtractr,
     abind
-Suggests:    
+Suggests: 
     xlsx,
     cairoDevice

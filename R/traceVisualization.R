@@ -497,7 +497,13 @@ LinesEvery.5 <- function(dat,m.names, img="img1",channel=NULL,pic.plot=TRUE,zf=N
             for(i in 1:length(values)){
                 if(!is.null(dat$c.dat[m.names, values[i]])){
                 rtag<-values[i]
-                rtag <- round(dat$c.dat[m.names,rtag], digits=digits[i])
+                
+                print(dat$c.dat[m.names,rtag])
+                tryCatch(
+                    {rtag <- round(dat$c.dat[m.names,rtag], digits=digits[i])},
+                    error = function(e){ rtag <<- dat$c.dat[m.names,rtag]}
+                )
+                
                 text(
                     rep(max(xseq)+xinch(placement[i]),length(m.names)),
                     seq(1,length(m.names))*sf+t.dat[nrow(t.dat),m.names],

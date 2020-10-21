@@ -398,3 +398,162 @@ boxPlotter <- function(mat, xlim_top=NULL, xlim_bottom=NULL, activewindows, cont
     }, error=function(e) NULL)
 
 }
+
+
+#' This is a function that returns a regular expression to find the testPulse
+#' @export
+testPulseFinder <- function(dat){
+    # Find windows that start with k
+    uniqueNames <-  grep("^K",names(dat$bin), value = T)
+    # discover the min length of these repeat pulses
+    toId <- min(sapply(strsplit(uniqueNames, "[.]"), function(x){length(x)}))
+
+    #Only show all pulse by this length.
+    pulseTypes <- sapply(uniqueNames, function(x){
+        paste0(strsplit(x, "[.]")[[1]][1:toId], collapse = '.')
+    })
+    pulseTypesSumm <- summary(as.factor(pulseTypes))
+    majorPulseTest <- names(which(pulseTypesSumm == max(pulseTypesSumm)))
+    pusleTestSplit <- strsplit(majorPulseTest, "[.]")[[1]]
+
+    # Now create the regulr expression that will get me to select the 
+    pulseTestRegex <- paste0("^", pusleTestSplit[1], "[.]", pusleTestSplit[2])
+    return(pulseTestRegex)
+}
+
+
+#' This function displayed the newly create stats in an automated way.
+#' It depends on the cell types present to display the stat.
+#' #' Adding more controls at the begining really improves the view of this
+#' @param dat RD.experiment
+#' @param stat slection between 'de' which returns the direct effect stat or 'ide' which displays the indirect effect stat
+#' @param controlToView a major highlighter of this vixualization is the ability to compare against a control window region
+#' @export
+ecdfPlotter <- function(dat, controlNames, testNames, legendSep = 0.2, rdName = NA, cell_types = NA){
+    # if the rdName is NA
+    if(!is.na(rdName)){
+        mainName <- rdName
+    }else{
+        mainName <- deparse(substitute(dat))
+    }
+
+    # allNames <- grep(paste0('[.]', stat, ".", "mmnorm"), names(tmpRD$scp), value= T)
+    # controlNames <- grep("control", allNames, value = T)
+    # testNames <- setdiff(allNames, controlNames)
+    
+    # if(is.na(controlToView)){
+    #     controlNames <- select.list(controlNames, multiple = T)
+    # }else{
+    #     controlNames <- controlNames[controlToView]
+    # }
+
+    collumns <- c(controlNames, testNames)
+
+    if(is.na(cell_types)){
+        cellTypes <- c("L1","L2","L3","L4","L5","L6","G7","G8","G9","G10","R11","R12","R13","N14","N15","N16", "UC")
+    }else{
+        cellTypes <- cell_types
+    }
+    controlColorFunc <- colorRampPalette(c("black", 'gray50'))
+    cols <- c(
+        controlColorFunc(length(controlNames)), 
+        rev(rev(RColorBrewer::brewer.pal(n = length(collumns), 'Dark2')))
+    )
+
+    lwds <- c(
+        rep(3, length(controlNames)), 
+        rep(2, 8)
+    )
+
+    # Now Plot it up!
+    mar <- c(0,4,4,0)
+
+    par(mfrow = c( (length(cellTypes) + 3), 1), mar = mar)
+    plot(0, xlim = c(-1,1), pch = '', bty = 'n', yaxt = 'n', ylab='', xaxt='n', main = mainName)
+    mar[3] <- 0 
+
+    for(i in 1:length(cellTypes)){
+        par(mar = mar, las = 2)
+        tryCatch({
+            plot(
+                ecdf(dat$scp[dat$cell_types[[ cellTypes[i] ]] , collumns[1]]), 
+                col = 'black', 
+                xlim = c(-1,1), 
+                main = '', 
+                ylab = cellTypes[i], 
+                yaxt = 'n', 
+                xaxt = 'n', 
+                bty = 'n',
+                do.points=F,
+                col.01line = NULL, 
+                lwd = lwds[1]
+            )
+            for(j in 2:length(collumns)){
+                lines(
+                    ecdf(dat$scp[dat$cell_types[[ cellTypes[i] ]] , collumns[j]]), 
+                    type = 'l', 
+                    col = cols[j],
+                    do.points=F,
+                    col.01line = NULL, 
+                    lwd = lwds[j]
+                )
+            }
+            legend('topleft', legend = paste("N= ", length(dat$cell_types[[cellTypes[i] ]])), bty = 'n')
+            
+        }, error = function(e){
+            plot(
+                0,0, 
+                ylim =c(0,1), 
+                xlim = c(-1,1), 
+                yaxt = 'n', 
+                xaxt = 'n',
+                bty = 
+                'n', 
+                ylab = cellTypes[i], 
+                main = "", pch =''
+            )
+            text(0,0.5,"No Values")
+            legend(
+                'topleft', 
+                legend = paste("N= ", length(dat$cell_types[[cellTypes[i] ]])), 
+                bty = 'n'
+            )
+        })
+        abline(v = c(0,-1), h = c(0))
+    }
+
+    # plot for legend
+    plot(0, xlim = c(-1,1), pch = '', bty = 'n', yaxt = 'n', ylab='', xaxt='n')
+    compNames <- Reduce(c, lapply(strsplit(collumns, "_"),function(x){x[1]}))
+    par(xpd=T)
+    legendVals <- sub("[.]max[.]ide", "", collumns)
+    legendVals <- sub("[_]", "\n", legendVals)
+    legendVals <- sub("[.]mmnorm", "", legendVals)
+    
+    gsub("[.]mmnorm", '', collumns)
+
+    legend('top',
+        legendVals[1:4] , 
+        fill = cols[1:4], 
+        bty = 'n', 
+        border = NA, 
+        horiz = T, 
+        text.width = legendSep
+    )
+
+    if( length(legendVals) > 4){
+        legend('bottom',
+            legendVals[5:length(legendVals)] , 
+            fill = cols[5:length(legendVals)], 
+            bty = 'n', 
+            border = NA, 
+            horiz = T, 
+            text.width = legendSep
+        )
+    }
+    
+    #Plot of rthe x axis
+    mar[1] <- 3
+    par(mar = mar)
+    plot(0, xlim = c(-1,1), pch = '', bty = 'n', yaxt = 'n', ylab='')
+}

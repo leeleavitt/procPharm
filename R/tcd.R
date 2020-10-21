@@ -324,6 +324,9 @@ tcd<-function(dat, cells=NULL,img="img1", l.img=c("img1"), yvar=FALSE, t.type="t
         SETTINGS$underline <- underline
         SETTINGS$t.type <- t.type
         dat$SETTINGS <- SETTINGS
+        SETTINGS$ecdf$controlChoices <- NA
+        SETTINGS$ecdf$testChoices <- NA
+        SETTINGS$ecdf$cell_types <- NA
     }else{
         SETTINGS <- dat$SETTINGS
     }
@@ -1172,6 +1175,86 @@ tcd<-function(dat, cells=NULL,img="img1", l.img=c("img1"), yvar=FALSE, t.type="t
                 lines.flag<-1
                 windows.flag<-1
             }, error = function(e) cat("\nDid not work. Review documentation\n"))
+        }
+
+        #F9: ecdf plotter
+        if(keyPressed == 'F9'){
+            # First select the test window regions to display
+            stat <- 'ide'
+
+            # Do the stats exists?
+            totalStat <- length(
+                grep(
+                    paste0(stat,"[.]mmnorm"), 
+                    names(dat$scp), value = T
+                )
+            )
+
+            if(totalStat < 1){
+                pulseTestRegex <- testPulseFinder(dat)
+                dat <- ideStatMaker(dat, testPulseNames = pulseTestRegex)
+            }
+
+            # Choose the specific selections
+            allNames <- grep(paste0('[.]', stat, ".", "mmnorm"), names(dat$scp), value= T)
+            controlNames <- grep("control", allNames, value = T)
+            testNames <- setdiff(allNames, controlNames)
+
+            tryCatch({
+                SETTINGS$ecdf$controlChoices <- select.list(
+                    controlNames, 
+                    preselect = SETTINGS$ecdf$controlChoices, 
+                    multiple = T, 
+                    title = "Select the controls to view"
+                )
+
+                SETTINGS$ecdf$testChoices <- select.list(
+                    testNames, 
+                    preselect = SETTINGS$ecdf$testChoices, 
+                    multiple = T, 
+                    title = "Select the test to view"
+                )
+
+                SETTINGS$ecdf$cell_types <- select.list(
+                    names(dat$cell_types), 
+                    preselect = SETTINGS$ecdf$cell_types, 
+                    multiple = T, 
+                    title = "Select the cell_types to view"
+                )
+            }, error = function(e){
+                SETTINGS$ecdf$controlChoices <<- select.list(
+                    controlNames, 
+                    multiple = T, 
+                    title = "Select the controls to view"
+                )
+
+                SETTINGS$ecdf$testChoices <<- select.list(
+                    testNames, 
+                    multiple = T, 
+                    title = "Select the test to view"
+                )
+
+                SETTINGS$ecdf$cell_types <<- select.list(
+                    names(dat$cell_types), 
+                    multiple = T, 
+                    title = "Select the cell_types to view"
+                )
+            })
+
+            
+            tryCatch(dev.off(which=ecdf.window), error=function(e)NULL)
+            tryCatch(
+                windows(
+                    width=5,
+                    height= length(SETTINGS$ecdf$cell_types),
+                    xpos=1000, 
+                    ypos = 0)
+            , error=function(e)windows(width=5,height=15))
+            ecdf.window<-dev.cur()            
+
+            # Here we select the names of the collumns to observer
+            dev.set(ecdf.window)
+            ecdfPlotter(dat, SETTINGS$ecdf$controlChoices, SETTINGS$ecdf$testChoices, legendSep = .3, rdName = dat.name, cell_types = SETTINGS$ecdf$cell_types)
         }
 
         if(keyPressed=="1")
