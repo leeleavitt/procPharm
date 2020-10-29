@@ -22,7 +22,7 @@ devtools::install_github("https://github.com/leeleavitt/procPharm.git")
 Make Sure to read the console if any ERROR's arise. If so Close R and paste the commands again.
 
 # Lab Computers
-If installing R on computers in the lab (these need to be connected to the network drive see [here](../Z_drive_Mounting_Information_1.docx)). From there you need to follow the instructions [here]("../labDriveInstall/README.R")
+If installing R on computers in the lab (these need to be connected to the network drive see [here](../Z_drive_Mounting_Information_1.docx)). From there you need to follow the instructions [here](../labDriveInstall/README.md)
 
 # Python Installation
 **Skip this if;**
