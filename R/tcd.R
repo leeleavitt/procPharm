@@ -1243,13 +1243,20 @@ tcd<-function(dat, cells=NULL,img="img1", l.img=c("img1"), yvar=FALSE, t.type="t
 
             
             tryCatch(dev.off(which=ecdf.window), error=function(e)NULL)
+
             tryCatch(
+                if(length(SETTINGS$ecdf$cell_types) > 12){
+                    windowHeight  <- 12
+                }else{
+                    windowHeight <- length(SETTINGS$ecdf$cell_types)
+                }
+
                 windows(
                     width=5,
-                    height= length(SETTINGS$ecdf$cell_types),
+                    height= windowHeight,
                     xpos=1000, 
                     ypos = 0)
-            , error=function(e)windows(width=5,height=15))
+            , error = function(e)windows(width=5,height=windowHeight))
             ecdf.window<-dev.cur()            
 
             # Here we select the names of the collumns to observer

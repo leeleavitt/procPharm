@@ -654,25 +654,31 @@ Cell_Typer_3 <- function(dat){
                         dat$bin[neurons, menthName] != 1 &
                         dat$bin[neurons, capsName] != 1
             UL <- neurons[uLLogic]
-            UL <- UL[!is.na(UL)]
-            largeCells <- tcd(dat, UL, save_question = F)[1:2]
-            names(largeCells) <- c("L1", "L2")
-
             levs <- unique(dat$w.dat$wr1)
             r3jLocation <- grep('[rR](3|[I]{3})[jJ].*[mM]$', levs)[1]
             beforeR3j <- r3jLocation - 1
             afterR3j <- r3jLocation + 1
 
-            tot <- Reduce(c, largeCells)
-            L3L4 <- setdiff(UL, tot)
-            
-            l3Logic <-  (dat$scp[L3L4, paste0(levs[afterR3j], ".max")] * 0.7) > dat$scp[L3L4, paste0(levs[beforeR3j], ".max")] 
-            L3 <- L3L4[l3Logic]
 
-            l4Logic <-  (dat$scp[L3L4, paste0(levs[afterR3j], ".max")] * 0.7) <= dat$scp[L3L4, paste0(levs[beforeR3j], ".max")]
-            L4 <- L3L4[l4Logic]
+            if(length(UL) > 1){
+                UL <- UL[!is.na(UL)]
+                largeCells <- tcd(dat, UL, save_question = F)[1:2]
+                names(largeCells) <- c("L1", "L2")
 
-            largeCells <- c(largeCells, list(L3 = L3, L4 = L4))
+                tot <- Reduce(c, largeCells)
+                L3L4 <- setdiff(UL, tot)
+                
+                l3Logic <-  (dat$scp[L3L4, paste0(levs[afterR3j], ".max")] * 0.7) > dat$scp[L3L4, paste0(levs[beforeR3j], ".max")] 
+                L3 <- L3L4[l3Logic]
+
+                l4Logic <-  (dat$scp[L3L4, paste0(levs[afterR3j], ".max")] * 0.7) <= dat$scp[L3L4, paste0(levs[beforeR3j], ".max")]
+                L4 <- L3L4[l4Logic]
+
+                largeCells <- c(largeCells, list(L3 = L3, L4 = L4))
+            }else{
+                cat("There are no unlabeled Large Diameter cells to cell type.\n")
+                largeCells <- list(L1 = NA, L2 = NA, L3 = NA, L4 = NA, L5 = NA, L6 = NA)
+            }
 
             if(gfpLogic){
                 # L5   

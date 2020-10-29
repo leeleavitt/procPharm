@@ -1,0 +1,41 @@
+# Things you might want to change
+
+# options(papersize="a4")
+# options(editor="notepad")
+# options(pager="internal")
+
+# set the default help type
+# options(help_type="text")
+  options(help_type="html")
+
+# set a site library
+# .Library.site <- file.path(chartr("\\", "/", R.home()), "site-library")
+
+# set a CRAN mirror
+# local({r <- getOption("repos")
+#       r["CRAN"] <- "http://my.local.cran"
+#       options(repos=r)})
+
+# Give a fortune cookie, but only to interactive sessions
+# (This would need the fortunes package to be installed.)
+#  if (interactive()) 
+#    fortunes::fortune()
+
+# Prevents R asking you to save
+utils::assignInNamespace("q", 
+                                function(save = "no", status = 0, runLast = TRUE) {
+     .Internal(quit(save, status, runLast))
+}, "base")    
+utils::assignInNamespace("quit", 
+                                function(save = "no", status = 0, runLast = TRUE) {
+     .Internal(quit(save, status, runLast))
+ }, "base")
+
+
+# Also add the new libpath
+.First <- function(){
+    .libPaths(c("Z:/Computer setup/R/rLibraries", "Y:/Computer setup/R/rLibraries", .libPaths()))
+}
+.libPaths(c("Z:/Computer setup/R/rLibraries", "Y:/Computer setup/R/rLibraries", .libPaths()))
+require(procPharm)
+options(locatorBell=F)

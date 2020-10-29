@@ -6,7 +6,14 @@
 It depends on the cell types present to display the stat.
 #' Adding more controls at the begining really improves the view of this}
 \usage{
-ecdfPlotter(dat, controlNames, testNames, legendSep = 0.2, rdName = NA)
+ecdfPlotter(
+  dat,
+  controlNames,
+  testNames,
+  legendSep = 0.2,
+  rdName = NA,
+  cell_types = NA
+)
 }
 \arguments{
 \item{dat}{RD.experiment}
