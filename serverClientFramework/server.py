@@ -12,5 +12,10 @@ csrf.init_app(app)
 def home():
     return render_template("home.html")
 
+@app.route('/processExperimentalData', methods=['POST'])
+def processExperimentalData():
+    print(request.form)
+    return jsonify({"status": "received"})
+
 if __name__ == '__main__':
     app.run(host=HOST, port=PORT, debug=True)

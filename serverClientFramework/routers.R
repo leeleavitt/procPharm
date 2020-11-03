@@ -7,5 +7,7 @@ function(msg="") {
     list(msg = paste0("The test message is: '", msg, "'"))
 }
 
-#* @assets ./templates ./static
-list()
+#* @post /import
+function() {
+    
+}
