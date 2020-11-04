@@ -8,6 +8,6 @@ function(msg="") {
 }
 
 #* @post /import
-function() {
-    
+function(req) {
+    print(req)
 }
