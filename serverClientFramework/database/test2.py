@@ -1,6 +1,6 @@
 from imaging_results import Imaging
 
-img = Imaging(r"C:\Users\rishi\Documents\gitrepos\procPharm\extras\RD.200309.30.m.m3.p1.Rdata")
+img = Imaging(r"C:\Users\Arikill\Documents\gitrepos\procPharm\extras\RD.200309.30.m.m3.p1.Rdata", 200309, 30, "m", "m3", "p1", "drg", "")
 img.organizeCellData()
 img.writeToDB()
 
