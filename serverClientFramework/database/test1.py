@@ -6,6 +6,3 @@ from pyArango.connection import *
 conn = Connection(username="root", password="roselab2")
 
 db = conn["test"]
-print(db)
-testCollection = db.createCollection(name="Test")
-print(db["Test"])
