@@ -30,10 +30,11 @@ class Imaging:
         self.cy5_end = data[2][11]
         self.time = np.asarray(data[0][0], dtype=np.float32)
         self.values = np.asarray(data[0][1:], dtype=np.float32)
+        self.agent = np.array(data[1][1])
         pass
 
     def organizeCellData(self):
-        self.cells = [{}]*len(self.names)
+        self.cells = [{}]*(len(self.names)+2)
         for index, name in enumerate(self.names):
             self.cells[index] = {
                 "date": self.date,
@@ -57,9 +58,62 @@ class Imaging:
                 "cy5": {
                     "end": float(self.cy5_end[index])
                 },
-                "times": self.time.tolist(),
-                "ratio-values": self.values[index, :].tolist()
+                # "times": self.time.tolist(),
+                "values": self.values[index, :].tolist()
+                # "agent": self.agent.tolist()
             }
+        self.cells[index+1] = {
+            "date": self.date,
+                "age": self.age,
+                "gender": self.gender,
+                "tissue": self.tissue,
+                "info": self.info,
+                "name": "times", 
+                "area": None,
+                "x": "",
+                "y": None,
+                "bright-field": {
+                    "start": None,
+                    "end": None
+                },
+                "gfp": {
+                    "start": None,
+                    "end": None
+                },
+                "dapi": None,
+                "cy5": {
+                    "end": None
+                },
+                "values": self.time.tolist()
+                # "ratio-values": self.values[index, :].tolist()
+                # "agent": self.agent.tolist()
+        }
+        self.cells[index+2] = {
+            "date": self.date,
+                "age": self.age,
+                "gender": self.gender,
+                "tissue": self.tissue,
+                "info": self.info,
+                "name": "pharmacology", 
+                "area": None,
+                "x": "",
+                "y": None,
+                "bright-field": {
+                    "start": None,
+                    "end": None
+                },
+                "gfp": {
+                    "start": None,
+                    "end": None
+                },
+                "dapi": None,
+                "cy5": {
+                    "end": None
+                },
+                "values": self.agent.tolist()
+                # "ratio-values": self.values[index, :].tolist()
+                # "agent": self.agent.tolist()
+        }
         pass
 
     def writeToDB(self):
