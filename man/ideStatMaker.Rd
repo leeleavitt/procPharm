@@ -5,7 +5,12 @@
 \title{Function taht creates a ide stat automatically if you have all control and test window regions in the data.
 To make this work you can't half ass your window regions you must include all control window regions}
 \usage{
-ideStatMaker(dat, statType = "max", testPulseNames = "^[kK][.]30")
+ideStatMaker(
+  dat,
+  statType = "max",
+  testPulseNames = "^[kK][.]30",
+  controlToUse = 1
+)
 }
 \arguments{
 \item{statType}{this is the scp stat you would use}

@@ -1,29 +1,36 @@
 #################################################################
 #Package to look at the data collected during ca img and ephyz
 #################################################################
-
+    
 #function to import data
 #if the data is properly structured then this should work
 #make sure you are in the right working directory
-if( !library(abf2, logical.return=T) ){
-    install.packages('abf2')
-}else{}
+# if( !library(abf2, logical.return=T) ){
+#     install.packages('abf2')
+# }else{}
 
-if( !library(readABF, logical.return=T) ){
-    install.packages('readABF')
-}else{}
+# if( !library(readABF, logical.return=T) ){
+#     install.packages('readABF')
+# }else{}
 
 
 ephyz_import<-function(dat, abName= NULL, plotz=F){
+    tmpRD <- dat
+    
     if(is.null(abName)){
 		ab_fname<-select.list(list.files(pattern=".abf"))
-	}else{ab_fname <- abName}
-    dat$ab<-abf2::abfload(ab_fname)
+	}else{
+        ab_fname <- abName
+    }
+
+    ab <- abf2::abfload(ab_fname)
     if(plotz){
         cat("\nI'm going to plot the trace for you\n")
         ephyz_total_plotter(dat)
-    }else{}
-    return(dat)
+    }
+
+    tmpRD[['ab']] <- ab
+    return(tmpRD)
 }
     
 ephyz_total_plotter<-function(dat){
@@ -191,7 +198,10 @@ ephyz_ca_aligner<-function(dat, delay_time=3.2){
 # Series for analyzing current steps
 # See "Y:/Halen/Ephyz/191210.40.m.m3.p1 L2 TTA and RIIIJ/c.860" For example
 #Steps Plotter
-stepPlotter<-function(){
+stepPlotter<-function(ylim = NA){
+    if(is.na(ylim)){
+        ylim <- c(-200,200)
+    }
 	#install.packages('readABF')
 	#require(readABF)
 
@@ -199,7 +209,7 @@ stepPlotter<-function(){
 
 	experiments <- select.list(abfFiles, multiple=T)
 	for(j in 1:length(experiments)){
-		tmpabf<- readABF(experiments[j])
+		tmpabf<- readABF::readABF(experiments[j])
         # Now that i have loaded the data get the points/sec
         pointPerSecond <- tmpabf$samplingIntervalInSec
         # How many point are collected per run?
@@ -220,7 +230,7 @@ stepPlotter<-function(){
             par(mai=c(0,0,0,0), cex=.5)
             
             #Plot the Steps
-            plot(tmpabf$data[i][[1]][,2], type='l', ylim=c(-200,200), xaxt='n', ylab='', yaxt='n', bty='l')
+            plot(tmpabf$data[i][[1]][,2], type='l', ylim=ylim, xaxt='n', ylab='', yaxt='n', bty='l')
             if(i == totalSteps ){
                 legend('bottom', legend = experiments[j], bty='n', cex=1.5)
             }
@@ -357,7 +367,7 @@ stepsSpikeComparer <- function(apInterval=50, apThresh=-20){
     expCompDf <- list()
     for(i in 1:length(abToCompare)){
         abName <- sub('[.]abf','',abToCompare[i])
-        abList[[abName]] <- readABF(abToCompare[i])
+        abList[[abName]] <- readABF::readABF(abToCompare[i])
         expCompDf[[i]] <- stepCounter(abList[[abName]],apInterval,apThresh)
     }
     expComps <- Reduce(cbind,expCompDf)
@@ -423,7 +433,7 @@ apCollector <- function(trace, apInterval = 300, apView = 500, apThresh = -10){
 # apView: to buffer around the action potential for viewing purpose
 # apThrsh: The minimum detectable hieght of an action potential 
 apStepCollector <- function(traces, apInterval = 200, apView = 400, apThresh = -10){
-    traces <- readABF(traces)
+    traces <- readABF::readABF(traces)
     
     #List to hold all of my action potentials
     ap <- list()

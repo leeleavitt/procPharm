@@ -39,7 +39,12 @@ dat <- tmpRD
 .libPaths()
 .libPaths(.libPaths()[3] )
 
+#install
 devtools::document()
 devtools::install()
+
+## quickSource
+files.sources = list.files("C:/Users/leele/Documents/procPharm/R/",full.names = T)
+sapply(files.sources, source)
 
 

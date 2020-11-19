@@ -203,7 +203,7 @@ ScoreConstPharm <- function(dat, blc=NULL, snr=NULL, der=NULL, snr.lim=5, blc.li
         snr<-dat$snr
     }else{
         snr<-snr
-    }
+        }
 
     wr<-dat$w.dat$wr1
 
@@ -225,17 +225,20 @@ ScoreConstPharm <- function(dat, blc=NULL, snr=NULL, der=NULL, snr.lim=5, blc.li
     res.tab["snr.iwc"] <- apply(snr[is.element(wr,levs),cnames],2,gtfunc,alph=snr.lim)
     res.tab["snr.owc"] <- apply(snr[!is.element(wr,levs),cnames],2,gtfunc,alph=snr.lim)
     
-    for(i in cnames){
-        s1 <- MALDIquant::createMassSpectrum(t.dat[,"Time"],t.dat[,i])
-        s3 <- MALDIquant::smoothIntensity(s1, method="SavitzkyGolay", halfWindowSize=shws)
-        bl.th <- MALDIquant::estimateBaseline(s3, method="TopHat")[,"intensity"]
-        bl.snp <- MALDIquant::estimateBaseline(s3, method="SNIP")[,"intensity"]
-        eseq <- 1:ceiling((nrow(t.dat)/2))
-        lseq <- max(eseq):nrow(t.dat)
-        res.tab[i,"bl.diff"] <- mean(bl.th-bl.snp)
-        res.tab[i,"earl.bl.diff"] <- mean(bl.th[eseq]-bl.snp[eseq])
-        res.tab[i,"late.bl.diff"] <- mean(bl.th[lseq]-bl.snp[lseq])        
-    }
+    tryCatch({
+        for(i in cnames){
+
+            s1 <- MALDIquant::createMassSpectrum(t.dat[,"Time"],t.dat[,i])
+            s3 <- MALDIquant::smoothIntensity(s1, method="SavitzkyGolay", halfWindowSize=shws)
+            bl.th <- MALDIquant::estimateBaseline(s3, method="TopHat")[,"intensity"]
+            bl.snp <- MALDIquant::estimateBaseline(s3, method="SNIP")[,"intensity"]
+            eseq <- 1:ceiling((nrow(t.dat)/2))
+            lseq <- max(eseq):nrow(t.dat)
+            res.tab[i,"bl.diff"] <- mean(bl.th-bl.snp)
+            res.tab[i,"earl.bl.diff"] <- mean(bl.th[eseq]-bl.snp[eseq])
+            res.tab[i,"late.bl.diff"] <- mean(bl.th[lseq]-bl.snp[lseq])        
+        }
+    }, error = function(e)cat("\nCannot Make Stats from MALDIquant\n"))
     
     for(i in levs){
         res.tab[paste(i,".snr",sep="")] <- apply(snr[wr==i,cnames],2,max)
@@ -253,31 +256,58 @@ ScoreConstPharm <- function(dat, blc=NULL, snr=NULL, der=NULL, snr.lim=5, blc.li
 #' @param statType this is the scp stat you would use
 #' @param testPulseNames this is the test pulse names that contains the experiments
 #' @export
-ideStatMaker <- function(dat, statType = "max", testPulseNames = "^[kK][.]30"){
+ideStatMaker <- function(dat, statType = "max", testPulseNames = "^[kK][.]30", controlToUse = 1){
     # statType <- ".max"
     # testPulseNames <- "^[kK][.]20"
     # controlToView <- c(1,2)
 
-    testPulses <- grep(testPulseNames, names(dat$bin), value = F, ignore.case = T)
-    testPulsesNames <- grep(testPulseNames, names(dat$bin), value = T, ignore.case = T)
+    levs <- setdiff(unique(as.character(dat$w.dat$wr1)), "")
+
+    testPulses <- grep(testPulseNames, 
+        levs, 
+        value = F, 
+        ignore.case = T
+    )
+    
+    testPulsesNames <- grep(testPulseNames, 
+        levs, 
+        value = T, 
+        ignore.case = T
+    )
 
     # Within this region we will compute a specific minmax norm stat
-    control <- names(dat$bin)[testPulses]
-    test <- names(dat$bin)[testPulses + 1]
+    test <- testPulses[2:length(testPulses)]
+    
+    if(is.na(controlToUse)){
+        control <- rep(testPulses[controlToUse], length(test))
+    }else{
+        control <- testPulses
+    }
 
-    for(i in 1:(length(testPulses) - 1) ){
-        z <- i +1
-        
-        respLogic <- !(dat$bin[testPulses[i]] == 1 |
-            dat$bin[testPulses[z]] == 1)
+    testNames <- levs[testPulses + 1 ]
 
-        statsToComp <- dat$scp[paste0(testPulsesNames[i:z], ".", statType)]
+    for(i in 1:length(test) ){
+        # First answer is there a response in the test or control. 
+        respLogic <- 
+            !(
+                # Test pulses
+                dat$bin[ levs[test[i]] ] == 1 |
+                dat$bin[ levs[control[i]] ] == 1
+            )
 
+        # Grab the control window followed by the test window, 
+        statNamesToGrab <- paste0(
+            c(levs[control[i]], levs[test[i]]), 
+            ".", 
+            statType
+        )
+        statsToComp <- dat$scp[statNamesToGrab]
+        # remove all nonresponders
         statsToComp[respLogic,] <- NA
 
+        # Now compute the F2 Stat
         collumnstat <- (statsToComp[2] - statsToComp[1] ) / (statsToComp[2] + statsToComp[1])
-        newName <- paste0(test[i], ".",statType,".","ide", ".mmnorm")
-
+        newName <- paste0(testNames[i], ".", statType, ".", "ide", ".mmnorm")
         dat$scp[newName] <- collumnstat
     }
     return(dat)

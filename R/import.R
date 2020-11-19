@@ -43,7 +43,7 @@ pharming_harvest <- function(main_dir=NULL, area_conversion=1.625, img_name_vec 
         setwd(exp_dir[i])
 
         #Input the names of the files that CP created
-        cell_data_name <- list.files(pattern= '^cell.*[.]txt$')
+        cell_data_name <- list.files(pattern= '^cell.*txt$')
         #cell_data_name<-"celldatacells_filtered.txt"
 
         ################################################
@@ -372,7 +372,8 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
     ##################################################################################
 
     if(!is.null(c.dat)){
-        c.dat<-read.delim(file=c.dat,fileEncoding="UCS-2LE", sep=sep)
+        c.dat.name <- c.dat
+        c.dat<-read.delim(file=c.dat.name,fileEncoding="UCS-2LE", sep=sep)
         c.dat.names<-names(c.dat)
         
         id.name <- grep("id",c.dat.names,value=T,ignore=T)
@@ -413,7 +414,7 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
     #	o.names <- setdiff(c.dat.names,c(time.name,id.name,area.name,ratio.name,cx.name,cy.name, mean.gfp, mean.tritc))
     #	if(length(o.names) > 0){warning(paste(o.names,"added to c.dat"));cnames <- c(cnames,o.names)}
         
-        c.dat<-c.dat[cnames]#create c.dat with specified collumns from cnames
+        c.dat <- c.dat[cnames]#create c.dat with specified collumns from cnames
         c.dat <- c.dat[order(c.dat[,id.name]),] # order rows by ROIid
         c.dat[,id.name] <- paste("X.",c.dat[,id.name],sep="")#rename ROIid with a X.cell#
         row.names(c.dat)<-c.dat[,"RoiID"]# assign row.names the ROIid name
@@ -440,8 +441,7 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
         if(class(c.dat[,mean.dapi])=="factor"){c.dat[,mean.dapi]<-NULL
         }else{colnames(c.dat)[which(colnames(c.dat)==mean.dapi)]<-"mean.dapi"}
 
-        }
-        else{
+        }else{
         area.name <- grep("Area",all.names,value=T,ignore=T)[1]
         if(is.na(area.name)){stop("no ROI.Area data")}
         else{if(area.name != "ROI.Area"){warning(paste(area.name,"assumed to be ROI.Area"))}}
@@ -461,6 +461,7 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
         names(c.dat)[1:4] <- c("id","area","center.x","center.y") 
         row.names(c.dat) <- c.dat[,"id"]
     }
+    c.dat <- cbind(c.dat, read.delim(file=c.dat.name,fileEncoding="UCS-2LE", sep=sep))
     
     #####################################################
     # Window Region Definition
@@ -511,8 +512,11 @@ ReadDataDump.lee.2 <- function(rd.name=NULL,img1=NULL,img2=NULL,img3=NULL,img4=N
     snr.lim=5; hab.lim=.05; sm=2; ws=3; blc="SNIP"
     pcp <- ProcConstPharm(tmp.rd,sm,ws,blc)
     scp <- ScoreConstPharm(tmp.rd,pcp$blc,pcp$snr,pcp$der,snr.lim,hab.lim,sm)
-    bin <- bScore(pcp$blc, pcp$snr, snr.lim, hab.lim, levs, tmp.rd$w.dat[,"wr1"])
-    bin <- bin[,levs]
+    tmp.rd <- bscore2(tmp.rd)
+    bin <- tmp.rd$bin
+
+    #bin <- bScore(pcp$blc, pcp$snr, snr.lim, hab.lim, levs, tmp.rd$w.dat[,"wr1"])
+    bin <- bin[,levs,drop=F]
     bin["drop"] <- 0 #maybe try to generate some drop criteria from the scp 
 
     tmp.rd <- list(

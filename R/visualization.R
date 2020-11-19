@@ -468,7 +468,7 @@ ecdfPlotter <- function(dat, controlNames, testNames, legendSep = 0.2, rdName = 
     # Now Plot it up!
     mar <- c(0,4,4,0)
 
-    par(mfrow = c( (length(cellTypes) + 3), 1), mar = mar)
+    par(mfrow = c( (length(cellTypes) + 5), 1), mar = mar)
     plot(0, xlim = c(-1,1), pch = '', bty = 'n', yaxt = 'n', ylab='', xaxt='n', main = mainName)
     mar[3] <- 0 
 

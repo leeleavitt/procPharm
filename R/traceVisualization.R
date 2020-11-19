@@ -210,7 +210,7 @@ PeakFunc7 <- function(dat,cell,t.type="t.dat", info=T,lmain=NULL, bcex=.7, yvar=
             )
 
             valNames <- paste(levs, toAdd[j], sep=".")
-            val <- apply(dat$scp[cell, valNames], 1, round, digits=2)
+            val <- apply(dat$scp[cell, valNames,drop=F], 1, round, digits=2)
 
             text(
                 x = levs.loc[ levs ],
