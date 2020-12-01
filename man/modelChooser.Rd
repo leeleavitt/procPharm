@@ -5,7 +5,7 @@
 \title{This function allows you to choose models to apply to your applications
 This will allow you to choose variouse models and apply it to the applications you desire}
 \usage{
-modelChooser(dat)
+modelChooser(dat, levPat = NA, modelName = NA, windowSize = 3)
 }
 \description{
 This function allows you to choose models to apply to your applications

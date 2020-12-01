@@ -253,8 +253,9 @@ ScoreConstPharm <- function(dat, blc=NULL, snr=NULL, der=NULL, snr.lim=5, blc.li
 # Indirect effect stat maker
 #' Function taht creates a ide stat automatically if you have all control and test window regions in the data.
 #' To make this work you can't half ass your window regions you must include all control window regions
-#' @param statType this is the scp stat you would use
-#' @param testPulseNames this is the test pulse names that contains the experiments
+#' @param statType "max", "snr", "tot" are entries into this
+#' @param testPulseNames this is the test pulse names that contains the experiments, examples include "^[kK].*40" or "^[aA][cC][hH].*300[uU][mM]" or "ATP"
+#' @param controlToUse this is an integer input to specify the testPulse to use for control is lefft NA, the pulse prior to the pulse is control pulse
 #' @export
 ideStatMaker <- function(dat, statType = "max", testPulseNames = "^[kK][.]30", controlToUse = 1){
     # statType <- ".max"
@@ -307,7 +308,7 @@ ideStatMaker <- function(dat, statType = "max", testPulseNames = "^[kK][.]30", c
 
         # Now compute the F2 Stat
         collumnstat <- (statsToComp[2] - statsToComp[1] ) / (statsToComp[2] + statsToComp[1])
-        newName <- paste0(testNames[i], ".", statType, ".", "ide", ".mmnorm")
+        newName <- paste0(testNames[i], "_", testPulsesNames[1], "_", statType, "_", "ide", "_mmnorm")
         dat$scp[newName] <- collumnstat
     }
     return(dat)
@@ -343,6 +344,36 @@ deStatMaker <- function(dat, statType = "tot", testPulseNames = "^[kK][.]30", co
 
         dat$scp[newName] <- collumnstat
     }
+    return(dat)
+}
+
+#' @export
+drStatMaker <- function(dat, statType = "tot", testPulseNames=paste0("^[kK].", c(10,15,20,30,40)) ){
+    
+    testPulses <- paste0(testPulseNames, ".*", statType)
+    
+    # Conduct the peak height stat
+    for(i in 1:length(testPulseNames) ){
+        testNames <- rev(rev(grep(testPulseNames[i], names(dat$bin), value = T, ignore.case = T))[1:2])
+        testNamesLoc <- rev(rev(grep(testPulseNames[i], names(dat$bin), value = F, ignore.case = T))[1:2])
+
+        respLogic <- 
+            !(
+                # Test pulses
+                dat$bin[ testNames[1] ] == 1 |
+                dat$bin[ testNames[2] ] == 1
+            )
+
+        # Find the statistic
+        statNamesToGrab <- rev(rev(grep(testPulses[i], names(dat$scp), value = T, ignore.case = T))[1:2])
+        statsToComp <- dat$scp[statNamesToGrab]
+        statsToComp[respLogic,] <- NA
+
+        collumnstat <- (statsToComp[2] - statsToComp[1] ) / (statsToComp[2] + statsToComp[1])[1]
+        newName <- paste0(testNames[1], "_", names(dat$bin)[ testNamesLoc[2] - 1 ], "_", statType, "_", "dr", "_mmnorm")
+        dat$scp[newName] <- collumnstat
+    }
+
     return(dat)
 }
 

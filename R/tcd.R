@@ -1180,12 +1180,12 @@ tcd<-function(dat, cells=NULL,img="img1", l.img=c("img1"), yvar=FALSE, t.type="t
         #F9: ecdf plotter
         if(keyPressed == 'F9'){
             # First select the test window regions to display
-            stat <- 'ide'
+            #stat <- 'ide'
 
             # Do the stats exists?
             totalStat <- length(
                 grep(
-                    paste0(stat,"[.]mmnorm"), 
+                    "mmnorm", 
                     names(dat$scp), value = T
                 )
             )
@@ -1196,7 +1196,7 @@ tcd<-function(dat, cells=NULL,img="img1", l.img=c("img1"), yvar=FALSE, t.type="t
             }
 
             # Choose the specific selections
-            allNames <- grep(paste0('[.]', stat, ".", "mmnorm"), names(dat$scp), value= T)
+            allNames <- grep("mmnorm", names(dat$scp), value = T)
             controlNames <- grep("control", allNames, value = T)
             testNames <- setdiff(allNames, controlNames)
 

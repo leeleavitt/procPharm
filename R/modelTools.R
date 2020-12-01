@@ -793,30 +793,42 @@ lungModeler <- function(dat){
 #' This function allows you to choose models to apply to your applications
 #' This will allow you to choose variouse models and apply it to the applications you desire
 # load("Y:/Lee Leavitt/nicotinic receptor/201103.36.m.m1.p2 mc_mc.am2_PNU/RD.201103.36.m.m1.p2.Rdata")
-modelChooser <- function(dat){
+#' @export
+modelChooser <- function(dat, levPat = NA, modelName = NA, windowSize = 3){
     pyPharm <- reticulate::import('python_pharmer')
     cat("####################################################\n\n####################################################\n\n####################################################\nTHIS WILL WIPE THE SCORES OF YOUR PUSLES\n\nello, welcome to modelChooser, select a model to apply to your applications\nIt might break, so try again.")
     
     # Find and load up models based on user input
     modelLocations <- "Y:/Computer Setup/R/models/"
-    modelNames <- list.files(modelLocations)
-    cat("As a suggestion try\nkdr.h5, trained on potassium dose response\nlungMulti.h5, trained on lung profiling experiments\n")
-    selectedModelName <- select.list(modelNames)
-    model <- keras::load_model_hdf5(paste0(modelLocations,selectedModelName))
+    if(is.na(modelName)){
+        modelNames <- list.files(modelLocations)
+        cat("As a suggestion try\nkdr.h5, trained on potassium dose response\nlungMulti.h5, trained on lung profiling experiments\n")
+        selectedModelName <- select.list(modelNames)
+    }else{
+        selectedModelName <- modelName
+    }
+    model <- keras::load_model_hdf5(paste0(modelLocations, selectedModelName))
 
     # Define the window size to send into the neural networks
-    cat("How many minutes per pulse should we feed in minutes?\n 3 min or 4 min is standard\n\nEnter an integer ")
-    windowSize <- scan(n =1, what = integer())
+    if(is.na(windowSize)){
+        cat("How many minutes per pulse should we feed in minutes?\n 3 min or 4 min is standard\n\nEnter an integer ")
+        windowSize <- scan(n =1, what = integer())
+    }
 
     # Define other model parameters
     featureWindows <- 12
     tType <- c("blc")
 
     # Select the windows to send through the models
-    cat("####################################################\n\n####################################################\n\n####################################################\n\nSelect the windows to place into the neural networks.\n")
     wr <- dat$w.dat$wr1
     levs <- setdiff(unique(wr), "")
-    selectedLevs <- select.list(levs, multiple = T, title = "Select Windows")
+
+    if(is.na(levPat)){
+        cat("####################################################\n\n####################################################\n\n####################################################\n\nSelect the windows to place into the neural networks.\n")
+        selectedLevs <- select.list(levs, multiple = T, title = "Select Windows")
+    }else{
+        selectedLevs <- grep(levPat, levs, TRUE, value = T)
+    }
 
     # Obtain the start and end times of the selected windows
     x1s <- tapply(dat$w.dat[,"Time"],as.factor(wr),min)

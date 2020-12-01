@@ -7,6 +7,8 @@ setuptools.setup(name='python_pharmer',
       author_email='lee.leavitt.u@gmail.com',
       packages=setuptools.find_packages(),
       package_data={'':['models/*.h5']},
-      install_requires=['pims', 'tensorflow', 'keras', 'pandas', 'scikit-image', 'numpy', 'numba', 'xmltodict']
+      install_requires=[
+            'pims', 'tensorflow', 'keras', 'pandas', 'scikit-image', 'numpy', 'numba', 'xmltodict'
+      ]
       )
 

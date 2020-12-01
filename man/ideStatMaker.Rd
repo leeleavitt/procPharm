@@ -13,9 +13,11 @@ ideStatMaker(
 )
 }
 \arguments{
-\item{statType}{this is the scp stat you would use}
+\item{statType}{"max", "snr", "tot" are entries into this}
 
-\item{testPulseNames}{this is the test pulse names that contains the experiments}
+\item{testPulseNames}{this is the test pulse names that contains the experiments, examples include "^[kK].*40" or "^[aA][cC][hH].*300[uU][mM]" or "ATP"}
+
+\item{controlToUse}{this is an integer input to specify the testPulse to use for control is lefft NA, the pulse prior to the pulse is control pulse}
 }
 \description{
 Function taht creates a ide stat automatically if you have all control and test window regions in the data.

@@ -437,33 +437,37 @@ ecdfPlotter <- function(dat, controlNames, testNames, legendSep = 0.2, rdName = 
         mainName <- deparse(substitute(dat))
     }
 
-    # allNames <- grep(paste0('[.]', stat, ".", "mmnorm"), names(tmpRD$scp), value= T)
-    # controlNames <- grep("control", allNames, value = T)
-    # testNames <- setdiff(allNames, controlNames)
-    
-    # if(is.na(controlToView)){
-    #     controlNames <- select.list(controlNames, multiple = T)
-    # }else{
-    #     controlNames <- controlNames[controlToView]
-    # }
-
-    collumns <- c(controlNames, testNames)
-
     if(is.na(cell_types)){
         cellTypes <- c("L1","L2","L3","L4","L5","L6","G7","G8","G9","G10","R11","R12","R13","N14","N15","N16", "UC")
     }else{
         cellTypes <- cell_types
     }
-    controlColorFunc <- colorRampPalette(c("black", 'gray50'))
-    cols <- c(
-        controlColorFunc(length(controlNames)), 
-        rev(rev(RColorBrewer::brewer.pal(n = length(collumns), 'Dark2')))
-    )
 
-    lwds <- c(
-        rep(3, length(controlNames)), 
-        rep(2, 8)
-    )
+
+    if(length(controlNames) > 1 ){
+        print(controlNames)
+        print("controlsinecdf")
+        collumns <- c(controlNames, testNames)
+
+        controlColorFunc <- colorRampPalette(c("black", 'gray50'))
+        cols <- c(
+            controlColorFunc(length(controlNames)), 
+            rev(rev(RColorBrewer::brewer.pal(n = length(collumns), 'Dark2')))
+        )
+
+        lwds <- c(
+            rep(3, length(controlNames)), 
+            rep(2, length(collumns))
+        )
+    }else{
+        collumns <- c(testNames)
+        colorFunc <- colorRampPalette(c("hotpink4", 'plum1'))
+
+        cols <- colorFunc(length(collumns))
+
+        lwds <- rep(2, length(collumns))
+
+    }
 
     # Now Plot it up!
     mar <- c(0,4,4,0)
@@ -477,7 +481,7 @@ ecdfPlotter <- function(dat, controlNames, testNames, legendSep = 0.2, rdName = 
         tryCatch({
             plot(
                 ecdf(dat$scp[dat$cell_types[[ cellTypes[i] ]] , collumns[1]]), 
-                col = 'black', 
+                col = cols[1], 
                 xlim = c(-1,1), 
                 main = '', 
                 ylab = cellTypes[i], 
@@ -498,6 +502,8 @@ ecdfPlotter <- function(dat, controlNames, testNames, legendSep = 0.2, rdName = 
                     lwd = lwds[j]
                 )
             }
+
+            
             legend('topleft', legend = paste("N= ", length(dat$cell_types[[cellTypes[i] ]])), bty = 'n')
             
         }, error = function(e){
