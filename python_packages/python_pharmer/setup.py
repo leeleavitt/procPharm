@@ -13,7 +13,8 @@ setuptools.setup(name='python_pharmer',
             'keras==2.3.1', 
             'pandas==1.0.1', 
             'scikit-image==0.16.2', 
-            'numpy==1.18.1'
+            'numpy==1.18.1',
+            'hdf5==1.10.4'
       ]
 )
 
