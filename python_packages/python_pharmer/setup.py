@@ -8,7 +8,12 @@ setuptools.setup(name='python_pharmer',
       packages=setuptools.find_packages(),
       package_data={'':['models/*.h5']},
       install_requires=[
-            'pims', 'tensorflow', 'keras', 'pandas', 'scikit-image', 'numpy', 'numba', 'xmltodict'
+            'pims=0.4.1', 
+            'tensorflow=1.14', 
+            'keras=2.3.1', 
+            'pandas=1.0.1', 
+            'scikit-image=0.16.2', 
+            'numpy=1.18.1'
       ]
-      )
+)
 
