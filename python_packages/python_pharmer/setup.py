@@ -14,7 +14,6 @@ setuptools.setup(name='python_pharmer',
             'pandas==1.0.1', 
             'scikit-image==0.16.2', 
             'numpy==1.18.1',
-            'hdf5==1.10.4',
             'xmltodict==0.12.0'
       ]
 )
