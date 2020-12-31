@@ -257,59 +257,69 @@ ScoreConstPharm <- function(dat, blc=NULL, snr=NULL, der=NULL, snr.lim=5, blc.li
 #' @param testPulseNames this is the test pulse names that contains the experiments, examples include "^[kK].*40" or "^[aA][cC][hH].*300[uU][mM]" or "ATP"
 #' @param controlToUse this is an integer input to specify the testPulse to use for control is lefft NA, the pulse prior to the pulse is control pulse
 #' @export
-ideStatMaker <- function(dat, statType = "max", testPulseNames = "^[kK][.]30", controlToUse = 1){
+ideStatMaker <- function(dat, statType = "max", testPulseExp = "^[kK][.]20", controlToUse = c(1,2,3)){
     # statType <- ".max"
     # testPulseNames <- "^[kK][.]20"
     # controlToView <- c(1,2)
 
     levs <- setdiff(unique(as.character(dat$w.dat$wr1)), "")
 
-    testPulses <- grep(testPulseNames, 
+    pulses <- grep(testPulseExp, 
         levs, 
         value = F, 
         ignore.case = T
     )
     
-    testPulsesNames <- grep(testPulseNames, 
+    pulsesNames <- grep(testPulseExp, 
         levs, 
         value = T, 
         ignore.case = T
     )
 
     # Within this region we will compute a specific minmax norm stat
-    test <- testPulses[2:length(testPulses)]
+    testPulses <- pulsesNames[2:length(pulsesNames)]
+    testPulsesScp <- paste0(testPulses, ".", statType)
+
     
-    if(is.na(controlToUse)){
-        control <- rep(testPulses[controlToUse], length(test))
+    if(!is.na(controlToUse)){
+        controlPulses <- testPulsesNames[controlToUse]
+        controlPulsesScp <- paste0(controlPulses, ".", statType)
     }else{
-        control <- testPulses
+        controlPulses <- pulsesNames
+        controlPulsesScp <- paste0(controlPulses, ".", statType)
     }
 
-    testNames <- levs[testPulses + 1 ]
-
-    for(i in 1:length(test) ){
+    for(i in 1:length(testPulses) ){
         # First answer is there a response in the test or control. 
-        respLogic <- 
+        
+        if(!is.na(controlToUse)){
+            test <- dat$scp[testPulsesScp[i]]
+            control <- apply(dat$scp[controlPulsesScp], 1, mean)
+            
+            respLogic <- 
             !(
                 # Test pulses
-                dat$bin[ levs[test[i]] ] == 1 |
-                dat$bin[ levs[control[i]] ] == 1
+                dat$bin[ testPulses[i] ] == 1 |
+                apply(dat$bin[ controlPulses ] == 1, 1, any)
             )
-
-        # Grab the control window followed by the test window, 
-        statNamesToGrab <- paste0(
-            c(levs[control[i]], levs[test[i]]), 
-            ".", 
-            statType
-        )
-        statsToComp <- dat$scp[statNamesToGrab]
-        # remove all nonresponders
-        statsToComp[respLogic,] <- NA
+        }else{
+            test <- dat$scp[ testPulsesScp[i] ]
+            control <- dat$scp[ controlPulsesScp[i] ]
+            
+            respLogic <- 
+            !(
+                # Test pulses
+                dat$bin[ testPulses[i] ] == 1 |
+                dat$bin[ controlPulses[i] ] == 1
+            )
+        }
 
         # Now compute the F2 Stat
-        collumnstat <- (statsToComp[2] - statsToComp[1] ) / (statsToComp[2] + statsToComp[1])
-        newName <- paste0(testNames[i], "_", testPulsesNames[1], "_", statType, "_", "ide", "_mmnorm")
-        dat$scp[newName] <- collumnstat
+        stat <- (test - control)/(test + control)
+
+        newName <- paste0(levs[pulses[i] + 1], "_", statType, "_", "ide", "_mmnorm")
+        dat$scp[newName] <- stat
+        dat$scp[respLogic, newName] <- NA
     }
     return(dat)
 }
