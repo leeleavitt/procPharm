@@ -1250,10 +1250,10 @@ tcd<-function(dat, cells=NULL,img="img1", l.img=c("img1"), yvar=FALSE, t.type="t
                 # calculate the number of collumns
                 collumns <- ceiling(cellTypeTotal / rowLayout)
 
-                windowHeight  <- 16
+                windowHeight  <- 20
 
                 windows(
-                    width=5 * collumns,
+                    width=4 * collumns,
                     height= windowHeight,
                     xpos=1000, 
                     ypos = 0)
