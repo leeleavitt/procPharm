@@ -46,7 +46,7 @@ devtools::install()
 ## quickSource
 tmpRD <- get(load("Y:/NP-Nehls/nAChR Research/Other data/223L/200812.30.m.m3.p1 K10_K15_K20_K40_mc_dose/RD.200812.30.m.m3.p1.Rdata"))
 
-files.sources = list.files("C:/Users/leele/Documents/procPharm/R/",full.names = T)
+files.sources = list.files("C:/Users/leeLeavittLapTop/Documents/procPharm/procPharm/R/",full.names = T)
 sapply(files.sources, source)
 
 tmpRD <- drStatMaker(tmpRD)

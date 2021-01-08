@@ -439,17 +439,19 @@ labelBinder <- function(dat, windowSizeMin = 3, tType = "t.dat", winMin = 1.2, w
 #' @export
 cell_type_modeler <- function(dat){
     pyPharm <- reticulate::import("python_pharmer")
+    driveLoc <- strsplit(getwd(), "/")[[1]][1]
+
     # R12 is very dirty lots of N15 reassignment
     # R13 vs N14 is very dirty, so I am going to try and clean it up using neuralNets
-    aitcModel <- "Y:/Computer Setup/R/models/aitc.h5"
-    menthModel <- "Y:/Computer Setup/R/models/menth.h5"
-    capsModel <- "Y:/Computer Setup/R/models/caps.h5"
-    k40Model <- "Y:/Computer Setup/R/models/k40.h5"
-    r3jModel <- "Y:/Computer Setup/R/models/r3j.h5"
+    aitcModel <- paste0(driveLoc, "/models/aitc.h5")
+    menthModel <- paste0(driveLoc, "/models/menth.h5")
+    capsModel <- paste0(driveLoc, "/models/caps.h5")
+    k40Model <- paste0(driveLoc, "/models/k40.h5")
+    r3jModel <- paste0(driveLoc, "/models/r3j.h5")
 
     # ImageModels
-    ib4Model <- "Y:/Computer Setup/R/models/ib4.h5"
-    gfpModel <- "Y:/Computer Setup/R/models/gfp.h5"
+    ib4Model <- paste0(driveLoc, "/models/ib4.h5")
+    gfpModel <- paste0(driveLoc, "/models/gfp.h5")
 
     models <- c(aitcModel, menthModel, capsModel, k40Model, r3jModel, ib4Model, gfpModel)
 
@@ -679,7 +681,7 @@ modelViewer <- function(dat, cell, plot.new = T){
 #' except the first k40 window, which has its own model to use
 #' @export
 potassiumModeler <- function(dat){
-    model <- keras::load_model_hdf5("Y:/Computer Setup/R/models/kdr.h5")
+    model <- keras::load_model_hdf5("D:/models/kdr.h5")
     pyPharm <- reticulate::import('python_pharmer')
 
     windowSize <- 3
