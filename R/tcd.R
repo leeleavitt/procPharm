@@ -1244,13 +1244,13 @@ tcd<-function(dat, cells=NULL,img="img1", l.img=c("img1"), yvar=FALSE, t.type="t
             tryCatch(dev.off(which=ecdf.window), error=function(e)NULL)
 
             tryCatch({
-                rowLayout <- 6
+                rowLayout <- 5
                 cellTypeTotal <- length(SETTINGS$ecdf$cell_types)
                 # only 6 cell types allowed per collumn
                 # calculate the number of collumns
                 collumns <- ceiling(cellTypeTotal / rowLayout)
 
-                windowHeight  <- 10
+                windowHeight  <- 12
 
                 windows(
                     width=4 * collumns,
