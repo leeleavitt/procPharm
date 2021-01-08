@@ -11,9 +11,9 @@
 #' @param plot_new Will create a new window for this plot
 #' @param abline_loc where to display the added line to help display data better
 #' @export
-density_ct_plotter<-function(dat, cells, cell_types = NA, stat=dat$c.dat["area"],xlim_top=NULL, xlim_bottom=NULL,overlay=T,dense_sep=T,plot_new=T,env=NULL,dat.name=NULL, abline_loc=0){	
+density_ct_plotter<-function(dat, cells, cell_types = NA, stat=dat$c.dat["area"],xlim_top=NULL, xlim_bottom=NULL,overlay=T,dense_sep=T,plot_new=T,env=NULL,dat.name=NULL, abline_loc=0){
     stat[is.na(stat)]<-0
-    
+
     par(xpd=F, bty='n')
     if(is.null(dat.name)){
         dat.name<-deparse(substitute(dat))
@@ -24,7 +24,7 @@ density_ct_plotter<-function(dat, cells, cell_types = NA, stat=dat$c.dat["area"]
         density_window<-dev.cur()
         #density_plot<-dev.cur()
     }
-    
+
     if(plot_new & dense_sep==F){
         dev.new(width=5,height=5)
         density_window<-dev.cur()
@@ -46,7 +46,7 @@ density_ct_plotter<-function(dat, cells, cell_types = NA, stat=dat$c.dat["area"]
         "darkturquoise", "green1", "yellow4", "yellow3",
         "darkorange4", "brown"
     )
-    
+
     all.cells.density<-density(stat[,1])
     #Overlay plot used in bp.selector
     if(is.na(cell_types)){
@@ -67,13 +67,13 @@ density_ct_plotter<-function(dat, cells, cell_types = NA, stat=dat$c.dat["area"]
         plot_sep<-ceiling(sqrt(length(cell_types)+2))
         par(mfrow=c(plot_sep,plot_sep),mai=c(.25,.25,.25,.25))
     }
-    
+
     if( is.null(xlim_top) ){
         xlim_top<-max(stat[,1])
     }else{
         xlim_top<-xlim_top
     }
-    
+
     if( is.null(xlim_bottom) ){
         xlim_bottom<-min(stat[,1])
     }else{
@@ -84,16 +84,16 @@ density_ct_plotter<-function(dat, cells, cell_types = NA, stat=dat$c.dat["area"]
     xlim <- c(xlim_bottom, xlim_top)
     dev.set(density_window)
     plot(
-        all.cells.density, 
+        all.cells.density,
         xlab="",
-        xlim=xlim, 
-        ylim=c(0,max(all.cells.density$y)*1.5), 
+        xlim=xlim,
+        ylim=c(0,max(all.cells.density$y)*1.5),
         pch="",lwd=3, col="black",
         main=names(stat),
         xaxt = 'n'
         #main = ""
     )
-    
+
     if(max(xlim) > 10){
         axisSeq <- ceiling(seq(xlim[1], xlim[2], length.out = 15))
     }else{
@@ -109,14 +109,14 @@ density_ct_plotter<-function(dat, cells, cell_types = NA, stat=dat$c.dat["area"]
             if(length(cell_types[[i]])>2){
                 tryCatch({
                     cell_type_density <- density(stat[cell_types[[i]],])
-                    lines(cell_type_density, col="black", lwd=5) 
-                    lines(cell_type_density, col=color[i], lwd=2)  
+                    lines(cell_type_density, col="black", lwd=5)
+                    lines(cell_type_density, col=color[i], lwd=2)
                 }, error = function(e) NULL)
             }
         }
     legend("topleft",legend=names(cell_types), fill=color, cex=.6,box.col="Black")
     }
-    
+
     if(dense_sep){
         for(i in 1:length(cell_types)){
             if(length(cell_types[[i]])>2){
@@ -124,14 +124,14 @@ density_ct_plotter<-function(dat, cells, cell_types = NA, stat=dat$c.dat["area"]
 
                 plot(
                     cell_type_density, col="black", lwd=5,
-                    xlim=xlim, 
+                    xlim=xlim,
                     ylim=c(0,max(all.cells.density$y)*1.5),
                     main=paste(names(cell_types[i])," n=",length(cell_types[[i]])),
                     bty="l",
                     xlab = ''
-                )   
+                )
                 abline(v=abline_loc,col="red")
-                lines(cell_type_density, col=color[i], lwd=2) 
+                lines(cell_type_density, col=color[i], lwd=2)
             }else{
                 plot(0,0,pch="",main=paste(names(cell_types[i])," n=",length(cell_types[[i]])),bty="l", xlab='')
             }
@@ -163,7 +163,7 @@ density_ct_plotter<-function(dat, cells, cell_types = NA, stat=dat$c.dat["area"]
 #' # Once it is saved, open the cvs and manually rename the amp something like "CNF EP1 1uM"
 #' #
 #' # Set the working directory to have the correct location. This will be where the files are located
-#' # In the example you can see that i've set the working directory to 
+#' # In the example you can see that i've set the working directory to
 #' setwd('Y:/Cris Urcino/CNF experiments/Ep1/')
 #' # This means i can access each csv file in the following way
 #' tables <- c(
@@ -175,7 +175,7 @@ density_ct_plotter<-function(dat, cells, cell_types = NA, stat=dat$c.dat["area"]
 #' # Now barPlotter() it,
 #' barPlotter(tables)
 #' }
-#' @export 
+#' @export
 barPlotter <- function(dat = NULL, cols = 'Dark2', selectCT = T, horiz=T){
     print(deparse(substitute(dat)))
     cat("\nREAD ME\nWelcome to barPlotter to use me,\nbarPlotter(dat=RD.experiment, col = \'YlOrRd\')\n\nCustomize your colors, TRY \n\n\'Set1\', \'Set2\', \'Pastel1\', \'Dark2\', \'PuBu\', \'Reds\'\n\nGo to this webpage to get other names \nhttps://www.datanovia.com/en/wp-content/uploads/dn-tutorials/ggplot2/figures/0101-rcolorbrewer-palette-rcolorbrewer-palettes-1.png")
@@ -187,7 +187,7 @@ barPlotter <- function(dat = NULL, cols = 'Dark2', selectCT = T, horiz=T){
         for( i in 1:length(dat)){
             table <- read.csv(dat[i], row.names = 1)
             tableList[[ row.names(table)[2] ]] <- table
-        }        
+        }
     }else{
         table <- TableBrewer(dat, ,F,F)
         # for each row except the first (this is the number of cells in each cell type)
@@ -200,7 +200,7 @@ barPlotter <- function(dat = NULL, cols = 'Dark2', selectCT = T, horiz=T){
     # Select the cell type to display
     if(selectCT){
         tableNames <- colnames(table)
-        cat("\nSelect Cell Types to display\n") 
+        cat("\nSelect Cell Types to display\n")
         tableNames <- select.list(tableNames, multiple=T, title="Select CellTypes")
         table <- table[tableNames]
 
@@ -227,8 +227,8 @@ barPlotter <- function(dat = NULL, cols = 'Dark2', selectCT = T, horiz=T){
         dev.new(width=5, height=12)
         par(mar=c(5,4,4,7))
         bpDims <- barplot(
-            tablePercsMut, 
-            beside=T, 
+            tablePercsMut,
+            beside=T,
             horiz=T,
             col=cols,
             yaxt='n',
@@ -241,9 +241,9 @@ barPlotter <- function(dat = NULL, cols = 'Dark2', selectCT = T, horiz=T){
         responses <- names(tableList)
         legend(
             par('usr')[2]+xinch(.2),
-            par('usr')[4]+yinch(.2), 
-            responses, 
-            fill=rev(cols), 
+            par('usr')[4]+yinch(.2),
+            responses,
+            fill=rev(cols),
             border=NA,
             bty='n',
             horiz=F,
@@ -278,8 +278,8 @@ barPlotter <- function(dat = NULL, cols = 'Dark2', selectCT = T, horiz=T){
         dev.new(width=12, height=5)
         par(mar=c(5,5,5,2))
         bpDims <- barplot(
-            tablePercsMut, 
-            beside=T, 
+            tablePercsMut,
+            beside=T,
             horiz=F,
             col=cols,
             xaxt='n',
@@ -292,9 +292,9 @@ barPlotter <- function(dat = NULL, cols = 'Dark2', selectCT = T, horiz=T){
         responses <- names(tableList)
         legend(
             mean(c(par('usr')[1], par('usr')[2]))-xinch(1.8),
-            par('usr')[4]+yinch(.8), 
-            responses, 
-            fill=cols, 
+            par('usr')[4]+yinch(.8),
+            responses,
+            fill=cols,
             border=NA,
             bty='n',
             horiz=T,
@@ -319,7 +319,7 @@ barPlotter <- function(dat = NULL, cols = 'Dark2', selectCT = T, horiz=T){
             text(xLocs, yLocs, textToPlace, cex=.6, srt=90)
         }
     }
-    
+
     dat.name <- deparse(substitute(dat))
     if(any(dat.name %in% c("tmp.rd", "tmpRD","tmp"))){
         dat.name <- ls(pattern = "^RD[.]", envir = .GlobalEnv)
@@ -342,7 +342,7 @@ boxPlotter <- function(mat, xlim_top=NULL, xlim_bottom=NULL, activewindows, cont
         xLabel <- NA
     })
 
-    
+
     xLabel <- "Active.Max/Control.Max"
 
     if( is.null(xlim_top) ){
@@ -350,7 +350,7 @@ boxPlotter <- function(mat, xlim_top=NULL, xlim_bottom=NULL, activewindows, cont
     }else{
         xlim_top<-xlim_top
     }
-    
+
     if( is.null(xlim_bottom) ){
         xlim_bottom<-min(stat[,1])
     }else{
@@ -360,23 +360,23 @@ boxPlotter <- function(mat, xlim_top=NULL, xlim_bottom=NULL, activewindows, cont
     xlim <- c(xlim_bottom, xlim_top)
 
     bpStats <- boxplot(
-        mat[,1], 
-        outline=F, 
-        ylim  = xlim, 
-        boxfill=rgb(1,1,1,.6,maxColorValue = 1), 
-        width=5, 
-        lty=1, 
-        lwd=3, 
-        main=mainName, 
-        xlab=xLabel, 
+        mat[,1],
+        outline=F,
+        ylim  = xlim,
+        boxfill=rgb(1,1,1,.6,maxColorValue = 1),
+        width=5,
+        lty=1,
+        lwd=3,
+        main=mainName,
+        xlab=xLabel,
         horizontal=T,
         xaxt='n')
     par(xpd=T)
-    
+
     tryCatch({
         # Jittered cell names to view ontop of boxplot
         if( length(row.names(mat)) > 500 ){
-            abovequartiles <- 
+            abovequartiles <-
                 mat[,1] < bpStats$stats[1,1] |
                 mat[,1] > bpStats$stats[5,1]
 
@@ -387,12 +387,12 @@ boxPlotter <- function(mat, xlim_top=NULL, xlim_bottom=NULL, activewindows, cont
         text(
             jitter(
                 rep(
-                    1, 
+                    1,
                     length(mat[cellsToView, 1])
                 ),10
-            )~mat[cellsToView,1], 
-            labels=row.names(mat[cellsToView,]), 
-            cex=.5, 
+            )~mat[cellsToView,1],
+            labels=row.names(mat[cellsToView,]),
+            cex=.5,
             col=rgb(1,1,1,2, maxColorValue=10)
         )#,ylim=c(0,2.5), add=T, vertical=T, method="jitter", jitter=.2)
     }, error=function(e) NULL)
@@ -416,7 +416,7 @@ testPulseFinder <- function(dat){
     majorPulseTest <- names(which(pulseTypesSumm == max(pulseTypesSumm)))
     pusleTestSplit <- strsplit(majorPulseTest, "[.]")[[1]]
 
-    # Now create the regulr expression that will get me to select the 
+    # Now create the regulr expression that will get me to select the
     pulseTestRegex <- paste0("^", pusleTestSplit[1], "[.]", pusleTestSplit[2])
     return(pulseTestRegex)
 }
@@ -429,7 +429,7 @@ testPulseFinder <- function(dat){
 #' @param stat slection between 'de' which returns the direct effect stat or 'ide' which displays the indirect effect stat
 #' @param controlToView a major highlighter of this vixualization is the ability to compare against a control window region
 #' @export
-ecdfPlotter <- function(dat, controlNames, testNames, legendSep = 0.2, rdName = NA, cell_types = NA){
+ecdfPlotter <- function(dat, cells = NA, controlNames, testNames, legendSep = 0.2, rdName = NA, cell_types = NA){
     # if the rdName is NA
     if(!is.na(rdName)){
         mainName <- rdName
@@ -445,18 +445,16 @@ ecdfPlotter <- function(dat, controlNames, testNames, legendSep = 0.2, rdName = 
 
 
     if(length(controlNames) > 1 ){
-        print(controlNames)
-        print("controlsinecdf")
         collumns <- c(controlNames, testNames)
 
         controlColorFunc <- colorRampPalette(c("black", 'gray50'))
         cols <- c(
-            controlColorFunc(length(controlNames)), 
+            controlColorFunc(length(controlNames)),
             rev(rev(RColorBrewer::brewer.pal(n = length(collumns), 'Dark2')))
         )
 
         lwds <- c(
-            rep(3, length(controlNames)), 
+            rep(3, length(controlNames)),
             rep(2, length(collumns))
         )
     }else{
@@ -472,60 +470,96 @@ ecdfPlotter <- function(dat, controlNames, testNames, legendSep = 0.2, rdName = 
     # Now Plot it up!
     mar <- c(0,4,4,0)
 
-    par(mfrow = c( (length(cellTypes) + 5), 1), mar = mar)
+    # Creat a layout to fill in
+    rowLayout <- 8
+    cellTypeTotal <- length(cell_types)
+    # only 6 cell types allowed per collumn
+    # calculate the number of collumns
+    layoutCollumns <- ceiling(cellTypeTotal / rowLayout)
+
+    ecdfSeq <- c(seq(1, cellTypeTotal, 1) + 1, rep(0, (layoutCollumns * rowLayout) - cellTypeTotal))
+    dim(ecdfSeq) <- c(rowLayout, layoutCollumns)
+
+    titlePos <- rep(1, layoutCollumns)
+    xaxisPos <- seq(cellTypeTotal+2, length.out = layoutCollumns)
+    legendPos <- rep(xaxisPos[length(xaxisPos)]+1, layoutCollumns)
+
+    layoutMat <- rbind(
+        titlePos,
+        ecdfSeq,
+        xaxisPos,
+        legendPos
+    )
+
+    print(layoutMat)
+
+
+    #par(mfrow = c( (length(cellTypes) + 4), 1), mar = mar)
+    layout(layoutMat)
     plot(0, xlim = c(-1,1), pch = '', bty = 'n', yaxt = 'n', ylab='', xaxt='n', main = mainName)
-    mar[3] <- 0 
+    mar[3] <- 0
 
     for(i in 1:length(cellTypes)){
         par(mar = mar, las = 2)
         tryCatch({
+            if(!is.na(cells)){
+                cellsToView <- intersect(cells, dat$cell_types[[ cellTypes[i] ]])
+            }else{
+                cellsToView <- dat$cell_types[[ cellTypes[i] ]]
+            }
             plot(
-                ecdf(dat$scp[dat$cell_types[[ cellTypes[i] ]] , collumns[1]]), 
-                col = cols[1], 
-                xlim = c(-1,1), 
-                main = '', 
-                ylab = cellTypes[i], 
-                yaxt = 'n', 
-                xaxt = 'n', 
+                ecdf(dat$scp[cellsToView , collumns[1]]),
+                col = cols[1],
+                xlim = c(-1,1),
+                main = '',
+                ylab = cellTypes[i],
+                yaxt = 'n',
+                xaxt = 'n',
                 bty = 'n',
                 do.points=F,
-                col.01line = NULL, 
+                col.01line = NULL,
                 lwd = lwds[1]
             )
             for(j in 2:length(collumns)){
                 lines(
-                    ecdf(dat$scp[dat$cell_types[[ cellTypes[i] ]] , collumns[j]]), 
-                    type = 'l', 
+                    ecdf(dat$scp[cellsToView , collumns[j]]),
+                    type = 'l',
                     col = cols[j],
                     do.points=F,
-                    col.01line = NULL, 
+                    col.01line = NULL,
                     lwd = lwds[j]
                 )
             }
 
-            
             legend('topleft', legend = paste("N= ", length(dat$cell_types[[cellTypes[i] ]])), bty = 'n')
-            
+
         }, error = function(e){
             plot(
-                0,0, 
-                ylim =c(0,1), 
-                xlim = c(-1,1), 
-                yaxt = 'n', 
+                0,0,
+                ylim =c(0,1),
+                xlim = c(-1,1),
+                yaxt = 'n',
                 xaxt = 'n',
-                bty = 
-                'n', 
-                ylab = cellTypes[i], 
+                bty =
+                'n',
+                ylab = cellTypes[i],
                 main = "", pch =''
             )
             text(0,0.5,"No Values")
             legend(
-                'topleft', 
-                legend = paste("N= ", length(dat$cell_types[[cellTypes[i] ]])), 
+                'topleft',
+                legend = paste("N= ", length(dat$cell_types[[cellTypes[i] ]])),
                 bty = 'n'
             )
         })
         abline(v = c(0,-1), h = c(0))
+    }
+
+    #Plot of the x axis
+    for(i in 1:layoutCollumns){
+        mar[1] <- 3
+        par(mar = mar)
+        plot(0, xlim = c(-1,1), pch = '', bty = 'n', yaxt = 'n', ylab='')
     }
 
     # plot for legend
@@ -535,31 +569,27 @@ ecdfPlotter <- function(dat, controlNames, testNames, legendSep = 0.2, rdName = 
     legendVals <- sub("[.]max[.]ide", "", collumns)
     legendVals <- sub("[_]", "\n", legendVals)
     legendVals <- sub("[.]mmnorm", "", legendVals)
-    
+
     gsub("[.]mmnorm", '', collumns)
 
     legend('top',
-        legendVals[1:4] , 
-        fill = cols[1:4], 
-        bty = 'n', 
-        border = NA, 
-        horiz = T, 
+        legendVals[1:4] ,
+        fill = cols[1:4],
+        bty = 'n',
+        border = NA,
+        horiz = T,
         text.width = legendSep
     )
 
     if( length(legendVals) > 4){
         legend('bottom',
-            legendVals[5:length(legendVals)] , 
-            fill = cols[5:length(legendVals)], 
-            bty = 'n', 
-            border = NA, 
-            horiz = T, 
+            legendVals[5:length(legendVals)] ,
+            fill = cols[5:length(legendVals)],
+            bty = 'n',
+            border = NA,
+            horiz = T,
             text.width = legendSep
         )
     }
-    
-    #Plot of rthe x axis
-    mar[1] <- 3
-    par(mar = mar)
-    plot(0, xlim = c(-1,1), pch = '', bty = 'n', yaxt = 'n', ylab='')
+
 }

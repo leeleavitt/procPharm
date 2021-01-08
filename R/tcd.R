@@ -1241,27 +1241,40 @@ tcd<-function(dat, cells=NULL,img="img1", l.img=c("img1"), yvar=FALSE, t.type="t
                 )
             })
 
-            
             tryCatch(dev.off(which=ecdf.window), error=function(e)NULL)
 
             tryCatch({
-                if(length(SETTINGS$ecdf$cell_types) > 12){
-                    windowHeight  <- 12
-                }else{
-                    windowHeight <- length(SETTINGS$ecdf$cell_types)
-                }
+                rowLayout <- 8
+                cellTypeTotal <- length(SETTINGS$ecdf$cell_types)
+                # only 6 cell types allowed per collumn
+                # calculate the number of collumns
+                collumns <- ceiling(cellTypeTotal / rowLayout)
+
+                windowHeight  <- 16
 
                 windows(
-                    width=5,
+                    width=5 * collumns,
                     height= windowHeight,
                     xpos=1000, 
                     ypos = 0)
             }, error = function(e)windows(width=5,height=windowHeight))
             ecdf.window<-dev.cur()            
 
+            # Ask to only consider the cells in view
+            cat("Only consider cells in view?\n")
+            sel <- c("yes",'no')
+            sel <- sel[menu(sel)]
+
+            if(sel == 'yes'){
+                ecdfCells <- cnames
+            }else{
+                ecdfCells <- NA
+            }
+            
+
             # Here we select the names of the collumns to observer
             dev.set(ecdf.window)
-            ecdfPlotter(dat, SETTINGS$ecdf$controlChoices, SETTINGS$ecdf$testChoices, legendSep = .3, rdName = dat.name, cell_types = SETTINGS$ecdf$cell_types)
+            ecdfPlotter(dat, cells = ecdfCells, controlNames=SETTINGS$ecdf$controlChoices, testNames = SETTINGS$ecdf$testChoices, legendSep = .3, rdName = dat.name, cell_types = SETTINGS$ecdf$cell_types)
         }
 
         if(keyPressed=="1")

@@ -61,4 +61,6 @@ tmpRD <- get(load("G:/My Drive/gaba paper/rd experiments/RD.201219.48m.m3.p1/RD.
 files.sources = list.files("C:/Users/leele/Documents/procPharm/R/",full.names = T)
 sapply(files.sources, source)
 
+tcd(tmpRD)
+
 

@@ -282,7 +282,7 @@ ideStatMaker <- function(dat, statType = "max", testPulseExp = "^[kK][.]20", con
 
     
     if(!is.na(controlToUse)){
-        controlPulses <- testPulsesNames[controlToUse]
+        controlPulses <- pulsesNames[controlToUse]
         controlPulsesScp <- paste0(controlPulses, ".", statType)
     }else{
         controlPulses <- pulsesNames

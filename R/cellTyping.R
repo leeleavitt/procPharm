@@ -498,7 +498,7 @@ Cell_Typer_2<-function(tmp_rd, edit_ct=F, UL_classify=T, GFP=T, cell_types=NA){
 #' @param dat RD.experiment
 #' @param UL_classify boolean decision to classify large diameter cells
 #' @export
-Cell_Typer_3 <- function(dat){
+Cell_Typer_3 <- function(dat, modelDir = NA){
     # This logic assesess whether to reclassify
     largeClassifiedAlready <- any(c("L1","L2", "L3", "L4", "L5", "L6") %in% names(dat$cell_types))
 
@@ -742,7 +742,7 @@ Cell_Typer_3 <- function(dat){
     toReClassify <- Reduce(union, cell_types[selectCT])
     if( !("cellTypeModel" %in% names(dat)) ){
         # Correct my models to improve things a bit
-        dat <- cell_type_modeler(dat)
+        dat <- cell_type_modeler(dat, modelDir)
         
         x <- dat$cellTypeModel[toReClassify]
         for(i in 1:length(x)){

@@ -6,7 +6,7 @@
 Simply inputing a RD.experiment which contains AMCK, R3J, and and image of IB4 only at
 img3 and an image of GFP only at img4, this function returns a list of model output matrices.}
 \usage{
-cell_type_modeler(dat)
+cell_type_modeler(dat, modelDir = NA)
 }
 \description{
 Using marios cell type models I will create the cell_type model list. This is BETA version,

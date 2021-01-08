@@ -8,6 +8,7 @@ It depends on the cell types present to display the stat.
 \usage{
 ecdfPlotter(
   dat,
+  cells = NA,
   controlNames,
   testNames,
   legendSep = 0.2,

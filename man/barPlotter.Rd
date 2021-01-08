@@ -33,7 +33,7 @@ TableBrewer(RD.experiment)
 # Once it is saved, open the cvs and manually rename the amp something like "CNF EP1 1uM"
 #
 # Set the working directory to have the correct location. This will be where the files are located
-# In the example you can see that i've set the working directory to 
+# In the example you can see that i've set the working directory to
 setwd('Y:/Cris Urcino/CNF experiments/Ep1/')
 # This means i can access each csv file in the following way
 tables <- c(
