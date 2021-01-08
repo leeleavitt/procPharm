@@ -429,7 +429,7 @@ testPulseFinder <- function(dat){
 #' @param stat slection between 'de' which returns the direct effect stat or 'ide' which displays the indirect effect stat
 #' @param controlToView a major highlighter of this vixualization is the ability to compare against a control window region
 #' @export
-ecdfPlotter <- function(dat, cells = NA, controlNames, testNames, legendSep = 0.2, rdName = NA, cell_types = NA){
+ecdfPlotter <- function(dat, cells = NA, controlNames, testNames, legendSep = 0.2, rdName = NA, cell_types = NA, rowLayout = 4){
     # if the rdName is NA
     if(!is.na(rdName)){
         mainName <- rdName
@@ -471,7 +471,7 @@ ecdfPlotter <- function(dat, cells = NA, controlNames, testNames, legendSep = 0.
     mar <- c(0,4,4,0)
 
     # Creat a layout to fill in
-    rowLayout <- 8
+    #rowLayout <- 8
     cellTypeTotal <- length(cell_types)
     # only 6 cell types allowed per collumn
     # calculate the number of collumns

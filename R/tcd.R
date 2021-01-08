@@ -1244,13 +1244,13 @@ tcd<-function(dat, cells=NULL,img="img1", l.img=c("img1"), yvar=FALSE, t.type="t
             tryCatch(dev.off(which=ecdf.window), error=function(e)NULL)
 
             tryCatch({
-                rowLayout <- 8
+                rowLayout <- 6
                 cellTypeTotal <- length(SETTINGS$ecdf$cell_types)
                 # only 6 cell types allowed per collumn
                 # calculate the number of collumns
                 collumns <- ceiling(cellTypeTotal / rowLayout)
 
-                windowHeight  <- 20
+                windowHeight  <- 10
 
                 windows(
                     width=4 * collumns,
@@ -1274,7 +1274,7 @@ tcd<-function(dat, cells=NULL,img="img1", l.img=c("img1"), yvar=FALSE, t.type="t
 
             # Here we select the names of the collumns to observer
             dev.set(ecdf.window)
-            ecdfPlotter(dat, cells = ecdfCells, controlNames=SETTINGS$ecdf$controlChoices, testNames = SETTINGS$ecdf$testChoices, legendSep = .3, rdName = dat.name, cell_types = SETTINGS$ecdf$cell_types)
+            ecdfPlotter(dat, cells = ecdfCells, controlNames=SETTINGS$ecdf$controlChoices, testNames = SETTINGS$ecdf$testChoices, legendSep = .3, rdName = dat.name, cell_types = SETTINGS$ecdf$cell_types, rowLayout = 4)
         }
 
         if(keyPressed=="1")
