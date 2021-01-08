@@ -9,7 +9,7 @@ setuptools.setup(name='python_pharmer',
       package_data={'':['models/*.h5']},
       install_requires=[
             'pims==0.4.1', 
-            'tensorflow==1.14', 
+            'tensorflow==2.3.1', 
             'keras==2.3.1', 
             'pandas==1.0.1', 
             'scikit-image==0.16.2', 
