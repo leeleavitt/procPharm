@@ -5,7 +5,7 @@
 \title{Updated cell_typer which incorporates neural networks to distinguish n14 vs R13
 Now only the proprioceptors and jagged need to be classified. Everything else is automated.}
 \usage{
-Cell_Typer_3(dat)
+Cell_Typer_3(dat, modelDir = NA)
 }
 \arguments{
 \item{dat}{RD.experiment}

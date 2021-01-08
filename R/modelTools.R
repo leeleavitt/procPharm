@@ -437,21 +437,25 @@ labelBinder <- function(dat, windowSizeMin = 3, tType = "t.dat", winMin = 1.2, w
 #' img3 and an image of GFP only at img4, this function returns a list of model output matrices.
 #' 
 #' @export
-cell_type_modeler <- function(dat){
+cell_type_modeler <- function(dat, modelDir = NA){
+    if(is.na(modelDir)){
+        modelDir <- "Y:/Computer Setup/R/models/"
+    }
+
     pyPharm <- reticulate::import("python_pharmer")
     driveLoc <- strsplit(getwd(), "/")[[1]][1]
 
     # R12 is very dirty lots of N15 reassignment
     # R13 vs N14 is very dirty, so I am going to try and clean it up using neuralNets
-    aitcModel <- paste0(driveLoc, "/models/aitc.h5")
-    menthModel <- paste0(driveLoc, "/models/menth.h5")
-    capsModel <- paste0(driveLoc, "/models/caps.h5")
-    k40Model <- paste0(driveLoc, "/models/k40.h5")
-    r3jModel <- paste0(driveLoc, "/models/r3j.h5")
+    aitcModel <- paste0(modelDir,"aitc.h5")
+    menthModel <- paste0(modelDir,"menth.h5")
+    capsModel <- paste0(modelDir,"caps.h5")
+    k40Model <- paste0(modelDir,"k40.h5")
+    r3jModel <- paste0(modelDir,"r3j.h5")
 
     # ImageModels
-    ib4Model <- paste0(driveLoc, "/models/ib4.h5")
-    gfpModel <- paste0(driveLoc, "/models/gfp.h5")
+    ib4Model <- paste0(modelDir,"ib4.h5")
+    gfpModel <- paste0(modelDir,"gfp.h5")
 
     models <- c(aitcModel, menthModel, capsModel, k40Model, r3jModel, ib4Model, gfpModel)
 
@@ -680,8 +684,12 @@ modelViewer <- function(dat, cell, plot.new = T){
 #' dose response experiment. This will apply the model to any potassium window
 #' except the first k40 window, which has its own model to use
 #' @export
-potassiumModeler <- function(dat){
-    model <- keras::load_model_hdf5("D:/models/kdr.h5")
+potassiumModeler <- function(dat, modelLoc = NA){
+    if(is.na(modelLoc)){
+        model <- keras::load_model_hdf5("Y:/Computer Setup/R/models/kdr.h5")
+    }else{
+        model <- keras::load_model_hdf5(modelLoc)
+    }
     pyPharm <- reticulate::import('python_pharmer')
 
     windowSize <- 3

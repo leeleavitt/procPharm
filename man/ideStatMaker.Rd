@@ -8,16 +8,16 @@ To make this work you can't half ass your window regions you must include all co
 ideStatMaker(
   dat,
   statType = "max",
-  testPulseNames = "^[kK][.]30",
-  controlToUse = 1
+  testPulseExp = "^[kK][.]20",
+  controlToUse = c(1, 2, 3)
 )
 }
 \arguments{
 \item{statType}{"max", "snr", "tot" are entries into this}
 
-\item{testPulseNames}{this is the test pulse names that contains the experiments, examples include "^[kK].*40" or "^[aA][cC][hH].*300[uU][mM]" or "ATP"}
-
 \item{controlToUse}{this is an integer input to specify the testPulse to use for control is lefft NA, the pulse prior to the pulse is control pulse}
+
+\item{testPulseNames}{this is the test pulse names that contains the experiments, examples include "^[kK].*40" or "^[aA][cC][hH].*300[uU][mM]" or "ATP"}
 }
 \description{
 Function taht creates a ide stat automatically if you have all control and test window regions in the data.
