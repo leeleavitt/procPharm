@@ -21,13 +21,8 @@ devtools::install_github("https://github.com/leeleavitt/procPharm.git")
 
 Make Sure to read the console if any ERROR's arise. If so Close R and paste the commands again.
 
-# Lab Computers
-If installing R on computers in the lab (these need to be connected to the network drive see [here](../Z_drive_Mounting_Information_1.docx)). From there you need to follow the instructions [here](../labDriveInstall/README.md)
 
 # Python Installation
-**Skip this if;**
-1. You don't need to process the raw files 
-2. If you are installing this software to look at traces.
 
 This R package depends on some python processing. To install
 1. Install the [anaconda distribution](https://www.anaconda.com/distribution/). Make sure to select for a single user during this installation. From there you will need to use `pip` to install our software. 
